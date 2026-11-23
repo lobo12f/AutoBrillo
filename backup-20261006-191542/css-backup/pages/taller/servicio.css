@@ -1,0 +1,331 @@
+/* ============================================================================
+   AUTOBRILLO - SERVICIO TALLER (Legacy)
+   ============================================================================
+   Estilos para el panel de servicio del taller (versión simplificada).
+   Usa variables del sistema central (variables.css)
+   ============================================================================ */
+
+/* ============================================================================
+   SIDEBAR
+   ============================================================================ */
+.servicio-sidebar {
+    width: var(--sidebar-width);
+    background: var(--bg-sidebar);
+    border-right: 1px solid var(--border-color);
+    padding: var(--space-xl);
+    position: fixed;
+    height: 100vh;
+    overflow-y: auto;
+    transition: all var(--transition-base);
+}
+
+.servicio-logo {
+    font-size: var(--font-size-2xl);
+    font-weight: var(--font-weight-bold);
+    margin-bottom: var(--space-3xl);
+    letter-spacing: var(--letter-spacing-wide);
+}
+
+.servicio-logo span {
+    color: var(--accent-color);
+}
+
+.nav-links {
+    list-style: none;
+    margin-bottom: var(--space-3xl);
+}
+
+.nav-links li {
+    padding: var(--space-md) var(--space-lg);
+    border-radius: var(--radius-sm);
+    color: var(--text-secondary);
+    cursor: pointer;
+    margin-bottom: var(--space-xs);
+    transition: all var(--transition-base);
+    font-size: var(--font-size-md);
+}
+
+.nav-links li:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+.nav-links li.active {
+    background: var(--accent-bg);
+    color: var(--accent-color);
+    border-left: 3px solid var(--accent-color);
+}
+
+/* ============================================================================
+   BALANCE EN SIDEBAR
+   ============================================================================ */
+.balance-sidebar {
+    position: absolute;
+    bottom: var(--space-xl);
+    left: var(--space-xl);
+    right: var(--space-xl);
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: var(--space-lg);
+    text-align: center;
+}
+
+.balance-sidebar small {
+    color: var(--text-muted);
+    font-size: var(--font-size-xs);
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-wide);
+}
+
+.balance-sidebar #caja-total {
+    color: var(--accent-color);
+    font-size: var(--font-size-2xl);
+    font-weight: var(--font-weight-bold);
+    margin-top: var(--space-xs);
+}
+
+/* ============================================================================
+   MAIN CONTENT
+   ============================================================================ */
+.servicio-main {
+    margin-left: var(--sidebar-width);
+    padding: var(--space-2xl) var(--space-3xl);
+    min-height: 100vh;
+}
+
+.section-page {
+    animation: fadeIn var(--transition-base) ease;
+}
+
+.section-page h1 {
+    color: var(--text-primary);
+    font-size: var(--font-size-3xl);
+    font-weight: var(--font-weight-bold);
+    margin-bottom: var(--space-xl);
+}
+
+.section-page h3 {
+    color: var(--text-primary);
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-semibold);
+    margin: var(--space-2xl) 0 var(--space-lg);
+}
+
+/* ============================================================================
+   STATS GRID
+   ============================================================================ */
+.servicio-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--space-lg);
+    margin-bottom: var(--space-xl);
+}
+
+.servicio-stat-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: var(--space-xl);
+    transition: all var(--transition-base);
+}
+
+.servicio-stat-card:hover {
+    border-color: var(--accent-color);
+    transform: translateY(-2px);
+}
+
+.servicio-stat-card h3 {
+    color: var(--text-secondary);
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-medium);
+    margin: 0 0 var(--space-sm);
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-wide);
+}
+
+.servicio-stat-card p {
+    color: var(--accent-color);
+    font-size: var(--font-size-4xl);
+    font-weight: var(--font-weight-bold);
+    margin: 0;
+}
+
+/* ============================================================================
+   CARD GENÉRICA
+   ============================================================================ */
+.servicio-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: var(--space-xl);
+    margin-bottom: var(--space-xl);
+}
+
+.servicio-card--warning {
+    border-color: var(--color-warning);
+    background: rgba(var(--color-warning-rgb), 0.05);
+}
+
+.servicio-card--warning h4 {
+    color: var(--color-warning);
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    margin-bottom: var(--space-lg);
+}
+
+.servicio-card p {
+    color: var(--text-secondary);
+    margin-bottom: var(--space-lg);
+}
+
+/* ============================================================================
+   AVISOS
+   ============================================================================ */
+.avisos-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+}
+
+.avisos-container p {
+    color: var(--text-muted);
+    font-size: var(--font-size-base);
+    margin: 0;
+}
+
+/* ============================================================================
+   TASKS GRID
+   ============================================================================ */
+.tasks-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--space-lg);
+}
+
+/* ============================================================================
+   TABLAS
+   ============================================================================ */
+.servicio-main table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: var(--space-md);
+}
+
+.servicio-main thead tr {
+    border-bottom: 2px solid var(--border-color);
+    background: var(--bg-secondary);
+}
+
+.servicio-main th {
+    padding: var(--space-md);
+    text-align: left;
+    font-size: var(--font-size-sm);
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-wide);
+    font-weight: var(--font-weight-semibold);
+}
+
+.servicio-main td {
+    padding: var(--space-md);
+    color: var(--text-primary);
+    font-size: var(--font-size-base);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.servicio-main tbody tr {
+    transition: background var(--transition-fast);
+}
+
+.servicio-main tbody tr:hover {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+/* ============================================================================
+   INPUT GROUP
+   ============================================================================ */
+.input-group {
+    display: flex;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-lg);
+    flex-wrap: wrap;
+}
+
+.input-group input {
+    flex: 1;
+    min-width: 200px;
+    padding: var(--input-padding-y) var(--input-padding-x);
+    background: var(--bg-input);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    font-size: var(--font-size-md);
+    font-family: var(--font-family);
+    transition: all var(--transition-base);
+}
+
+.input-group input:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+}
+
+/* ============================================================================
+   BOTÓN AÑADIR
+   ============================================================================ */
+.servicio-btn-add {
+    padding: var(--input-padding-y) var(--space-xl);
+    background: var(--accent-color);
+    color: var(--text-inverse);
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-semibold);
+    cursor: pointer;
+    font-family: var(--font-family);
+    transition: all var(--transition-base);
+    white-space: nowrap;
+}
+
+.servicio-btn-add:hover {
+    box-shadow: var(--shadow-glow);
+    transform: translateY(-2px);
+}
+
+/* ============================================================================
+   CATÁLOGO LIST
+   ============================================================================ */
+.catalogo-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+}
+
+/* ============================================================================
+   RESPONSIVE
+   ============================================================================ */
+@media (max-width: 768px) {
+    .servicio-sidebar {
+        width: var(--sidebar-width-collapsed);
+        padding: var(--space-md);
+    }
+
+    .servicio-logo {
+        font-size: var(--font-size-lg);
+    }
+
+    .nav-links li {
+        font-size: var(--font-size-xs);
+        padding: var(--space-sm);
+    }
+
+    .servicio-main {
+        margin-left: var(--sidebar-width-collapsed);
+        padding: var(--space-lg);
+    }
+
+    .servicio-stats-grid {
+        grid-template-columns: 1fr;
+    }
+}

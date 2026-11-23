@@ -1,0 +1,581 @@
+/* ============================================================================
+   EXPLORAR TALLERES - ESTILOS CSS COMPLETOS
+   ============================================================================ */
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.et-loading-container {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 40px;
+}
+
+.et-spinner {
+    display: inline-block;
+    width: 40px;
+    height: 40px;
+    border: 3px solid #1e2a3a;
+    border-top-color: #00ff88;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+.et-loading-text {
+    color: #888;
+    margin-top: 15px;
+}
+
+.et-empty-message,
+.et-error-message {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 40px;
+}
+
+.et-empty-message {
+    color: #888;
+}
+
+.et-error-message {
+    color: #ff4444;
+}
+
+/* Taller Card Styles */
+.taller-card {
+    background: #131c2b;
+    border: 2px solid #1e2a3a;
+    border-radius: 15px;
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.taller-card:hover {
+    border-color: #00ff88;
+    transform: translateY(-3px);
+}
+
+.taller-card.vinculado {
+    border-color: #ffbb33;
+    box-shadow: 0 0 20px rgba(255, 187, 51, 0.15);
+}
+
+.taller-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 15px;
+}
+
+.taller-card-title-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.taller-card-logo-container {
+    width: 50px;
+    height: 50px;
+    min-width: 50px;
+    background: rgba(0, 255, 136, 0.08);
+    border: 2px solid rgba(0, 255, 136, 0.2);
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    overflow: hidden;
+}
+
+.taller-card-logo-container.vinculado {
+    background: rgba(255, 187, 51, 0.1);
+    border-color: rgba(255, 187, 51, 0.3);
+}
+
+.taller-card-logo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 14px;
+}
+
+.taller-card-title {
+    color: #fff;
+    margin: 0;
+    font-size: 1rem;
+}
+
+.cont-box-planes {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 8px;
+
+    margin-bottom: 25px;
+
+}
+
+.cont-cat-servicio {
+    background: #e0e5ec;
+    border-radius: 16px;
+    padding: 16px;
+    box-shadow: 6px 6px 12px #b8b9be, -6px -6px 12px #ffffff;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.box-cat-servicio {
+    background: #080c14;
+    border: 1px solid #1e2a3a;
+    border-radius: 10px;
+    padding: 15px;
+}
+
+.cont-servicio-imagen {
+
+    background: #24272c;
+    border-radius: 12px;
+    padding: 6px;
+    box-shadow: inset 3px 3px 6px #191b1f, inset -3px -3px 6px #2f3339;
+    overflow: hidden;
+
+}
+
+.cont-servicio-imagen img {
+    width: 100%;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 8px;
+    display: block;
+}
+
+.box-cat-servicio-tatlle {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 8px;
+}
+
+.box-cat-servicio-tatlle span {
+    color: #fff;
+    font-size: 1.2rem;
+
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.box-cat-servicio-precio {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.box-cat-servicio-precio span {
+    color: #00a86b;
+    font-weight: 700;
+    font-size: 1rem;
+}
+
+.box-cat-servicio-precio small {
+    color: #718096;
+    background: #e0e5ec;
+    padding: 4px 8px;
+    border-radius: 8px;
+    box-shadow: inset 2px 2px 5px #b8b9be, inset -2px -2px 5px #ffffff;
+    font-size: 0.8rem;
+}
+
+.taller-badge-vinculado {
+    background: #ffbb3322;
+    color: #ffbb33;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 0.6rem;
+    font-weight: 600;
+}
+
+.taller-rating {
+    color: #ffbb33;
+    font-size: 0.8rem;
+}
+
+.taller-badge-bahias {
+    background: rgba(0, 255, 136, 0.1);
+    color: #00ff88;
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.taller-card-desc-container {
+    margin-bottom: 12px;
+}
+
+.taller-card-desc {
+    color: #aaa;
+    font-size: 0.8rem;
+    line-height: 1.4;
+    margin: 0;
+}
+
+.taller-card-info-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 15px;
+}
+
+.taller-card-info-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #8892a4;
+    font-size: 0.8rem;
+}
+
+.taller-card-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-taller-action {
+    flex: 1;
+    padding: 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.8rem;
+    border: none;
+}
+
+.btn-ver-detalles {
+    background: #00ff88;
+    color: #000;
+}
+
+.btn-vincular {
+    background: transparent;
+    border: 1px solid #ffbb33;
+    color: #ffbb33;
+}
+
+.btn-vincular.vinculado {
+    background: #ffbb33;
+    color: #000;
+}
+
+.btn-agendar-icon {
+    padding: 10px 12px;
+    background: transparent;
+    border: 1px solid #00ff88;
+    color: #00ff88;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    white-space: nowrap;
+}
+
+/* Detalle Taller Styles */
+.et-detalle-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.et-detalle-info-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.et-detalle-logo {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #00ff88;
+}
+
+.et-detalle-icon-placeholder {
+    font-size: 2rem;
+}
+
+.et-detalle-title-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.et-detalle-title {
+    color: #fff;
+    margin: 0;
+    font-size: 1.3rem;
+}
+
+.et-detalle-rating-text {
+    color: #ffbb33;
+    margin: 5px 0;
+}
+
+.et-detalle-desc {
+    color: #aaa;
+    font-size: 0.85rem;
+    margin: 8px 0 0 60px;
+    line-height: 1.4;
+}
+
+.et-detalle-text-info {
+    color: #888;
+    font-size: 0.85rem;
+    margin: 2px 0;
+}
+
+.et-detalle-actions-right {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.btn-desvincular {
+    padding: 12px 20px;
+    background: transparent;
+    border: 1px solid #ff4444;
+    color: #ff4444;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.btn-vincular-detalle {
+    padding: 12px 20px;
+    background: #ffbb33;
+    color: #000;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.btn-agendar-detalle {
+    padding: 12px 20px;
+    background: #00ff88;
+    color: #000;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 0.9rem;
+}
+
+.btn-whatsapp-detalle {
+    padding: 12px 15px;
+    background: #25D366;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.et-divider {
+    border-color: #1e2a3a;
+    margin: 20px 0;
+}
+
+.et-section-title-servicios {
+    color: #00ff88;
+    margin-bottom: 15px;
+}
+
+.et-section-title-planes {
+    color: #ffbb33;
+    margin-bottom: 15px;
+}
+
+.et-section-title-calif {
+    color: #ffbb33;
+    margin-bottom: 15px;
+}
+
+.et-section-title-galeria,
+.et-section-title-mapa {
+    color: #00d4ff;
+    margin-bottom: 15px;
+}
+
+.et-servicios-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 10px;
+    margin-bottom: 25px;
+}
+
+.et-servicio-card {
+    background: #080c14;
+    border: 1px solid #1e2a3a;
+    border-radius: 10px;
+    padding: 15px;
+    transition: all 0.2s;
+}
+
+.et-servicio-card:hover {
+    border-color: #00ff88;
+}
+
+.et-servicio-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 8px;
+}
+
+.et-servicio-nombre {
+    color: #fff;
+    font-size: 0.9rem;
+}
+
+.et-servicio-footer {
+    display: flex;
+    justify-content: space-between;
+}
+
+.et-servicio-precio {
+    color: #00ff88;
+    font-weight: 600;
+}
+
+.et-servicio-duracion {
+    color: #888;
+}
+
+.et-planes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 10px;
+    margin-bottom: 25px;
+}
+
+.et-plan-card {
+    background: #080c14;
+    border-radius: 12px;
+    padding: 18px;
+    text-align: center;
+    border: 1px solid;
+}
+
+.et-plan-icon {
+    font-size: 1.8rem;
+}
+
+.et-plan-nombre {
+    color: #fff;
+    margin: 8px 0 4px;
+}
+
+.et-plan-badge {
+    padding: 2px 10px;
+    border-radius: 10px;
+    font-size: 0.7rem;
+}
+
+.et-plan-precio {
+    font-weight: 700;
+    font-size: 1.1rem;
+    margin: 8px 0;
+}
+
+.et-plan-footer-text {
+    color: #888;
+}
+
+.et-sub-section {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #1e2a3a;
+}
+
+.et-galeria-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 10px;
+}
+
+.et-galeria-item {
+    background: #080c14;
+    border-radius: 10px;
+    overflow: hidden;
+    cursor: pointer;
+    height: 120px;
+}
+
+.et-galeria-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.et-mapa-container {
+    width: 100%;
+    height: 300px;
+    border-radius: 12px;
+    background: #080c14;
+    border: 1px solid #1e2a3a;
+}
+
+.et-mapa-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.et-mapa-link {
+    color: #00d4ff;
+    text-decoration: none;
+    font-size: 0.8rem;
+}
+
+.et-modal-zoom {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.95);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    cursor: zoom-out;
+}
+
+.et-modal-zoom-img {
+    max-width: 90vw;
+    max-height: 90vh;
+    border-radius: 10px;
+}
+
+
+@media (max-width: 768px) {
+    .cont-lista-talleres {
+        position: relative;
+    }
+}

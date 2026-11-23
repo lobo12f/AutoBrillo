@@ -1,0 +1,180 @@
+/* ============================================================================
+   TALLER - CONFIGURACIÓN Y PERSONALIZACIÓN VISUAL
+   ============================================================================ */
+
+#configuracion .config-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-xl);
+}
+
+#configuracion .form-group {
+    margin-bottom: var(--space-xl);
+}
+
+#configuracion label {
+    display: block;
+    color: var(--text-secondary);
+    font-size: var(--font-size-base);
+    margin-bottom: var(--space-xs);
+    font-weight: var(--font-weight-semibold);
+}
+
+#configuracion input[type="text"],
+#configuracion input[type="email"],
+#configuracion input[type="tel"],
+#configuracion input[type="password"],
+#configuracion textarea,
+#configuracion select {
+    width: 100%;
+    padding: 12px 15px;
+    background: var(--bg-input);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    font-size: var(--font-size-base);
+    font-family: var(--font-family);
+    transition: var(--transition);
+}
+
+#configuracion input:focus,
+#configuracion textarea:focus,
+#configuracion select:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+}
+
+#configuracion h3 {
+    color: var(--text-primary);
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-bold);
+    margin-bottom: var(--space-xl);
+}
+
+#mapa-config-taller {
+    width: 100%;
+    height: 300px;
+    border-radius: var(--radius-md);
+    background: var(--bg-input);
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+}
+
+#horarios-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+}
+
+.horario-row {
+    display: grid;
+    grid-template-columns: 100px 1fr 1fr 60px;
+    gap: var(--space-sm);
+    align-items: center;
+    padding: var(--space-sm);
+    background: var(--bg-input);
+    border-radius: var(--radius-sm);
+}
+
+#configuracion input[type="checkbox"] {
+    width: auto;
+    accent-color: var(--accent-color);
+    cursor: pointer;
+}
+
+#configuracion label:has(input[type="checkbox"]) {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    background: var(--bg-input);
+    padding: 10px 15px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+#configuracion label:has(input[type="checkbox"]):hover {
+    border-color: var(--accent-color);
+}
+
+/* Botón guardar configuración */
+#btn-guardar-config {
+    padding: 15px 50px;
+    background: var(--accent-color);
+    color: var(--on-accent);
+    border: none;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-weight: var(--font-weight-bold);
+    font-size: var(--font-size-lg);
+    text-align: center;
+    transition: var(--transition);
+    display: inline-block;
+    font-family: var(--font-family);
+}
+
+#btn-guardar-config:hover {
+    box-shadow: 0 0 30px var(--accent-glow);
+    transform: translateY(-2px);
+}
+
+/* Cambiar contraseña */
+#configuracion .card-password {
+    background: var(--bg-card);
+    border: 1px solid var(--color-warning);
+    border-radius: var(--radius-lg);
+    padding: var(--space-2xl);
+    margin-bottom: var(--space-xl);
+}
+
+#configuracion .card-password h3 {
+    color: var(--color-warning);
+}
+
+#btn-cambiar-password {
+    width: 100%;
+    padding: 12px;
+    background: var(--color-warning);
+    color: var(--on-accent);
+    border: none;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-weight: var(--font-weight-semibold);
+    font-size: var(--font-size-base);
+    transition: var(--transition);
+    text-align: center;
+    font-family: var(--font-family);
+}
+
+#btn-cambiar-password:hover {
+    box-shadow: 0 0 20px rgba(var(--color-warning-rgb), 0.4);
+}
+
+/* Preview del color */
+#preview-color-card {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    padding: var(--space-md);
+    background: var(--bg-card);
+    border-radius: var(--radius-md);
+    border: 2px solid var(--accent-color);
+    transition: var(--transition);
+}
+
+#preview-color-avatar {
+    width: 45px;
+    height: 45px;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--font-size-2xl);
+    border: 2px solid var(--accent-color);
+}
+
+@media (max-width: 968px) {
+    #configuracion .config-grid { grid-template-columns: 1fr; }
+}

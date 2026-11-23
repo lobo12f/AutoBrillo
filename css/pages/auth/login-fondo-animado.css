@@ -1,0 +1,202 @@
+/* ============================================================================
+   AUTOBRILLO - FONDO LOGIN CON IMAGEN
+   ============================================================================
+   Fondo elegante basado en imagen fija con overlay.
+   Sin animaciones excesivas, solo un efecto de zoom muy lento y sutil.
+   ============================================================================ */
+
+/* ============================================================================
+   CONTENEDOR
+   ============================================================================ */
+.fondo-detailing {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    background: var(--bg-primary);
+}
+
+/* ============================================================================
+   IMAGEN DE FONDO CON EFECTO ZOOM LENTO
+   ============================================================================ */
+.fondo-imagen {
+    position: absolute;
+    inset: 0;
+    background-image: url('../../../imagen/images13.jpeg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    animation: zoom-lento 30s ease-in-out infinite alternate;
+    will-change: transform;
+}
+
+/* Zoom muy sutil (1 a 1.08) en 30 segundos */
+@keyframes zoom-lento {
+    from {
+        transform: scale(1);
+    }
+
+    to {
+        transform: scale(1.08);
+    }
+}
+
+/* ============================================================================
+   OVERLAY OSCURO PARA CONTRASTE
+   ============================================================================
+   Tres capas de overlay que oscurecen la imagen y crean profundidad
+   ============================================================================ */
+.fondo-overlay {
+    position: absolute;
+    inset: 0;
+    background:
+        /* Capa 1: Gradiente del tema activo (sutil) */
+        linear-gradient(135deg,
+            rgba(var(--accent-color-rgb), 0.15) 0%,
+            transparent 40%,
+            transparent 60%,
+            rgba(var(--color-info-rgb), 0.10) 100%),
+        /* Capa 2: Oscurecimiento general */
+        linear-gradient(180deg,
+            rgba(0, 0, 0, 0.55) 0%,
+            rgba(0, 0, 0, 0.75) 50%,
+            rgba(0, 0, 0, 0.85) 100%),
+        /* Capa 3: Viñeta (bordes oscuros) */
+        radial-gradient(ellipse at center,
+            transparent 30%,
+            rgba(0, 0, 0, 0.4) 100%);
+}
+
+/* ============================================================================
+   VERSIÓN SOLO CON OVERLAY OSCURO (sin acento del tema)
+   ============================================================================
+   Si prefieres que el fondo sea neutral sin importar el tema, comenta
+   el bloque de arriba y descomenta este.
+   ============================================================================ */
+/*
+.fondo-overlay {
+    position: absolute;
+    inset: 0;
+    background: 
+        linear-gradient(180deg, 
+            rgba(0, 0, 0, 0.5) 0%, 
+            rgba(0, 0, 0, 0.7) 50%,
+            rgba(0, 0, 0, 0.85) 100%),
+        radial-gradient(ellipse at center, 
+            transparent 30%, 
+            rgba(0, 0, 0, 0.5) 100%);
+}
+*/
+
+/* ============================================================================
+   GRID SUTIL ENCIMA (opcional, muy tenue)
+   ============================================================================ */
+.fondo-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+        linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+    background-size: 80px 80px;
+    mask-image: radial-gradient(ellipse at center,
+            transparent 30%,
+            rgba(0, 0, 0, 0.5) 70%,
+            transparent 100%);
+    -webkit-mask-image: radial-gradient(ellipse at center,
+            transparent 30%,
+            rgba(0, 0, 0, 0.5) 70%,
+            transparent 100%);
+    pointer-events: none;
+}
+
+/* ============================================================================
+   FORMULARIO CON EFECTO VIDRIO
+   ============================================================================ */
+.auth-page {
+    position: relative;
+    z-index: 1;
+}
+
+.auth-page .login-card,
+.auth-page .secion-01 {
+
+    z-index: 10;
+    background: rgba(var(--bg-card-rgb, 15, 22, 33), 0.55) !important;
+    backdrop-filter: blur(24px) saturate(1.4);
+    -webkit-backdrop-filter: blur(24px) saturate(1.4);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow:
+        0 25px 80px rgba(0, 0, 0, 0.6),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* Reflejo superior en la card */
+.auth-page .login-card::before,
+.auth-page .secion-01::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg,
+            transparent 0%,
+            rgba(255, 255, 255, 0.3) 50%,
+            transparent 100%);
+    pointer-events: none;
+}
+
+/* ============================================================================
+   RESPONSIVE
+   ============================================================================ */
+@media (max-width: 768px) {
+    .fondo-imagen {
+        background-position: center center;
+        animation: none;
+        /* Sin zoom en móvil para ahorrar batería */
+    }
+
+    .auth-page .login-card,
+    .auth-page .secion-01 {
+        backdrop-filter: blur(18px) saturate(1.3);
+        -webkit-backdrop-filter: blur(18px) saturate(1.3);
+        background: rgba(var(--bg-card-rgb, 15, 22, 33), 0.65) !important;
+    }
+
+    .fondo-grid {
+        display: none;
+    }
+}
+
+/* ============================================================================
+   ACCESIBILIDAD
+   ============================================================================ */
+@media (prefers-reduced-motion: reduce) {
+    .fondo-imagen {
+        animation: none;
+    }
+}
+
+/* ============================================================================
+   TEMAS CLAROS - Overlay más claro
+   ============================================================================ */
+[data-tema="light-clean"] .fondo-overlay,
+[data-mode="light"] .fondo-overlay {
+    background:
+        linear-gradient(180deg,
+            rgba(255, 255, 255, 0.6) 0%,
+            rgba(255, 255, 255, 0.75) 50%,
+            rgba(255, 255, 255, 0.9) 100%),
+        radial-gradient(ellipse at center,
+            transparent 30%,
+            rgba(0, 0, 0, 0.15) 100%);
+}
+
+[data-tema="light-clean"] .auth-page .login-card,
+[data-mode="light"] .auth-page .login-card {
+    background: rgba(255, 255, 255, 0.8) !important;
+    border-color: rgba(0, 0, 0, 0.08);
+    box-shadow:
+        0 25px 80px rgba(0, 0, 0, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}

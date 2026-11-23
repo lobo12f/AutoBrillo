@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrar Taller | AutoBrillo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #080c14;
+            --bg-card: #0f1621;
+            --accent: #00ff88;
+            --accent-glow: rgba(0, 255, 136, 0.15);
+            --text-primary: #ffffff;
+            --text-secondary: #8892a4;
+            --border: #1e2a3a;
+            --danger: #ff4444;
+            --warning: #ffbb33;
+            --info: #00d4ff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-image:
+                radial-gradient(circle at 20% 50%, rgba(0, 255, 136, 0.03) 0%, transparent 50%),
+                radial-gradient(circle at 80% 50%, rgba(0, 212, 255, 0.03) 0%, transparent 50%);
+        }
+
+        .register-container {
+            width: 100%;
+            max-width: 700px;
+            padding: 20px;
+        }
+
+        .register-card {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 40px;
+            border: 1px solid var(--border);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .logo-section {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            font-size: 2rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+        }
+
+        .logo span {
+            color: var(--accent);
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .steps-indicator {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .step {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        .step.active {
+            color: var(--accent);
+        }
+
+        .step-number {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: 2px solid currentColor;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.8rem;
+        }
+
+        .step.active .step-number {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #000;
+        }
+
+        .step.completed .step-number {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #000;
+        }
+
+        .form-step {
+            display: none;
+            animation: fadeSlide 0.4s ease;
+        }
+
+        .form-step.active {
+            display: block;
+        }
+
+        @keyframes fadeSlide {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 12px 15px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            transition: all 0.3s;
+            font-family: 'Inter', sans-serif;
+        }
+
+        input:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 14px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: 'Inter', sans-serif;
+            flex: 1;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: #000;
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 0 30px var(--accent-glow);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .alert {
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 0.85rem;
+        }
+
+        .alert-error {
+            background: rgba(255, 68, 68, 0.1);
+            border: 1px solid var(--danger);
+            color: var(--danger);
+        }
+
+        .alert-success {
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid var(--accent);
+            color: var(--accent);
+        }
+
+        .login-link {
+            text-align: center;
+            margin-top: 20px;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .login-link a {
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .login-link a:hover {
+            text-decoration: underline;
+        }
+
+        .plan-card {
+            background: var(--bg-primary);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .plan-card:hover {
+            border-color: var(--accent);
+        }
+
+        .plan-card.selected {
+            border-color: var(--accent);
+            background: rgba(0, 255, 136, 0.05);
+        }
+
+        .plan-name {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+        }
+
+        .plan-price {
+            color: var(--accent);
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .plan-features {
+            list-style: none;
+            margin-top: 10px;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        .plan-features li::before {
+            content: "✓ ";
+            color: var(--accent);
+        }
+
+        @media (max-width: 600px) {
+            .register-card {
+                padding: 25px;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .form-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+    <!-- ⭐ CSS UNIFICADO -->
+    <!-- ⭐ CSS MANAGER -->
+        <!-- ⭐ CSS UNIFICADO -->
+    <link rel="stylesheet" href="../../css/main.css">
+    <!-- ⭐ CSS MANAGER -->
+    <script type="module" src="../../javascript/css-manager.js"></script>
+</head>
+
+<body>
+    <div class="register-container">
+        <div class="register-card">
+            <div class="logo-section">
+                <div class="logo">AUTOBRILLO<span>D.</span></div>
+                <p class="subtitle">Registro de Taller Profesional</p>
+            </div>
+
+            <div class="steps-indicator">
+                <div class="step active" data-step="1">
+                    <span class="step-number">1</span> Datos del Taller
+                </div>
+                <div class="step" data-step="2">
+                    <span class="step-number">2</span> Plan
+                </div>
+                <div class="step" data-step="3">
+                    <span class="step-number">3</span> Credenciales
+                </div>
+            </div>
+
+            <div id="alert-container"></div>
+
+            <form id="register-form">
+                <!-- Paso 1: Datos del Taller -->
+                <div class="form-step active" data-step="1">
+                    <h2>Información del Taller</h2>
+
+                    <div class="form-group">
+                        <label>Nombre del Taller *</label>
+                        <input type="text" id="taller-nombre" placeholder="Ej: AutoBrillo Express Este" required>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Teléfono *</label>
+                            <input type="tel" id="taller-telefono" placeholder="Ej: 809-555-1234" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Email del Taller *</label>
+                            <input type="email" id="taller-email" placeholder="Ej: contacto@tutaller.com" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Dirección Completa *</label>
+                        <input type="text" id="taller-direccion" placeholder="Ej: Av. Circunvalación, Plaza Comercial"
+                            required>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Ciudad *</label>
+                            <input type="text" id="taller-ciudad" placeholder="Ej: San Pedro de Macorís" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Provincia *</label>
+                            <input type="text" id="taller-provincia" placeholder="Ej: San Pedro de Macorís" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Especialidad Principal *</label>
+                        <select id="taller-especialidad" required>
+                            <option value="">Selecciona una especialidad</option>
+                            <option value="LAVADO">Lavado de Vehículos</option>
+                            <option value="DETALLADO">Detallado Completo</option>
+                            <option value="PULIDO">Pulido y Corrección</option>
+                            <option value="TRATAMIENTO">Tratamientos Cerámicos</option>
+                            <option value="GENERAL">Servicio General</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Paso 2: Selección de Plan -->
+                <div class="form-step" data-step="2">
+                    <h2>Elige tu Plan</h2>
+                    <p style="color: var(--text-secondary); text-align: center; margin-bottom: 20px;">
+                        Selecciona el plan que mejor se adapte a tu negocio
+                    </p>
+
+                    <div class="plan-card selected" data-plan="BASICO" onclick="seleccionarPlan('BASICO')">
+                        <div class="plan-name">🌟 Plan Básico</div>
+                        <div class="plan-price">GRATIS</div>
+                        <ul class="plan-features">
+                            <li>1 Bahía de trabajo</li>
+                            <li>Hasta 3 empleados</li>
+                            <li>Gestión de citas básica</li>
+                            <li>Soporte por email</li>
+                        </ul>
+                    </div>
+
+                    <div class="plan-card" data-plan="PROFESIONAL" onclick="seleccionarPlan('PROFESIONAL')"
+                        style="margin-top: 15px;">
+                        <div class="plan-name">💎 Plan Profesional</div>
+                        <div class="plan-price">RD$ 2,500/mes</div>
+                        <ul class="plan-features">
+                            <li>Hasta 5 bahías</li>
+                            <li>Hasta 10 empleados</li>
+                            <li>Dashboard avanzado</li>
+                            <li>Reportes y estadísticas</li>
+                            <li>Soporte prioritario 24/7</li>
+                        </ul>
+                    </div>
+
+                    <div class="plan-card" data-plan="EMPRESARIAL" onclick="seleccionarPlan('EMPRESARIAL')"
+                        style="margin-top: 15px;">
+                        <div class="plan-name">👑 Plan Empresarial</div>
+                        <div class="plan-price">RD$ 5,000/mes</div>
+                        <ul class="plan-features">
+                            <li>Bahías ilimitadas</li>
+                            <li>Empleados ilimitados</li>
+                            <li>Múltiples sucursales</li>
+                            <li>API de integración</li>
+                            <li>Gerente de cuenta dedicado</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Paso 3: Credenciales -->
+                <div class="form-step" data-step="3">
+                    <h2>Credenciales de Acceso</h2>
+
+                    <div class="form-group">
+                        <label>Nombre del Propietario *</label>
+                        <input type="text" id="propietario-nombre" placeholder="Tu nombre completo" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Email del Propietario *</label>
+                        <input type="email" id="propietario-email" placeholder="Tu email personal" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Contraseña *</label>
+                        <input type="password" id="propietario-password" placeholder="Mínimo 8 caracteres" required
+                            minlength="8">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Confirmar Contraseña *</label>
+                        <input type="password" id="propietario-confirmar" placeholder="Repite tu contraseña" required>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" id="btn-prev" style="display: none;"
+                        onclick="pasoAnterior()">
+                        ← Anterior
+                    </button>
+                    <button type="button" class="btn btn-primary" id="btn-next" onclick="siguientePaso()">
+                        Siguiente →
+                    </button>
+                    <button type="submit" class="btn btn-primary" id="btn-submit" style="display: none;">
+                        ✅ Registrar Taller
+                    </button>
+                </div>
+            </form>
+
+            <div class="login-link">
+                ¿Ya tienes un taller registrado? <a href="login.html">Inicia Sesión</a>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="../../javascript/taller/taller-auth.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,656 @@
+/* ============================================================================
+   AUTOBRILLO - MODALES
+   ============================================================================ */
+
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--bg-overlay);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: var(--z-modal);
+    backdrop-filter: blur(5px);
+    animation: fadeIn var(--transition-base);
+}
+
+.modal.d-none {
+    display: none;
+}
+
+.modal-content {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-xl);
+    padding: var(--space-2xl);
+    max-width: 550px;
+    width: 95%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: var(--shadow-xl);
+    animation: slideUp var(--transition-base);
+    position: relative;
+}
+
+.modal-content h3 {
+    margin-bottom: var(--space-xl);
+    font-size: var(--font-size-xl);
+    color: var(--text-primary);
+}
+
+.modal-actions {
+    display: flex;
+    gap: var(--space-lg);
+    margin-top: var(--space-2xl);
+    justify-content: flex-end;
+}
+
+/* Overlay específico para notificaciones */
+.modal-notificaciones-overlay {
+    position: fixed;
+    inset: 0;
+    background: var(--bg-overlay);
+    z-index: var(--z-modal-top);
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(5px);
+}
+
+.modal-notificaciones-overlay:not(.d-none) {
+    display: flex;
+}
+
+/* Modal fullscreen (fotos cita) */
+.modal-fotos-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.92);
+    z-index: var(--z-modal-top);
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(12px);
+    display: none;
+}
+
+.modal-fotos-overlay:not(.d-none) {
+    display: flex;
+}
+
+@media (max-width: 640px) {
+    .modal-content {
+        padding: var(--space-xl);
+        max-height: 95vh;
+    }
+
+    .modal-actions {
+        flex-direction: column;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   MODAL AGENDAR CITA v3 - WIZARD
+   ═══════════════════════════════════════════════════════════ */
+
+.modal-wizard {
+    display: flex;
+    flex-direction: column;
+    max-height: 90vh;
+}
+
+/* Header con progreso */
+.mc-wizard-header {
+    padding: 20px 24px 12px;
+    border-bottom: 1px solid var(--border-color);
+    position: relative;
+    background: var(--bg-card);
+}
+
+.mc-wizard-close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 1.3rem;
+    cursor: pointer;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    transition: all 0.2s;
+}
+
+.mc-wizard-close:hover {
+    background: rgba(255, 68, 68, 0.1);
+    color: var(--color-danger);
+}
+
+.mc-wizard-title {
+    margin: 0 0 4px;
+    color: var(--text-primary);
+    font-size: 1.15rem;
+}
+
+.mc-wizard-paso {
+    font-size: 0.75rem;
+    color: var(--accent-color);
+    font-weight: 600;
+}
+
+/* Barra de progreso */
+.mc-wizard-progress {
+    height: 3px;
+    background: var(--bg-primary);
+    position: relative;
+}
+
+.mc-wizard-progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent-color), var(--color-info));
+    transition: width 0.35s ease;
+    border-radius: 0 2px 2px 0;
+}
+
+/* Pasos */
+.mc-wizard-paso {
+    padding: 20px 24px;
+    overflow-y: auto;
+    flex: 1;
+    min-height: 0;
+}
+
+.mc-wizard-subtitulo {
+    color: var(--text-primary);
+    font-size: 1rem;
+    margin: 0 0 16px;
+}
+
+/* Lista de cards */
+.mc-cards-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.mc-empty {
+    color: var(--text-secondary);
+    text-align: center;
+    padding: 30px 20px;
+    font-size: 0.85rem;
+    margin: 0;
+}
+
+/* Card genérica (vehículo / servicio / empleado) */
+.mc-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: var(--bg-primary);
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.mc-card:hover {
+    border-color: var(--accent-color);
+    background: rgba(0, 255, 136, 0.03);
+}
+
+.mc-card.selected {
+    border-color: var(--accent-color);
+    background: rgba(0, 255, 136, 0.08);
+}
+
+.mc-card.selected::after {
+    content: '✓';
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 22px;
+    height: 22px;
+    background: var(--accent-color);
+    color: #000;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 900;
+}
+
+
+
+.mc-card-vehiculo-img {
+    width: 70px;
+    height: 70px;
+    border-radius: 10px;
+    object-fit: cover;
+    background: var(--bg-card);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+}
+
+.mc-card-vehiculo-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.mc-card-vehiculo-info strong {
+    display: block;
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    margin-bottom: 3px;
+}
+
+.mc-card-vehiculo-info small {
+    color: var(--text-secondary);
+    font-size: 0.78rem;
+    display: block;
+}
+
+.mc-card-vehiculo-color {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 4px;
+    vertical-align: middle;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Card "agregar vehículo" */
+.mc-card-add {
+    border-style: dashed;
+    justify-content: center;
+    color: var(--accent-color);
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.mc-card-add:hover {
+    background: rgba(0, 255, 136, 0.05);
+}
+
+/* Card servicio */
+.mc-card-servicio-icon {
+    font-size: 1.8rem;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-card);
+    border-radius: 10px;
+    flex-shrink: 0;
+}
+
+.mc-card-servicio-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.mc-card-servicio-info strong {
+    display: block;
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    margin-bottom: 3px;
+}
+
+.mc-card-servicio-info small {
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+    display: block;
+    line-height: 1.3;
+}
+
+.mc-card-servicio-precio {
+    text-align: right;
+    flex-shrink: 0;
+}
+
+.mc-card-servicio-precio strong {
+    display: block;
+    color: var(--accent-color);
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.mc-card-servicio-precio small {
+    color: var(--text-secondary);
+    font-size: 0.7rem;
+}
+
+/* Card empleado */
+.mc-card-empleado-foto {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--border-color);
+    flex-shrink: 0;
+}
+
+.mc-card-empleado-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.mc-card-empleado-info strong {
+    display: block;
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    margin-bottom: 3px;
+}
+
+.mc-card-empleado-info small {
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+}
+
+.mc-card-empleado-estado {
+    font-size: 0.9rem;
+    flex-shrink: 0;
+}
+
+/* Sin preferencia (empleado) */
+.mc-card--sinpref {
+    background: rgba(255, 187, 51, 0.04);
+    border-color: rgba(255, 187, 51, 0.2);
+}
+
+.mc-card--sinpref:hover {
+    border-color: var(--color-warning);
+    background: rgba(255, 187, 51, 0.08);
+}
+
+.mc-card--sinpref.selected {
+    border-color: var(--color-warning);
+    background: rgba(255, 187, 51, 0.12);
+}
+
+.mc-card--sinpref.selected::after {
+    background: var(--color-warning);
+}
+
+.mc-card--sinpref .mc-card-empleado-icon {
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    background: var(--bg-card);
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+/* Horarios (grid de botones) */
+.mc-horarios-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.mc-horario-btn {
+    padding: 10px;
+    background: var(--bg-primary);
+    border: 2px solid var(--border-color);
+    border-radius: 10px;
+    color: var(--text-primary);
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+}
+
+.mc-horario-btn:hover:not(:disabled) {
+    border-color: var(--accent-color);
+    background: rgba(0, 255, 136, 0.05);
+}
+
+.mc-horario-btn.selected {
+    background: var(--accent-color);
+    color: #000;
+    border-color: var(--accent-color);
+}
+
+.mc-horario-btn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+    text-decoration: line-through;
+}
+
+/* Resumen */
+.mc-resumen {
+    background: rgba(0, 255, 136, 0.05);
+    border: 1px solid rgba(0, 255, 136, 0.2);
+    border-radius: 12px;
+    padding: 14px;
+    margin-top: 20px;
+}
+
+.mc-resumen h5 {
+    margin: 0 0 10px;
+    color: var(--accent-color);
+    font-size: 0.9rem;
+}
+
+.mc-resumen-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+    font-size: 0.85rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.mc-resumen-item:last-child {
+    border-bottom: none;
+}
+
+.mc-resumen-item span:first-child {
+    color: var(--text-secondary);
+}
+
+.mc-resumen-item span:last-child {
+    color: var(--text-primary);
+    font-weight: 600;
+    text-align: right;
+    max-width: 60%;
+}
+
+.mc-resumen-total {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 2px solid var(--accent-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.mc-resumen-total span:first-child {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.mc-resumen-total strong {
+    color: var(--accent-color);
+    font-size: 1.3rem;
+}
+
+/* Footer con botones */
+.mc-wizard-footer {
+    padding: 16px 24px;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    gap: 10px;
+    background: var(--bg-card);
+}
+
+.mc-btn-nav {
+    flex: 1;
+    padding: 12px 16px;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+}
+
+.mc-btn-prev {
+    background: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    flex: 0.6;
+}
+
+.mc-btn-prev:hover {
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+}
+
+.mc-btn-cancel {
+    background: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    flex: 0.6;
+}
+
+.mc-btn-cancel:hover {
+    border-color: var(--color-danger);
+    color: var(--color-danger);
+}
+
+.mc-btn-next,
+.mc-btn-confirm {
+    background: var(--accent-color);
+    color: #000;
+    flex: 1;
+}
+
+.mc-btn-next:hover,
+.mc-btn-confirm:hover {
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+}
+
+.mc-btn-next:disabled,
+.mc-btn-confirm:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Chip taller fijo */
+.mc-taller-fijo {
+    background: rgba(0, 255, 136, 0.06);
+    border-bottom: 1px solid rgba(0, 255, 136, 0.2);
+    padding: 12px 24px;
+}
+
+.mc-taller-fijo-header {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.mc-taller-fijo-icon {
+    font-size: 1.5rem;
+}
+
+.mc-taller-fijo-header strong {
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    display: block;
+}
+
+.mc-taller-fijo-header small {
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+}
+
+/* Responsive */
+@media (max-width: 500px) {
+    .mc-wizard-paso {
+        padding: 16px;
+    }
+
+    .mc-wizard-header {
+        padding: 16px 16px 10px;
+    }
+
+    .mc-wizard-footer {
+        padding: 12px 16px;
+    }
+
+    .mc-card-vehiculo-img {
+        width: 60px;
+        height: 60px;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   MODAL DE CONFLICTO DE HORARIO
+   ═══════════════════════════════════════════════════════════ */
+
+.mc-alternativa-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px;
+    background: var(--bg-primary);
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-bottom: 8px;
+}
+
+.mc-alternativa-card:hover {
+    border-color: var(--accent-color);
+    background: rgba(0, 255, 136, 0.05);
+    transform: translateY(-2px);
+}
+
+.mc-alternativa-icon {
+    font-size: 1.5rem;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-card);
+    border-radius: 50%;
+}
+
+.mc-alternativa-info {
+    flex: 1;
+}
+
+.mc-alternativa-info strong {
+    color: var(--text-primary);
+    font-size: 1.1rem;
+    display: block;
+}
+
+.mc-alternativa-info small {
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+}
+
+.mc-alternativa-arrow {
+    color: var(--accent-color);
+    font-size: 1.2rem;
+    font-weight: 700;
+}

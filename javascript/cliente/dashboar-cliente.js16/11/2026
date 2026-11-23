@@ -1,0 +1,3252 @@
+import { Cliente } from "../cliente.js";
+import { Wallet } from "../movimientoDinero/Wallet.js";
+import { db } from "../db.js";
+import { TallerManager } from "../taller/TallerManager.js";
+import { ClienteTallerService } from "../taller/ClienteTallerService.js";
+import { TallerVinculadoManager } from './taller-vinculado.js';
+import { CalificacionesManager } from './calificaciones.js';
+import { ResenasSocialManager } from './resenas-social.js';
+import { GaleriaTrabajos } from './galeria-trabajos.js';
+import { GaleriaTaller } from './galeria-taller.js';
+import { MapaTaller } from './mapa-taller.js';
+import { conectarWebSocketCliente } from './websocket-cliente.js';
+import { API_URL } from '../config.js';
+import { apiFetch } from '../api-client.js';
+
+
+// ==================== CONFIGURACIÓN INICIAL ====================
+const API_BASE_URL = API_URL;
+const MAX_RETRIES = 3;
+const SYNC_INTERVAL = 10000;
+const CACHE_TTL = 60000;
+
+// Inicializar el servicio de talleres para clientes
+window.clienteTallerService = new ClienteTallerService();
+
+// Cache de talleres disponibles
+let talleresDisponibles = [];
+let tallerSeleccionadoActual = null;
+window.tabClienteActual = 'pendientes';
+let intervaloActual = null;
+let isSubmitting = false;
+
+// Sistema de bloqueo para operaciones críticas
+window.bloqueos = new Map();
+
+// Inicializar el taller cuando arranca el dashboard
+window.taller = new TallerManager({
+    bahias: [
+        { id: 1, nombre: "Bahía Express", estado: "LIBRE", especialidad: "Lavado Rápido" },
+        { id: 2, nombre: "Bahía Premium", estado: "LIBRE", especialidad: "Lavado Completo" },
+        { id: 3, nombre: "Bahía Detallado", estado: "LIBRE", especialidad: "Detallado Interior" }
+    ]
+});
+
+// ==================== SISTEMA DE LOGS ====================
+const logger = {
+    niveles: { DEBUG: 0, INFO: 1, WARN: 2, ERROR: 3 },
+    nivel: 1,
+    historial: [],
+
+    log: function (nivel, mensaje, data = null) {
+        if (nivel >= this.nivel) {
+            const timestamp = new Date().toISOString();
+            const prefijo = Object.keys(this.niveles).find(k => this.niveles[k] === nivel);
+            const logEntry = { timestamp, nivel: prefijo, mensaje, data };
+            this.historial.push(logEntry);
+
+            if (this.historial.length > 100) {
+                this.historial.shift();
+            }
+
+            const styles = {
+                DEBUG: 'color: #888',
+                INFO: 'color: #00d4ff',
+                WARN: 'color: #ffbb33',
+                ERROR: 'color: #ff4444'
+            };
+
+            console.log(
+                `%c[${timestamp}] [${prefijo}] ${mensaje}`,
+                styles[prefijo] || '',
+                data || ''
+            );
+        }
+    },
+
+    debug: function (msg, data) { this.log(0, msg, data); },
+    info: function (msg, data) { this.log(1, msg, data); },
+    warn: function (msg, data) { this.log(2, msg, data); },
+    error: function (msg, data) { this.log(3, msg, data); },
+
+    obtenerHistorial: function () { return [...this.historial]; },
+    exportar: function () { return JSON.stringify(this.historial, null, 2); }
+};
+
+// ==================== SISTEMA DE TOAST NOTIFICATIONS ====================
+window.mostrarToast = function (mensaje, tipo = 'info', duracion = 3000) {
+    const colores = {
+        success: '#00ff88',
+        error: '#ff4444',
+        warning: '#ffbb33',
+        info: '#00d4ff'
+    };
+
+    const iconos = {
+        success: '✅',
+        error: '❌',
+        warning: '⚠️',
+        info: 'ℹ️'
+    };
+
+    const toast = document.createElement('div');
+    toast.className = 'toast-notification';
+    toast.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #131c2b;
+        border-left: 4px solid ${colores[tipo]};
+        color: white;
+        padding: 15px 20px;
+        border-radius: 8px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        z-index: 100000;
+        min-width: 300px;
+        max-width: 400px;
+        transform: translateX(120%);
+        transition: transform 0.3s ease;
+        font-family: 'Inter', sans-serif;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        animation: slideIn 0.3s ease forwards, fadeOut 0.3s ease ${duracion - 300}ms forwards;
+    `;
+
+    toast.innerHTML = `
+        <span style="font-size: 1.2rem;">${iconos[tipo]}</span>
+        <span style="flex: 1; font-size: 0.9rem;">${mensaje}</span>
+        <button onclick="this.parentElement.remove()" style="background: none; border: none; color: #888; cursor: pointer; font-size: 1.2rem;">×</button>
+    `;
+
+    if (!document.getElementById('toast-styles')) {
+        const style = document.createElement('style');
+        style.id = 'toast-styles';
+        style.textContent = `
+            @keyframes slideIn {
+                to { transform: translateX(0); }
+            }
+            @keyframes fadeOut {
+                to { opacity: 0; transform: translateX(120%); }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+
+    document.body.appendChild(toast);
+
+    setTimeout(() => {
+        if (toast.parentElement) {
+            toast.remove();
+        }
+    }, duracion);
+};
+
+// ==================== SISTEMA DE ESTADO DE CARGA ====================
+window.estadoCarga = {
+    overlay: null,
+
+    inicializar: function () {
+        if (!this.overlay) {
+            this.overlay = document.createElement('div');
+            this.overlay.id = 'loading-overlay';
+            this.overlay.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.8);
+                z-index: 99999;
+                display: none;
+                align-items: center;
+                justify-content: center;
+                flex-direction: column;
+                gap: 20px;
+            `;
+            this.overlay.innerHTML = `
+                <div class="spinner" style="
+                    width: 50px;
+                    height: 50px;
+                    border: 3px solid #333;
+                    border-top: 3px solid #00ff88;
+                    border-radius: 50%;
+                    animation: spin 1s linear infinite;
+                "></div>
+                <p style="color: #00ff88; font-family: 'Inter', sans-serif;">Procesando...</p>
+            `;
+
+            const spinnerStyle = document.createElement('style');
+            spinnerStyle.textContent = `
+                @keyframes spin {
+                    to { transform: rotate(360deg); }
+                }
+            `;
+            document.head.appendChild(spinnerStyle);
+            document.body.appendChild(this.overlay);
+        }
+    },
+
+    mostrar: function (mensaje = 'Procesando...') {
+        this.inicializar();
+        this.overlay.querySelector('p').textContent = mensaje;
+        this.overlay.style.display = 'flex';
+    },
+
+    ocultar: function () {
+        if (this.overlay) {
+            this.overlay.style.display = 'none';
+        }
+    }
+};
+
+// ==================== SISTEMA DE CACHE ====================
+const cache = new Map();
+
+window.obtenerConCache = async function (clave, funcionFetch, ttl = CACHE_TTL) {
+    const cached = cache.get(clave);
+
+    if (cached && (Date.now() - cached.timestamp) < ttl) {
+        logger.debug(`Cache hit: ${clave}`);
+        return cached.data;
+    }
+
+    logger.debug(`Cache miss: ${clave}, fetching...`);
+
+    try {
+        const data = await funcionFetch();
+        cache.set(clave, { data, timestamp: Date.now() });
+        return data;
+    } catch (error) {
+        logger.error(`Error fetching ${clave}:`, error);
+        if (cached) {
+            logger.warn(`Usando cache expirado como fallback: ${clave}`);
+            return cached.data;
+        }
+        throw error;
+    }
+};
+
+window.limpiarCache = function () {
+    cache.clear();
+    logger.info('Cache limpiado');
+};
+
+// ==================== VALIDADORES ====================
+const validadores = {
+    placa: (placa) => /^[A-Z0-9]{5,8}$/.test(placa.toUpperCase().replace(/[-\s]/g, '')),
+    telefono: (tel) => /^(809|829|849)\d{7}$/.test(tel.replace(/[-\s]/g, '')),
+    email: (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email),
+    fecha: (fecha) => {
+        const f = new Date(fecha);
+        const hoy = new Date();
+        hoy.setHours(0, 0, 0, 0);
+        const maxFecha = new Date();
+        maxFecha.setDate(maxFecha.getDate() + 30);
+        return f >= hoy && f <= maxFecha && f.getDay() !== 0;
+    }
+};
+
+// ==================== SISTEMA DE REINTENTOS ====================
+window.fetchConReintento = async function (url, options = {}, maxRetries = MAX_RETRIES) {
+    let ultimoError;
+
+    for (let intento = 1; intento <= maxRetries; intento++) {
+        try {
+            logger.debug(`Intento ${intento}/${maxRetries} para ${url}`);
+            const response = await apiFetch(url, options);
+
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+
+            const data = await response.json();
+            return data;
+
+        } catch (error) {
+            ultimoError = error;
+            logger.warn(`Intento ${intento} fallido: ${error.message}`);
+
+            if (intento < maxRetries) {
+                const delay = Math.pow(2, intento) * 1000;
+                logger.debug(`Esperando ${delay}ms antes de reintentar...`);
+                await new Promise(resolve => setTimeout(resolve, delay));
+            }
+        }
+    }
+
+    throw new Error(`Falló después de ${maxRetries} intentos: ${ultimoError.message}`);
+};
+
+// ==================== BLOQUEO DE OPERACIONES ====================
+window.adquirirBloqueo = async function (clave, timeout = 5000) {
+    if (window.bloqueos.has(clave)) {
+        throw new Error(`Operación en progreso: ${clave}`);
+    }
+
+    window.bloqueos.set(clave, Date.now());
+    logger.debug(`Bloqueo adquirido: ${clave}`);
+
+    setTimeout(() => {
+        if (window.bloqueos.has(clave)) {
+            window.bloqueos.delete(clave);
+            logger.warn(`Bloqueo liberado por timeout: ${clave}`);
+        }
+    }, timeout);
+
+    return clave;
+};
+
+window.liberarBloqueo = function (clave) {
+    window.bloqueos.delete(clave);
+    logger.debug(`Bloqueo liberado: ${clave}`);
+};
+
+// ==================== FUNCIONES AUXILIARES PARA CLASE CLIENTE ====================
+
+window.obtenerIdUsuario = function () {
+    if (!window.user) return null;
+    return window.user.id; // Getter de la clase Cliente
+};
+
+window.persistirUsuario = function () {
+    if (!window.user) return;
+    try {
+        const datos = window.user.toJSON();
+        localStorage.setItem('sesion_activa', JSON.stringify(datos));
+    } catch (error) {
+        logger.error('Error al persistir usuario:', error);
+    }
+};
+
+// ==================== DATOS MAESTROS ====================
+const CATALOGO_VEHICULOS = {
+    "Toyota": ["Corolla", "Hilux", "Rav4", "Land Cruiser", "Yaris", "Tacoma"],
+    "Honda": ["Civic", "CR-V", "Accord", "Fit", "HR-V", "Pilot"],
+    "Hyundai": ["Tucson", "Santa Fe", "Elantra", "Accent", "Sonata", "Kona"],
+    "Kia": ["Sportage", "Sorento", "Picanto", "Rio", "Cerato", "Seltos"],
+    "Nissan": ["Frontier", "Sentra", "Versa", "Qashqai", "X-Trail", "March"],
+    "Ford": ["F-150", "Explorer", "Ranger", "Escape", "Focus", "Mustang"],
+    "Chevrolet": ["Silverado", "Colorado", "Spark", "Aveo", "Captiva", "Tracker"],
+    "BMW": ["Serie 3", "Serie 5", "X3", "X5", "M4"],
+    "Mercedes-Benz": ["Clase C", "Clase E", "GLC", "GLE", "Clase S"]
+};
+
+const MIS_PLANES_DISPONIBLES = [
+    { nombre: "Plan Bronce", precio: 50.00, servicios: 3, nivel: 1 },
+    { nombre: "Plan Plata", precio: 100.00, servicios: 7, nivel: 2 },
+    { nombre: "Plan Oro", precio: 200.00, servicios: 15, nivel: 3 }
+];
+
+const JERARQUIA_PLANES = {
+    "Plan Bronce": 1, "Plan Plata": 2, "Plan Oro": 3, "Ninguno": 0
+};
+
+// ==================== ESTADOS DE CITAS (CONSTANTES) ====================
+const ESTADOS_CITA = {
+    PENDIENTE: 'PENDIENTE',
+    CONFIRMADA: 'CONFIRMADA',
+    EN_RECEPCION: 'EN_RECEPCION',
+    EN_PROCESO: 'EN_PROCESO',
+    LISTO: 'LISTO',
+    ENTREGADO: 'ENTREGADO',
+    ENTREGADA: 'ENTREGADA',
+    CANCELADA: 'CANCELADA'
+};
+
+const ESTADOS_PENDIENTES = [ESTADOS_CITA.PENDIENTE, ESTADOS_CITA.CONFIRMADA, ESTADOS_CITA.EN_RECEPCION, ESTADOS_CITA.EN_PROCESO, ESTADOS_CITA.LISTO];
+const ESTADOS_HISTORIAL = [ESTADOS_CITA.ENTREGADA, ESTADOS_CITA.ENTREGADO, ESTADOS_CITA.CANCELADA];
+
+const COLORES_ESTADO = {
+    [ESTADOS_CITA.PENDIENTE]: "#ff8800",
+    [ESTADOS_CITA.CONFIRMADA]: "#00ff88",
+    [ESTADOS_CITA.EN_RECEPCION]: "#00d4ff",
+    [ESTADOS_CITA.EN_PROCESO]: "#ffcc00",
+    [ESTADOS_CITA.LISTO]: "#ff44ff",
+    [ESTADOS_CITA.ENTREGADO]: "#888888",
+    [ESTADOS_CITA.ENTREGADA]: "#888888",
+    [ESTADOS_CITA.CANCELADA]: "#ff4444"
+};
+
+const PROGRESO_ESTADO = {
+    [ESTADOS_CITA.PENDIENTE]: 10,
+    [ESTADOS_CITA.CONFIRMADA]: 25,
+    [ESTADOS_CITA.EN_RECEPCION]: 40,
+    [ESTADOS_CITA.EN_PROCESO]: 65,
+    [ESTADOS_CITA.LISTO]: 90,
+    [ESTADOS_CITA.ENTREGADO]: 100,
+    [ESTADOS_CITA.ENTREGADA]: 100,
+    [ESTADOS_CITA.CANCELADA]: 0
+};
+
+const MENSAJE_ESTADO = {
+    [ESTADOS_CITA.PENDIENTE]: 'Esperando confirmación',
+    [ESTADOS_CITA.CONFIRMADA]: 'Taller confirmó ✅',
+    [ESTADOS_CITA.EN_RECEPCION]: 'Vehículo recibido',
+    [ESTADOS_CITA.EN_PROCESO]: 'Trabajando 🔧',
+    [ESTADOS_CITA.LISTO]: '¡Listo para recoger! 🎉',
+    [ESTADOS_CITA.ENTREGADO]: 'Completado',
+    [ESTADOS_CITA.ENTREGADA]: 'Completado',
+    [ESTADOS_CITA.CANCELADA]: 'Cancelada'
+};
+
+const ICONO_ESTADO = {
+    [ESTADOS_CITA.PENDIENTE]: '⏳',
+    [ESTADOS_CITA.CONFIRMADA]: '✅',
+    [ESTADOS_CITA.EN_RECEPCION]: '📥',
+    [ESTADOS_CITA.EN_PROCESO]: '🔧',
+    [ESTADOS_CITA.LISTO]: '🎉',
+    [ESTADOS_CITA.ENTREGADO]: '🏁',
+    [ESTADOS_CITA.ENTREGADA]: '🏁',
+    [ESTADOS_CITA.CANCELADA]: '❌'
+};
+
+// ==================== VERIFICACIÓN DE SESIÓN ====================
+const sesion = localStorage.getItem('sesion_activa');
+if (!sesion) {
+    window.location.href = "../index.html";
+}
+
+// ==================== INICIO DEL DASHBOARD ====================
+
+document.addEventListener("DOMContentLoaded", async function () {
+    logger.info('🚀 Inicializando dashboard del cliente...');
+
+
+    const sesionData = db.obtenerSesion();
+    if (!sesionData) {
+        window.location.href = "login.html";
+        return;
+    }
+
+    try {
+        // Inicializar cliente (la clase Cliente maneja sus propiedades privadas)
+        window.user = new Cliente(sesionData);
+        window.calificacionesManager = new CalificacionesManager(API_BASE_URL);
+        window.resenasSocial = new ResenasSocialManager(API_BASE_URL);
+        window.galeriaTrabajos = new GaleriaTrabajos(API_BASE_URL);
+        window.galeriaTaller = new GaleriaTaller(API_BASE_URL);
+        window.mapaTaller = new MapaTaller();
+
+
+        logger.info('✅ Sistema listo. ID de usuario:', window.user.id);
+
+        // Inicializar wallet
+        window.wallet = new Wallet(window.user);
+        // ================================================================
+        // 🔌 CONECTAR WEBSOCKET DEL CLIENTE
+        // ================================================================
+        const clienteId = window.user._id || window.user.id;
+        if (clienteId) {
+            conectarWebSocketCliente(clienteId, {
+                // ============================================================
+                // 🔔 CAMBIOS DE ESTADO DE CITAS
+                // ============================================================
+                onCambioEstadoCita: (data) => {
+                    console.log('📡 Cambio de estado recibido:', data);
+                    window.mostrarToast(data.mensaje || 'Estado actualizado', 'info');
+
+                    // Recargar citas desde el servidor
+                    if (typeof window.sincronizarEstadoCitas === 'function') {
+                        window.sincronizarEstadoCitas();
+                    }
+
+                    // Reproducir sonido si es "LISTO"
+                    if (data.estado === 'LISTO') {
+                        try {
+                            const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2qEcP+1j2FtNjeC4dGqaIhx/7aQZWE2OILh0KtpiHH/tpBlYTc4guHQrGmIcf+3kGZhNjmC4dCraYhx/7eRZmE3OYLh0KxqiHH/uJFmYTc5guHQrGqIcf+4kmZhNzmC4dGsaohx/7mTZmE3OoLh0axqiHH/uZNmYTc6guHRrGqIcf+5k2ZhNzqC4dGta4hx/7qUZmE3OoLh0q1riHH/upRmYTc6guHSrWuIcf+6lWZhNzuC4dKta4hx/7uVZmE3O4Lh0q5riHH/u5ZmYTc7guHSrmuIcf+7l2ZhNzyC4dKua4hx/7yXZmE3PILh0q9riHH/vJhmYTc8guHSsGuIcf+8mGZhNz2C4dKwa4hx/72ZZmE3PYLh0rFriHH/vZlmYTc+guHSsWuIcf++mmZhNz6C4dKya4hx/76aZmE3PoLh0rJriHH/v5pmYTc/guHSs2uIcf+/m2ZhN0CC4dKza4hx/8CbZmE3QILh0rRriHH/wJxmYTdBguHStGuIcf/BnGZhN0GC4dK1a4hx/8GdZmE3QYLh0rVriHH/wp1mYTdCguHStmuIcf/CnWZhN0KC4dK2a4hx/8OeZmE3Q4Lh0rdriHH/w55mYTdDguHS');
+                            audio.volume = 0.3;
+                            audio.play().catch(() => { });
+                        } catch (e) { }
+                    }
+                },
+
+                // ============================================================
+                // 🔔 NOTIFICACIONES
+                // ============================================================
+                onNotificacion: (data) => {
+                    console.log('🔔 Notificación recibida:', data);
+                    window.mostrarToast(data.mensaje || 'Notificación', 'info');
+
+                    // Guardar en localStorage
+                    const notificaciones = JSON.parse(localStorage.getItem('notificaciones_clientes') || '[]');
+                    notificaciones.push({
+                        tipo: data.tipo || 'OTRO',
+                        citaId: data.citaId,
+                        mensaje: data.mensaje,
+                        fecha: new Date().toISOString(),
+                        leida: false
+                    });
+                    localStorage.setItem('notificaciones_clientes', JSON.stringify(notificaciones));
+
+                    // Actualizar badge
+                    if (typeof window.cargarNotificaciones === 'function') {
+                        window.cargarNotificaciones();
+                    }
+                },
+
+                // ============================================================
+                // 🔄 PERFIL ACTUALIZADO
+                // ============================================================
+                onPerfilActualizado: (cambios) => {
+                    console.log('👤 Perfil actualizado:', cambios);
+                    if (cambios.fotoPerfil && window.user) {
+                        window.user.fotoPerfil = cambios.fotoPerfil;
+                        window.persistirUsuario();
+                        window.actualizarInterfaz(window.user);
+                    }
+                }
+            });
+        }
+
+        // ✅ Inicializar TallerVinculadoManager (DENTRO del try)
+        window.tallerManager = new TallerVinculadoManager(API_BASE_URL);
+        await window.tallerManager.init();
+
+        // Escuchar cambios de taller
+        window.tallerManager.on('tallerVinculado', (taller) => {
+            console.log('🎉 Taller vinculado:', taller.nombre);
+            window.actualizarInterfaz(window.user);
+        });
+
+        window.tallerManager.on('tallerDesvinculado', () => {
+            console.log('🔓 Taller desvinculado');
+            window.renderizarPlanes?.();
+        });
+
+        // Cargar datos iniciales
+        await window.sincronizarEstadoCitas();
+        window.actualizarInterfaz(window.user);
+        window.inicializarMarcas();
+
+        // ✅ Si hay taller vinculado, cargar sus planes; si no, mostrar selector
+        if (window.tallerManager.tieneTallerVinculado()) {
+            await window.tallerManager.actualizarPlanes();
+        } else {
+            window.renderizarPlanes();
+        }
+
+        window.cargarNotificaciones();
+
+        // Configurar actualización periódica
+        window.iniciarSincronizacion();
+
+        // Renderizado inicial
+        if (typeof window.renderizarCitas === 'function') {
+            window.renderizarCitas();
+        }
+
+        // Sincronización con servidor
+        await db.sincronizarConServidor();
+
+        logger.info('✅ Dashboard inicializado correctamente');
+
+    } catch (error) {
+        logger.error('❌ Error crítico en inicio:', error);
+        console.error('Stack trace:', error.stack);
+        window.mostrarToast('Error al cargar el dashboard. Recarga la página.', 'error', 5000);
+    }
+
+    // Event listener para búsqueda (fuera del try porque no son críticos)
+    document.getElementById('busqueda-placa')?.addEventListener('input', (e) => {
+        window.filtroActualPlaca = e.target.value;
+        if (typeof window.renderizarGaleria === 'function') window.renderizarGaleria();
+    });
+
+    document.getElementById('filtro-modelo')?.addEventListener('change', () => {
+        if (typeof window.renderizarGaleria === 'function') window.renderizarGaleria();
+    });
+
+    // Configurar evento para cambio de foto de vehículo
+    const inputFotoAuto = document.getElementById('input-cambiar-foto-auto');
+    if (inputFotoAuto) {
+        inputFotoAuto.addEventListener('change', window.confirmarCambioFotoAuto);
+    }
+});
+
+// ==================== SINCRONIZACIÓN MEJORADA ====================
+window.iniciarSincronizacion = function () {
+    if (intervaloActual) {
+        clearInterval(intervaloActual);
+    }
+
+    intervaloActual = setInterval(async () => {
+        try {
+            await window.sincronizarEstadoCitas();
+            window.cargarNotificaciones();
+            logger.debug('Sincronización periódica completada');
+        } catch (error) {
+            logger.error('Error en sincronización periódica:', error);
+        }
+    }, SYNC_INTERVAL);
+
+    logger.info('Sincronización periódica iniciada');
+};
+
+window.detenerSincronizacion = function () {
+    if (intervaloActual) {
+        clearInterval(intervaloActual);
+        intervaloActual = null;
+        logger.info('Sincronización periódica detenida');
+    }
+};
+
+window.addEventListener('beforeunload', () => {
+    window.detenerSincronizacion();
+    logger.info('Dashboard cerrado');
+});
+
+// ==================== FUNCIONES DE INTERFAZ ====================
+
+window.actualizarInterfaz = function (instanciaCliente) {
+    const user = instanciaCliente || window.user;
+    if (!user) return;
+
+    logger.debug('Actualizando interfaz para usuario:', user.nombre);
+
+    // --- IDENTIDAD ---
+    const fotoURL = user.fotoPerfil || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.nombre)}&background=0b0f19&color=00ff88`;
+    document.querySelectorAll('#user-name, #display-nombre, #user-name-display').forEach(el => el.innerText = user.nombre);
+    document.querySelectorAll('#foto-perfil-grande, #avatar-sidebar').forEach(img => img.src = fotoURL);
+    if (document.getElementById('display-email')) document.getElementById('display-email').innerText = user.email;
+
+    // --- WALLET Y SERVICIOS (usando getters) ---
+    if (document.getElementById('saldo-cuenta')) {
+        document.getElementById('saldo-cuenta').innerText = `RD$ ${user.saldo.toFixed(2)}`;
+    }
+
+    const elServicios = document.getElementById('servicios-qty');
+    if (elServicios) {
+        const servicios = user.serviciosDisponibles;
+        elServicios.innerText = servicios;
+        elServicios.style.color = servicios > 0 ? "#00ff88" : "#ff4444";
+    }
+
+    // --- PLAN ---
+    const elPlanTexto = document.getElementById('plan-actual-texto');
+    const badgePlan = document.getElementById('badge-plan');
+    const planActual = user.planActual;
+    if (elPlanTexto) {
+        elPlanTexto.innerText = planActual !== "Ninguno" ? `Plan Activo: ${planActual}` : "Sin plan activo";
+        elPlanTexto.style.color = planActual !== "Ninguno" ? "#00ff88" : "#ffbb33";
+    }
+    if (badgePlan) badgePlan.innerText = `Plan: ${planActual}`;
+
+    // --- CONTADORES (usando getters) ---
+    const garaje = user.garaje;
+    const misCitas = user.misCitas;
+
+    if (document.getElementById('qty-autos')) {
+        document.getElementById('qty-autos').innerText = garaje.length;
+    }
+
+    // --- MINI ESTADÍSTICAS ---
+    if (document.getElementById('user-total-citas')) {
+        document.getElementById('user-total-citas').textContent = misCitas.length;
+    }
+    if (document.getElementById('user-vehiculos')) {
+        document.getElementById('user-vehiculos').textContent = garaje.length;
+    }
+    if (document.getElementById('user-antiguedad')) {
+        if (user.fechaRegistro) {
+            const fecha = new Date(user.fechaRegistro);
+            const ahora = new Date();
+            const meses = (ahora.getFullYear() - fecha.getFullYear()) * 12 + (ahora.getMonth() - fecha.getMonth());
+            document.getElementById('user-antiguedad').textContent = meses < 1 ? 'Nuevo' : meses;
+        } else {
+            document.getElementById('user-antiguedad').textContent = '-';
+        }
+    }
+
+    // --- CONTADOR DEL GARAJE ---
+    if (document.getElementById('garage-count')) {
+        document.getElementById('garage-count').textContent = garaje.length + ' vehículo' + (garaje.length !== 1 ? 's' : '');
+    }
+
+    // --- RENDERIZAR GARAJE ---
+    if (typeof window.renderizarGaraje === 'function') {
+        window.renderizarGaraje();
+    }
+
+    // --- PRÓXIMA CITA ---
+    const elProxima = document.getElementById('proxima-cita');
+    const elSucursalCita = document.getElementById('sucursal-cita');
+    if (elProxima) {
+        const citasPendientes = misCitas.filter(c =>
+            ESTADOS_PENDIENTES.includes(c.estado?.toUpperCase())
+        );
+        if (citasPendientes.length > 0) {
+            const citasOrdenadas = [...citasPendientes].sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
+            const cita = citasOrdenadas[0];
+            elProxima.innerText = `${cita.fecha} | ${cita.hora}`;
+            elProxima.style.color = "#00ff88";
+            if (elSucursalCita) elSucursalCita.innerText = `📍 ${cita.sucursal}`;
+        } else {
+            elProxima.innerText = "No hay citas";
+            elProxima.style.color = "#888";
+            if (elSucursalCita) elSucursalCita.innerText = "Reserva tu espacio ahora";
+        }
+    }
+    if (window.tallerManager?.tieneTallerVinculado()) {
+        document.getElementById('badge-plan').textContent = `🏪 ${window.tallerManager.getTaller().nombre}`;
+    }
+};
+
+// ==================== MARCAS Y MODELOS ====================
+
+window.inicializarMarcas = function () {
+    const selectMarca = document.getElementById('car-marca');
+    if (!selectMarca) return;
+    selectMarca.innerHTML = '<option value="" disabled selected>Selecciona una marca...</option>';
+    const marcas = Object.keys(CATALOGO_VEHICULOS).sort();
+    marcas.forEach(marca => {
+        const opt = document.createElement('option');
+        opt.value = marca;
+        opt.textContent = marca;
+        selectMarca.appendChild(opt);
+    });
+};
+
+window.actualizarModelos = function () {
+    const elMarca = document.getElementById('car-marca');
+    const elModelo = document.getElementById('car-modelo');
+    if (!elMarca || !elModelo) return;
+    const marcaElegida = elMarca.value;
+    elModelo.innerHTML = '<option value="" disabled selected>Selecciona un modelo...</option>';
+    if (CATALOGO_VEHICULOS[marcaElegida]) {
+        elModelo.disabled = false;
+        CATALOGO_VEHICULOS[marcaElegida].sort().forEach(modelo => {
+            const opt = document.createElement('option');
+            opt.value = modelo;
+            opt.textContent = modelo;
+            elModelo.appendChild(opt);
+        });
+    } else {
+        elModelo.disabled = true;
+    }
+};
+
+// ==================== GESTIÓN DE VEHÍCULOS (USANDO MÉTODOS DE CLASE) ====================
+
+window.renderizarGaraje = function () {
+    const container = document.getElementById('contenedor-vehiculos');
+    if (!container || !window.user) return;
+
+    container.innerHTML = '';
+
+    const garaje = window.user.garaje || [];
+
+    const countEl = document.getElementById('garage-count');
+    if (countEl) {
+        countEl.textContent = garaje.length + ' vehículo' + (garaje.length !== 1 ? 's' : '');
+    }
+
+    if (garaje.length === 0) {
+        container.innerHTML = `
+            <div class="empty-garage">
+                <div class="empty-garage-icon">🚙</div>
+                <p>No tienes vehículos registrados</p>
+                <button class="btn-add-first-car" onclick="window.abrirModalVehiculo()">
+                    + Registrar mi primer vehículo
+                </button>
+            </div>`;
+        return;
+    }
+
+    garaje.forEach(auto => {
+        const id = auto.id || auto._id;
+        const tieneFoto = auto.foto && (auto.foto.startsWith('data:image') || auto.foto.startsWith('http'));
+        const fotoUrl = tieneFoto ? auto.foto : 'https://via.placeholder.com/400x250/131c2b/00ff88?text=Sin+Foto';
+
+        const card = document.createElement('div');
+        card.className = 'car-card';
+        card.innerHTML = `
+            <div class="car-card-body" onclick="window.agendarCitaConVehiculo('${id}')">
+                <div class="car-image-wrapper">
+                    ${tieneFoto
+                ? `<img src="${fotoUrl}" alt="${auto.marca || 'Vehículo'}" class="car-img" />`
+                : `<div class="car-img-fallback">🚗</div>`
+            }
+                    ${auto.color ? `
+                    <div class="car-color-badge" title="Color: ${auto.color}">
+                        <span class="car-color-dot" style="background-color: ${auto.color};"></span>
+                    </div>` : ''}
+                </div>
+
+                <div class="car-details">
+                    <div class="car-header-info">
+                        <h4>${auto.marca || 'Vehículo'} ${auto.modelo || ''}</h4>
+                        <span class="car-plate">${auto.placa || 'S/P'}</span>
+                    </div>
+                    <p class="car-action-hint">Haz clic para agendar cita ⚡</p>
+                </div>
+            </div>
+
+            <div class="car-actions">
+                <button type="button" class="btn-car-action" title="Cambiar foto" onclick="event.stopPropagation(); window.dispararCambioFotoAuto('${id}')">📷</button>
+                <button type="button" class="btn-car-action" title="Editar vehículo" onclick="event.stopPropagation(); window.editarVehiculo('${id}')">✏️</button>
+                <button type="button" class="btn-car-action delete" title="Eliminar vehículo" onclick="event.stopPropagation(); window.eliminarVehiculo('${id}')">🗑️</button>
+            </div>
+        `;
+        container.appendChild(card);
+    });
+
+    if (document.getElementById('qty-autos')) {
+        document.getElementById('qty-autos').textContent = garaje.length;
+    }
+    if (document.getElementById('user-vehiculos')) {
+        document.getElementById('user-vehiculos').textContent = garaje.length;
+    }
+};
+
+window.abrirModalVehiculo = function () {
+    const modal = document.getElementById('modal-vehiculo');
+    if (!modal) {
+        logger.error('❌ No se encontró el modal de vehículo');
+        return;
+    }
+
+    document.getElementById('car-marca').value = '';
+    document.getElementById('car-modelo').innerHTML = '<option value="" disabled selected>Primero selecciona una marca...</option>';
+    document.getElementById('car-modelo').disabled = true;
+    document.getElementById('car-placa').value = '';
+    document.getElementById('car-color').value = '#33d17a';
+    document.getElementById('car-foto').value = '';
+
+    modal.querySelector('h3').textContent = 'Registrar Nuevo Vehículo';
+    modal.querySelector('button[type="submit"]').textContent = 'AÑADIR AL GARAJE';
+    modal.setAttribute('data-editando', '');
+
+    window.inicializarMarcas();
+    modal.style.display = 'flex';
+};
+
+window.editarVehiculo = function (id) {
+    const garaje = window.user.garaje; // Getter
+    const vehiculo = garaje.find(v => (v.id || v._id) == id);
+    if (!vehiculo) {
+        window.mostrarToast('⚠️ Vehículo no encontrado', 'warning');
+        return;
+    }
+
+    const modal = document.getElementById('modal-vehiculo');
+    if (!modal) return;
+
+    window.inicializarMarcas();
+
+    setTimeout(() => {
+        document.getElementById('car-marca').value = vehiculo.marca || '';
+        window.actualizarModelos();
+
+        setTimeout(() => {
+            document.getElementById('car-modelo').value = vehiculo.modelo || '';
+        }, 200);
+
+        document.getElementById('car-placa').value = vehiculo.placa || '';
+        document.getElementById('car-color').value = vehiculo.color || '#33d17a';
+        document.getElementById('car-foto').value = '';
+
+        modal.querySelector('h3').textContent = 'Editar Vehículo';
+        modal.querySelector('button[type="submit"]').textContent = '💾 GUARDAR CAMBIOS';
+        modal.setAttribute('data-editando', id);
+
+        modal.style.display = 'flex';
+    }, 300);
+};
+
+window.añadirVehiculo = async function (event) {
+    if (event) event.preventDefault();
+
+    const modal = document.getElementById('modal-vehiculo');
+    const editandoId = modal?.getAttribute('data-editando');
+
+    const marca = document.getElementById('car-marca')?.value;
+    const modelo = document.getElementById('car-modelo')?.value;
+    const placa = document.getElementById('car-placa')?.value.trim();
+    const color = document.getElementById('car-color')?.value;
+    const fotoInput = document.getElementById('car-foto');
+
+    if (!marca || !modelo || !placa) {
+        window.mostrarToast('⚠️ Completa todos los campos obligatorios', 'warning');
+        return;
+    }
+
+    if (!validadores.placa(placa)) {
+        window.mostrarToast('⚠️ La placa debe tener entre 5 y 8 caracteres alfanuméricos', 'warning');
+        return;
+    }
+
+    window.estadoCarga.mostrar('Guardando vehículo...');
+
+    let fotoUrl = null;
+    if (fotoInput && fotoInput.files && fotoInput.files[0]) {
+        if (fotoInput.files[0].size > 5 * 1024 * 1024) {
+            window.mostrarToast('⚠️ La imagen es muy grande. Máximo 5MB.', 'warning');
+            window.estadoCarga.ocultar();
+            return;
+        }
+
+        try {
+            const formData = new FormData();
+            formData.append('imagen', fotoInput.files[0]);
+
+            const data = await window.fetchConReintento(`/upload/imagen`, {
+                method: 'POST',
+                body: formData
+            });
+
+            if (data.exito) {
+                fotoUrl = data.url;
+                logger.info('📷 Imagen subida:', fotoUrl);
+            }
+        } catch (error) {
+            logger.error('❌ Error al subir imagen:', error);
+            window.mostrarToast('⚠️ No se pudo subir la foto. Continuará sin foto.', 'warning');
+        }
+    }
+
+    const vehiculoData = {
+        marca,
+        modelo,
+        placa: placa.toUpperCase(),
+        color,
+        foto: fotoUrl
+    };
+
+    try {
+        if (editandoId) {
+            // EDITAR usando método de la clase
+            const actualizado = window.user.actualizarVehiculo(editandoId, vehiculoData);
+            if (actualizado) {
+                window.mostrarToast('✅ Vehículo actualizado correctamente', 'success');
+            }
+        } else {
+            // NUEVO usando método de la clase
+            const agregado = window.user.agregarVehiculo(vehiculoData);
+            if (agregado) {
+                window.mostrarToast('✅ Vehículo agregado al garaje', 'success');
+            } else {
+                window.mostrarToast('⚠️ Ya existe un vehículo con esa placa', 'warning');
+            }
+        }
+
+        window.persistirUsuario();
+        modal.style.display = 'none';
+        window.renderizarGaraje();
+        window.actualizarInterfaz(window.user);
+
+        if (window.db && window.db.sincronizarConServidor) {
+            await window.db.sincronizarConServidor();
+        }
+    } catch (error) {
+        logger.error('Error al guardar vehículo:', error);
+        window.mostrarToast('❌ Error al guardar el vehículo', 'error');
+    } finally {
+        window.estadoCarga.ocultar();
+    }
+};
+
+window.eliminarVehiculo = function (id) {
+    if (!confirm('¿Estás seguro de eliminar este vehículo? Esta acción no se puede deshacer.')) return;
+
+    const garaje = window.user.garaje;
+    const vehiculo = garaje.find(v => (v.id || v._id) == id);
+
+    if (!vehiculo) {
+        window.mostrarToast('⚠️ Vehículo no encontrado.', 'warning');
+        return;
+    }
+
+    const eliminado = window.user.eliminarVehiculo(id);
+    if (eliminado) {
+        window.persistirUsuario();
+        window.renderizarGaraje();
+        window.actualizarInterfaz(window.user);
+        window.mostrarToast(`🗑️ Vehículo ${vehiculo.marca} eliminado`, 'success');
+
+        if (window.db && window.db.sincronizarConServidor) {
+            window.db.sincronizarConServidor();
+        }
+    }
+};
+
+window.dispararCambioFotoAuto = function (id) {
+    const input = document.getElementById('input-cambiar-foto-auto');
+    if (input) {
+        input.setAttribute('data-vehiculo-id', id);
+        input.click();
+    }
+};
+
+window.confirmarCambioFotoAuto = async function (event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const id = event.target.getAttribute('data-vehiculo-id');
+    if (!id) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+        window.mostrarToast('⚠️ La imagen es muy grande. Máximo 5MB.', 'warning');
+        return;
+    }
+
+    window.estadoCarga.mostrar('Subiendo foto...');
+
+    try {
+        const formData = new FormData();
+        formData.append('imagen', file);
+
+        const data = await window.fetchConReintento(`/upload/imagen`, {
+            method: 'POST',
+            body: formData
+        });
+
+        if (data.exito) {
+            window.user.actualizarVehiculo(id, { foto: data.url });
+            window.persistirUsuario();
+            window.renderizarGaraje();
+            window.mostrarToast('✅ Foto actualizada', 'success');
+        } else {
+            window.mostrarToast('❌ Error al subir la foto.', 'error');
+        }
+    } catch (error) {
+        logger.error('Error al cambiar foto:', error);
+        window.mostrarToast('❌ Error de conexión al subir la foto.', 'error');
+    } finally {
+        window.estadoCarga.ocultar();
+    }
+
+    event.target.value = '';
+};
+
+window.cerrarModalVehiculo = function () {
+    const modal = document.getElementById('modal-vehiculo');
+    if (modal) modal.style.display = 'none';
+};
+
+// ==================== RECARGA DE SALDO ====================
+
+window.abrirRecarga = function () {
+    if (!window.user) {
+        window.mostrarToast("⚠️ Debes iniciar sesión.", "warning");
+        return;
+    }
+    const modal = document.getElementById('modal-recarga');
+    const displayNombre = document.getElementById('recarga-usuario-nombre');
+    const inputMonto = document.getElementById('monto-recarga');
+    if (modal) {
+        if (displayNombre) displayNombre.textContent = window.user.nombre;
+        if (inputMonto) inputMonto.value = "";
+        modal.style.display = 'flex';
+    }
+};
+
+window.procesarRecarga = async function (e) {
+    if (e) e.preventDefault();
+    const inputMonto = document.getElementById('monto-recarga');
+    const monto = parseFloat(inputMonto.value);
+
+    if (isNaN(monto) || monto <= 0) {
+        window.mostrarToast("⚠️ Ingresa un monto válido.", "warning");
+        return;
+    }
+
+    if (monto < 50) {
+        window.mostrarToast("⚠️ El monto mínimo de recarga es RD$ 50.00", "warning");
+        return;
+    }
+
+    window.estadoCarga.mostrar('Procesando recarga...');
+
+    const saldoActual = window.user.saldo;
+    window.user.saldo = saldoActual + monto; // Usa el setter de la clase
+
+    try {
+        const exito = await window.db.sincronizarConServidor();
+        if (exito) {
+            window.persistirUsuario();
+            const displaySaldo = document.getElementById('saldo-cuenta');
+            if (displaySaldo) displaySaldo.textContent = window.user.saldo.toFixed(2);
+            window.mostrarToast(`✅ Recarga exitosa. Tu nuevo saldo es: RD$ ${window.user.saldo.toFixed(2)}`, 'success');
+            inputMonto.value = "";
+            window.cerrarModales();
+        } else {
+            window.user.saldo = saldoActual; // Revertir
+            window.mostrarToast("❌ Error al sincronizar.", "error");
+        }
+    } catch (error) {
+        logger.error('Error en recarga:', error);
+        window.user.saldo = saldoActual; // Revertir
+        window.mostrarToast("❌ Error de conexión.", "error");
+    } finally {
+        window.estadoCarga.ocultar();
+    }
+};
+
+// ==================== MODALES ====================
+
+window.cerrarModales = function () {
+    document.querySelectorAll('.modal').forEach(modal => {
+        modal.style.display = 'none';
+        modal.classList.remove('active', 'show');
+    });
+    ['modal-recarga', 'modal-vehiculo', 'modal-cita', 'modal-notificaciones'].forEach(id => {
+        const m = document.getElementById(id);
+        if (m) m.style.display = 'none';
+    });
+    document.querySelectorAll('form').forEach(f => f.reset());
+};
+
+document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') {
+        window.cerrarModales();
+    }
+});
+
+document.addEventListener('click', function (e) {
+    if (e.target.classList.contains('modal')) {
+        window.cerrarModales();
+    }
+});
+
+// ==================== PLANES ====================
+
+window.renderizarPlanes = async function () {
+    // Si hay taller vinculado, delegar al manager
+    if (window.tallerManager?.tieneTallerVinculado()) {
+        await window.tallerManager.actualizarPlanes();
+        return;
+    }
+
+    // Si no hay taller vinculado, mostrar mensaje para seleccionar
+    const contenedor = document.getElementById('contenedor-planes-cards');
+    if (!contenedor) return;
+
+    contenedor.innerHTML = `
+        <div style="grid-column:1/-1; text-align:center; padding:40px; color:#888;">
+            <span style="font-size:4rem;">🏪</span>
+            <h3 style="color:#fff; margin:15px 0;">Selecciona tu taller de confianza</h3>
+            <p style="margin-bottom:20px;">Vincula un taller para ver sus planes exclusivos</p>
+            <button onclick="window.tallerManager.mostrarSelector()" 
+                style="padding:14px 30px; background:#00ff88; color:#000; border:none; border-radius:10px; cursor:pointer; font-weight:700; font-size:1rem;">
+                🏪 Seleccionar Mi Taller
+            </button>
+        </div>`;
+};
+
+// ============================================================================
+// 💳 COMPRAR PLAN (v4 - con modal HTML, sin confirm nativo)
+// ============================================================================
+window.comprarPlanWeb = async function (planId, tallerId) {
+    console.log('═══════════════════════════════════════════');
+    console.log('🛒 comprarPlanWeb llamado');
+    console.log('   planId:', planId);
+    console.log('   tallerId:', tallerId);
+    console.log('═══════════════════════════════════════════');
+
+    // Verificar sesión
+    const clienteId = window.obtenerIdUsuario?.() || window.user?._id || window.user?.id;
+
+    if (!clienteId) {
+        window.mostrarToast?.('⚠️ Debes iniciar sesión', 'warning');
+        return;
+    }
+
+    // ⭐ Obtener datos del plan para mostrar en el modal
+    try {
+        const API_BASE = window.API_URL || 'http://localhost:3000/api';
+        const sesion = JSON.parse(localStorage.getItem('sesion_activa') || '{}');
+        const token = sesion.token || '';
+
+        const planRes = await fetch(`${API_BASE}/talleres/${tallerId}/planes`, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        const planData = await planRes.json();
+        const plan = planData.planes?.find(p => p._id === planId);
+
+        if (!plan) {
+            window.mostrarToast?.('❌ Plan no encontrado', 'error');
+            return;
+        }
+
+        // ⭐ Mostrar modal de confirmación
+        mostrarModalComprarPlan(plan, planId, tallerId, clienteId, token);
+
+    } catch (error) {
+        console.error('❌ Error:', error);
+        window.mostrarToast?.('❌ Error al cargar plan', 'error');
+    }
+};
+
+// ============================================================================
+// 💳 MOSTRAR MODAL DE COMPRA DE PLAN
+// ============================================================================
+function mostrarModalComprarPlan(plan, planId, tallerId, clienteId, token) {
+    // Eliminar modal existente
+    document.getElementById('modal-comprar-plan')?.remove();
+
+    const modalHTML = `
+        <div id="modal-comprar-plan" 
+             style="position:fixed; inset:0; background:rgba(0,0,0,0.9); z-index:10000; display:flex; align-items:center; justify-content:center; backdrop-filter:blur(8px); padding:20px;"
+             onclick="if(event.target === this) this.remove()">
+            
+            <div style="background:#0f1621; border:2px solid #1e2a3a; border-radius:20px; max-width:450px; width:100%; padding:0; overflow:hidden;"
+                 onclick="event.stopPropagation()">
+                
+                <!-- Header -->
+                <div style="padding:25px; background:linear-gradient(135deg, #ffbb3310, #ff880005); border-bottom:1px solid #1e2a3a; text-align:center;">
+                    <div style="font-size:3rem; margin-bottom:10px;">💳</div>
+                    <h2 style="color:#fff; margin:0 0 5px; font-size:1.4rem;">Confirmar Compra</h2>
+                    <p style="color:#888; margin:0; font-size:0.85rem;">¿Deseas contratar este plan?</p>
+                </div>
+
+                <!-- Info del plan -->
+                <div style="padding:25px;">
+                    <div style="background:#131c2b; border-radius:12px; padding:20px; margin-bottom:20px;">
+                        <div style="display:flex; justify-content:space-between; align-items:start; margin-bottom:15px;">
+                            <div>
+                                <h3 style="color:#fff; margin:0 0 5px; font-size:1.2rem;">📦 ${plan.nombre}</h3>
+                                <span style="background:#ffbb3320; color:#ffbb33; padding:3px 10px; border-radius:15px; font-size:0.7rem; font-weight:600;">${plan.nivel || 'NORMAL'}</span>
+                            </div>
+                            <div style="text-align:right;">
+                                <div style="color:#ffbb33; font-size:1.8rem; font-weight:800;">RD$ ${(plan.precio || 0).toLocaleString()}</div>
+                                <small style="color:#888; font-size:0.75rem;">${plan.duracionDias || 30} días</small>
+                            </div>
+                        </div>
+                        
+                        <div style="display:flex; gap:15px; padding-top:15px; border-top:1px solid #1e2a3a; flex-wrap:wrap;">
+                            <div style="flex:1; text-align:center;">
+                                <div style="color:#00ff88; font-size:1.3rem; font-weight:700;">${plan.serviciosIncluidos || 0}</div>
+                                <small style="color:#888; font-size:0.65rem;">SERVICIOS</small>
+                            </div>
+                            ${plan.numeroLavados > 0 ? `
+                            <div style="flex:1; text-align:center;">
+                                <div style="color:#00d4ff; font-size:1.3rem; font-weight:700;">${plan.numeroLavados}</div>
+                                <small style="color:#888; font-size:0.65rem;">🧽 LAVADOS</small>
+                            </div>
+                            ` : ''}
+                        </div>
+                    </div>
+
+                    <!-- Saldo -->
+                    <div style="background:#131c2b; border-radius:12px; padding:15px; margin-bottom:20px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <span style="color:#888; font-size:0.85rem;">💰 Tu saldo:</span>
+                            <span style="color:#00ff88; font-weight:700; font-size:1.1rem;">RD$ ${(window.user?.saldo || 0).toLocaleString()}</span>
+                        </div>
+                    </div>
+
+                    <!-- Botones -->
+                    <div style="display:flex; gap:10px;">
+                        <button onclick="document.getElementById('modal-comprar-plan').remove()"
+                            style="flex:1; padding:14px; background:transparent; border:1px solid #333; color:#fff; border-radius:12px; cursor:pointer; font-weight:600; font-size:0.9rem;">
+                            ❌ Cancelar
+                        </button>
+                        <button id="btn-confirmar-compra-plan"
+                            onclick="ejecutarCompraPlan('${planId}', '${tallerId}', '${clienteId}', '${token}', '${plan.nombre}', ${plan.serviciosIncluidos || 0})"
+                            style="flex:2; padding:14px; background:#00ff88; border:none; color:#000; border-radius:12px; cursor:pointer; font-weight:700; font-size:0.9rem;">
+                            ✅ Confirmar Compra
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+}
+
+// ============================================================================
+// 💳 EJECUTAR COMPRA (llamado desde el modal)
+// ============================================================================
+window.ejecutarCompraPlan = async function (planId, tallerId, clienteId, token, planNombre, serviciosIncluidos) {
+    const btn = document.getElementById('btn-confirmar-compra-plan');
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '⏳ Procesando...';
+    }
+
+    try {
+        const API_BASE = window.API_URL || 'http://localhost:3000/api';
+
+        console.log('📤 POST:', `${API_BASE}/talleres/${tallerId}/clientes/${clienteId}/planes/${planId}/contratar`);
+
+        const response = await fetch(
+            `${API_BASE}/talleres/${tallerId}/clientes/${clienteId}/planes/${planId}/contratar`,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ metodoPago: 'EFECTIVO' })
+            }
+        );
+
+        console.log('📥 Status:', response.status);
+
+        const data = await response.json();
+        console.log('📦 Data:', data);
+
+        if (!data.exito) {
+            window.mostrarToast?.(`❌ ${data.mensaje || 'Error'}`, 'error');
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = '✅ Confirmar Compra';
+            }
+            return;
+        }
+
+        console.log('✅ Plan contratado:', data.suscripcion);
+
+        // Cerrar modal
+        document.getElementById('modal-comprar-plan')?.remove();
+
+        // Actualizar localStorage
+        if (window.user) {
+            window.user.planActual = data.suscripcion.nombre || planNombre;
+            window.user.serviciosDisponibles = serviciosIncluidos;
+
+            if (window.persistirUsuario) window.persistirUsuario();
+            if (window.actualizarInterfaz) window.actualizarInterfaz(window.user);
+        }
+
+        // Toast de éxito
+        window.mostrarToast?.(`✅ ¡Plan "${planNombre}" contratado!`, 'success', 5000);
+
+        // Recargar UI
+        setTimeout(() => {
+            if (window.renderizarPlanes) window.renderizarPlanes();
+            if (window.cargarMiTaller) window.cargarMiTaller();
+        }, 1000);
+
+    } catch (error) {
+        console.error('❌ Error:', error);
+        window.mostrarToast?.(`❌ Error: ${error.message}`, 'error');
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = '✅ Confirmar Compra';
+        }
+    }
+};
+
+// ============================================================================
+// 📅 WIZARD DE AGENDAR CITA - v3
+// ============================================================================
+window._wizard = {
+    paso: 1,
+    totalPasos: 4,
+    tallerId: null,
+    vehiculo: null,
+    servicio: null,
+    empleado: null,
+    fecha: null,
+    hora: null
+};
+
+// ────────────────────────────────────────────────────────────
+// ABRIR MODAL
+// ────────────────────────────────────────────────────────────
+window.abrirModalSolicitud = async function (sucursalSeleccionada) {
+    const garaje = window.user.garaje;
+    if (garaje.length === 0) {
+        window.mostrarToast("⚠️ No tienes vehículos registrados.", "warning");
+        return;
+    }
+
+    // Reset estado
+    window._wizard = {
+        paso: 1,
+        totalPasos: 4,
+        tallerId: null,
+        vehiculo: null,
+        servicio: null,
+        empleado: null,
+        fecha: null,
+        hora: null
+    };
+
+    // Detectar taller vinculado
+    const tallerVinculado = window.tallerManager?.getTaller();
+    const bloqueTaller = document.getElementById('mc-taller-bloque');
+
+    if (tallerVinculado) {
+        window._wizard.tallerId = tallerVinculado._id;
+
+        if (bloqueTaller) {
+            const direccion = `${tallerVinculado.direccion?.calle || ''}, ${tallerVinculado.direccion?.ciudad || ''}`.trim().replace(/^,\s*|,\s*$/g, '');
+            bloqueTaller.innerHTML = `
+                <div class="mc-taller-fijo">
+                    <div class="mc-taller-fijo-header">
+                        <span class="mc-taller-fijo-icon">🏪</span>
+                        <div>
+                            <strong>${tallerVinculado.nombre}</strong>
+                            <small>📍 ${direccion || 'Sin dirección'}</small>
+                        </div>
+                    </div>
+                </div>
+            `;
+            bloqueTaller.style.display = 'block';
+        }
+    } else if (sucursalSeleccionada) {
+        window._wizard.tallerId = sucursalSeleccionada;
+        if (bloqueTaller) bloqueTaller.style.display = 'none';
+    }
+
+    // Reset campos
+    document.getElementById('cita-fecha').value = '';
+    document.getElementById('cita-fecha').setAttribute('min', new Date().toISOString().split('T')[0]);
+
+    // Ir a paso 1
+    window._wizard.paso = 1;
+    actualizarWizardUI();
+
+    // Renderizar vehículos
+    renderizarPasoVehiculos();
+
+    // Mostrar modal
+    const modal = document.getElementById('modal-cita');
+    if (modal) {
+        modal.style.display = 'flex';
+        modal.classList.add('fade-in');
+    }
+
+    // Si no hay taller vinculado, cargar servicios (con placeholder)
+    if (window._wizard.tallerId) {
+        await cargarServiciosDelTaller(window._wizard.tallerId, false);
+        await cargarEmpleadosDelTaller(window._wizard.tallerId);
+    }
+};
+
+// ────────────────────────────────────────────────────────────
+// ACTUALIZAR UI DEL WIZARD (barra, botones, pasos)
+// ────────────────────────────────────────────────────────────
+function actualizarWizardUI() {
+    const { paso, totalPasos } = window._wizard;
+
+    // Ocultar todos los pasos
+    document.querySelectorAll('.mc-wizard-paso').forEach(p => p.style.display = 'none');
+
+    // Mostrar el actual
+    const pasoActual = document.getElementById(`mc-paso-${paso}`);
+    if (pasoActual) pasoActual.style.display = 'block';
+
+    // Barra de progreso
+    const progreso = (paso / totalPasos) * 100;
+    document.getElementById('mc-wizard-progress-bar').style.width = progreso + '%';
+
+    // Label
+    document.getElementById('mc-wizard-paso-label').textContent = `Paso ${paso} de ${totalPasos}`;
+
+    // Botones
+    const btnPrev = document.getElementById('mc-btn-prev');
+    const btnCancel = document.getElementById('mc-btn-cancel');
+    const btnNext = document.getElementById('mc-btn-next');
+    const btnConfirm = document.getElementById('btn-agendar-cita');
+
+    btnPrev.style.display = paso > 1 ? 'block' : 'none';
+    btnCancel.style.display = paso === 1 ? 'block' : 'none';
+    btnNext.style.display = paso < totalPasos ? 'block' : 'none';
+    btnConfirm.style.display = paso === totalPasos ? 'block' : 'none';
+}
+
+// ────────────────────────────────────────────────────────────
+// NAVEGACIÓN
+// ────────────────────────────────────────────────────────────
+window.wizardNext = async function () {
+    const pasoActual = window._wizard.paso;
+
+    // Validar paso actual
+    if (pasoActual === 1 && !window._wizard.vehiculo) {
+        window.mostrarToast('⚠️ Selecciona un vehículo', 'warning');
+        return;
+    }
+    if (pasoActual === 2 && !window._wizard.servicio) {
+        window.mostrarToast('⚠️ Selecciona un servicio', 'warning');
+        return;
+    }
+    // Paso 3: empleado es opcional (Sin preferencia = null)
+
+    if (pasoActual >= window._wizard.totalPasos) return;
+
+    window._wizard.paso++;
+    actualizarWizardUI();
+
+    // Renderizar el paso al que vamos
+    if (window._wizard.paso === 2) {
+        // Servicios ya se cargaron al abrir
+    } else if (window._wizard.paso === 3) {
+        // Empleados ya se cargaron al abrir
+    } else if (window._wizard.paso === 4) {
+        actualizarResumen();
+    }
+};
+
+window.wizardPrev = function () {
+    if (window._wizard.paso > 1) {
+        window._wizard.paso--;
+        actualizarWizardUI();
+        if (window._wizard.paso === 4) {
+            // Volviendo del paso 4
+        }
+    }
+};
+
+// ────────────────────────────────────────────────────────────
+// PASO 1: VEHÍCULOS
+// ────────────────────────────────────────────────────────────
+function renderizarPasoVehiculos() {
+    const contenedor = document.getElementById('mc-vehiculos-lista');
+    if (!contenedor) return;
+
+    const garaje = window.user.garaje || [];
+
+    if (garaje.length === 0) {
+        contenedor.innerHTML = '<p class="mc-empty">No tienes vehículos registrados.</p>';
+        return;
+    }
+
+    const cardsHTML = garaje.map((auto, index) => {
+        const id = auto.id || auto._id || index;
+        const placa = auto.placa || 'S/P';
+        const foto = auto.foto && (auto.foto.startsWith('data:') || auto.foto.startsWith('http'))
+            ? auto.foto
+            : null;
+        const color = auto.color || '#888';
+
+        return `
+            <div class="mc-card mc-card-vehiculo" onclick="window.wizardSeleccionarVehiculo(${index})">
+                ${foto
+                ? `<img src="${foto}" class="mc-card-vehiculo-img" alt="${auto.marca}">`
+                : `<div class="mc-card-vehiculo-img">🚗</div>`
+            }
+                <div class="mc-card-vehiculo-info">
+                    <strong>${auto.marca || 'Vehículo'} ${auto.modelo || ''}</strong>
+                    <small>
+                        <span class="mc-card-vehiculo-color" style="background:${color};"></span>
+                        ${placa}
+                    </small>
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    const addCardHTML = `
+        <div class="mc-card mc-card-add" onclick="window.abrirModalVehiculo()">
+            ➕ Agregar nuevo vehículo
+        </div>
+    `;
+
+    contenedor.innerHTML = cardsHTML + addCardHTML;
+}
+
+window.wizardSeleccionarVehiculo = function (index) {
+    const garaje = window.user.garaje || [];
+    const auto = garaje[index];
+    if (!auto) return;
+
+    window._wizard.vehiculo = {
+        marca: auto.marca || 'Genérico',
+        modelo: auto.modelo || 'Modelo',
+        placa: auto.placa || 'S/P',
+        color: auto.color || ''
+    };
+
+    // Marcar visualmente
+    document.querySelectorAll('#mc-vehiculos-lista .mc-card').forEach((card, i) => {
+        card.classList.toggle('selected', i === index);
+    });
+};
+// ────────────────────────────────────────────────────────────
+// PASO 2: SERVICIOS
+// ────────────────────────────────────────────────────────────
+async function cargarServiciosDelTaller(tallerId, mostrarToast = true) {
+    const contenedor = document.getElementById('mc-servicios-lista');
+    if (!contenedor) return;
+
+    contenedor.innerHTML = '<p class="mc-empty">⏳ Cargando servicios...</p>';
+
+    try {
+        const response = await apiFetch(`/talleres/${tallerId}/servicios`);
+        const data = await response.json();
+
+        if (data.exito && data.servicios && data.servicios.length > 0) {
+            const servicios = data.servicios.filter(s => s.activo !== false);
+            renderizarListaServicios(servicios);
+        } else {
+            // Fallback con servicios por defecto
+            renderizarListaServicios([
+                { nombre: 'Lavado Básico', precio: 500, duracionEstimada: 30, descripcion: 'Lavado exterior + secado', tipo: 'LAVADO' },
+                { nombre: 'Lavado Premium', precio: 1200, duracionEstimada: 60, descripcion: 'Lavado completo + aspirado', tipo: 'LAVADO' },
+                { nombre: 'Detallado Interior', precio: 2500, duracionEstimada: 90, descripcion: 'Limpieza profunda de interiores', tipo: 'DETALLADO' },
+                { nombre: 'Pulido Completo', precio: 3500, duracionEstimada: 120, descripcion: 'Pulido y encerado profesional', tipo: 'PULIDO' }
+            ]);
+        }
+    } catch (error) {
+        console.error('Error cargando servicios:', error);
+        contenedor.innerHTML = '<p class="mc-empty">Error al cargar servicios</p>';
+    }
+}
+
+function renderizarListaServicios(servicios) {
+    const contenedor = document.getElementById('mc-servicios-lista');
+    if (!contenedor) return;
+
+    const iconos = {
+        'LAVADO': '🧽',
+        'DETALLADO': '✨',
+        'PULIDO': '💎',
+        'TRATAMIENTO': '🧴',
+        'EXTRA': '➕'
+    };
+
+    const cardsHTML = servicios.map((s, index) => {
+        const icono = iconos[s.tipo] || '🔧';
+        const precio = s.precio || 0;
+        const duracion = s.duracionEstimada || 45;
+        const descripcion = s.descripcion || '';
+
+        return `
+            <div class="mc-card mc-card-servicio" onclick="window.wizardSeleccionarServicio(${index})" data-index="${index}">
+                <div class="mc-card-servicio-icon">${icono}</div>
+                <div class="mc-card-servicio-info">
+                    <strong>${s.nombre}</strong>
+                    <small>${descripcion || '⏱️ ' + duracion + ' min'}</small>
+                </div>
+                <div class="mc-card-servicio-precio">
+                    <strong>RD$ ${precio.toLocaleString()}</strong>
+                    <small>⏱️ ${duracion} min</small>
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    contenedor.innerHTML = cardsHTML;
+    window._wizard.serviciosDisponibles = servicios;
+}
+
+window.wizardSeleccionarServicio = function (index) {
+    const servicios = window._wizard.serviciosDisponibles || [];
+    const servicio = servicios[index];
+    if (!servicio) return;
+
+    window._wizard.servicio = {
+        nombre: servicio.nombre,
+        precio: servicio.precio || 0,
+        duracion: servicio.duracionEstimada || 45,
+        descripcion: servicio.descripcion || ''
+    };
+
+    // Marcar visualmente
+    document.querySelectorAll('#mc-servicios-lista .mc-card').forEach((card, i) => {
+        card.classList.toggle('selected', i === index);
+    });
+};
+
+// ────────────────────────────────────────────────────────────
+// PASO 3: EMPLEADOS
+// ────────────────────────────────────────────────────────────
+async function cargarEmpleadosDelTaller(tallerId) {
+    const contenedor = document.getElementById('mc-empleados-lista');
+    if (!contenedor) return;
+
+    contenedor.innerHTML = '<p class="mc-empty">⏳ Cargando equipo...</p>';
+
+    // HTML "Sin preferencia"
+    const sinPrefHTML = `
+        <div class="mc-card mc-card--sinpref" onclick="window.wizardSeleccionarEmpleado('sinpref', -1)">
+            <div class="mc-card-empleado-icon">🤷</div>
+            <div class="mc-card-empleado-info">
+                <strong>Sin preferencia</strong>
+                <small>El taller asignará al mejor disponible</small>
+            </div>
+        </div>
+    `;
+
+    try {
+        const res = await apiFetch(`/talleres/${tallerId}/empleados-publico`, { noRedirigir: true });
+        const data = await res.json();
+
+        if (!data.exito || !data.empleados || data.empleados.length === 0) {
+            contenedor.innerHTML = sinPrefHTML;
+            window._wizard.empleadosDisponibles = [];
+            return;
+        }
+
+        const empleados = data.empleados;
+        window._wizard.empleadosDisponibles = empleados;
+
+        const cardsHTML = empleados.map((emp, index) => {
+            const foto = emp.foto || `https://ui-avatars.com/api/?background=131c2b&color=00ff88&bold=true&name=${encodeURIComponent(emp.nombre)}`;
+            const rating = emp.calificacionPromedio || 0;
+            const trabajos = emp.trabajosCompletados || 0;
+            const estadoIcon = emp.estado === 'DISPONIBLE' ? '🟢' : emp.estado === 'OCUPADO' ? '🟡' : '⚪';
+
+            return `
+                <div class="mc-card mc-card-empleado" onclick="window.wizardSeleccionarEmpleado(${index})">
+                    <img src="${foto}" class="mc-card-empleado-foto" alt="${emp.nombre}"
+                         onerror="this.src='https://ui-avatars.com/api/?background=131c2b&color=00ff88&bold=true&name=${encodeURIComponent(emp.nombre)}'">
+                    <div class="mc-card-empleado-info">
+                        <strong>${emp.nombre}</strong>
+                        <small>⭐ ${rating.toFixed(1)} · ${trabajos} trabajos</small>
+                    </div>
+                    <span class="mc-card-empleado-estado">${estadoIcon}</span>
+                </div>
+            `;
+        }).join('');
+
+        contenedor.innerHTML = sinPrefHTML + cardsHTML;
+
+    } catch (error) {
+        console.error('Error cargando empleados:', error);
+        contenedor.innerHTML = sinPrefHTML;
+    }
+}
+
+window.wizardSeleccionarEmpleado = function (indexOId, indexExplicito) {
+    const index = typeof indexOId === 'number' ? indexOId : -1;
+    const esSinPref = indexOId === 'sinpref' || index === -1;
+
+    if (esSinPref) {
+        window._wizard.empleado = null;
+    } else {
+        const empleados = window._wizard.empleadosDisponibles || [];
+        const emp = empleados[index];
+        if (!emp) return;
+        window._wizard.empleado = {
+            id: emp._id,
+            nombre: emp.nombre
+        };
+    }
+
+    // Marcar visualmente
+    const cards = document.querySelectorAll('#mc-empleados-lista .mc-card');
+    cards.forEach((card, i) => {
+        const esSinPrefCard = card.classList.contains('mc-card--sinpref');
+        if (esSinPref && esSinPrefCard) {
+            card.classList.add('selected');
+        } else if (!esSinPref && !esSinPrefCard && (i - 1) === index) {
+            card.classList.add('selected');
+        } else {
+            card.classList.remove('selected');
+        }
+    });
+}
+
+// Preselección desde "Agendar con X"
+window.limpiarEmpleados = function () {
+    const contenedor = document.getElementById('mc-empleados-lista');
+    if (contenedor) {
+        contenedor.innerHTML = '<p class="mc-empty">Primero selecciona un taller</p>';
+    }
+};
+
+function seleccionarEmpleadoEnModal(empleadoId) {
+    const empleados = window._wizard.empleadosDisponibles || [];
+    const index = empleados.findIndex(e => e._id === empleadoId);
+    if (index >= 0) {
+        window.wizardSeleccionarEmpleado(index);
+    }
+}
+// ────────────────────────────────────────────────────────────
+// PASO 4: FECHA Y HORA
+// ────────────────────────────────────────────────────────────
+window.alCambiarFecha = async function () {
+    const fecha = document.getElementById('cita-fecha')?.value;
+    const tallerId = window._wizard?.tallerId;
+    const contenedorHorarios = document.getElementById('mc-horarios-grid');
+    const dispInfo = document.getElementById('disponibilidad-info');
+
+    if (!fecha || !tallerId || !contenedorHorarios) return;
+
+    // ⭐ SOLO validar que no sea pasado (eso sí es universal)
+    const fechaObj = new Date(fecha + 'T12:00:00');
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+
+    if (fechaObj < hoy) {
+        dispInfo.textContent = '⚠️ No puedes agendar en el pasado';
+        dispInfo.style.color = 'var(--color-danger)';
+        contenedorHorarios.innerHTML = '<p class="mc-empty">Fecha no válida</p>';
+        return;
+    }
+
+    // ❌ QUITAR validación de domingo — el backend decide
+
+    window._wizard.fecha = fecha;
+    contenedorHorarios.innerHTML = '<p class="mc-empty">⏳ Verificando disponibilidad...</p>';
+    dispInfo.textContent = '';
+
+    try {
+        // ⭐ Llamar directo al endpoint (no pasar por service si no existe)
+        const token = JSON.parse(localStorage.getItem('sesion_activa') || '{}').token || '';
+        const response = await fetch(
+            `${window.API_URL || 'http://localhost:3000/api'}/talleres/${tallerId}/horarios?fecha=${fecha}`,
+            { headers: { 'Authorization': `Bearer ${token}` } }
+        );
+        const data = await response.json();
+
+        if (!data.exito) {
+            throw new Error(data.mensaje || 'Error');
+        }
+
+        // ⭐ Si el taller está cerrado ese día
+        if (data.diaAbierto === false) {
+            contenedorHorarios.innerHTML = `
+                <p class="mc-empty">🏪 ${data.mensaje || 'El taller no abre este día'}</p>
+            `;
+            dispInfo.textContent = '';
+            return;
+        }
+
+        if (!data.horarios || data.horarios.length === 0) {
+            contenedorHorarios.innerHTML = '<p class="mc-empty">Sin horarios disponibles</p>';
+            return;
+        }
+
+        // Renderizar botones
+        const botonesHTML = data.horarios.map(h => `
+            <button type="button" class="mc-horario-btn" 
+                    data-hora="${h.hora}"
+                    ${!h.disponible ? 'disabled' : ''}
+                    onclick="window.wizardSeleccionarHora('${h.hora}', this)">
+                ${h.hora}
+                ${h.disponible ? '' : `<small style="display:block;font-size:0.65rem;">lleno</small>`}
+            </button>
+        `).join('');
+
+        contenedorHorarios.innerHTML = botonesHTML;
+
+        const disponibles = data.horarios.filter(h => h.disponible).length;
+        const info = data.info;
+        if (disponibles > 0) {
+            dispInfo.textContent = `✅ ${disponibles} horarios disponibles · ${info?.apertura} - ${info?.cierre}`;
+            dispInfo.style.color = 'var(--color-success)';
+        } else {
+            dispInfo.textContent = `⚠️ Todos los horarios están ocupados`;
+            dispInfo.style.color = 'var(--color-warning)';
+        }
+
+    } catch (error) {
+        console.error('Error horarios:', error);
+        contenedorHorarios.innerHTML = '<p class="mc-empty">Error al cargar horarios</p>';
+        dispInfo.textContent = '⚠️ Intenta de nuevo';
+        dispInfo.style.color = 'var(--color-danger)';
+    }
+};
+window.wizardSeleccionarHora = function (hora, btn) {
+    window._wizard.hora = hora;
+    document.querySelectorAll('#mc-horarios-grid .mc-horario-btn').forEach(b => b.classList.remove('selected'));
+    if (btn) btn.classList.add('selected');
+    actualizarResumen();
+};
+
+function actualizarResumen() {
+    const contenedor = document.getElementById('mc-resumen-content');
+    if (!contenedor) return;
+
+    const w = window._wizard;
+    const items = [];
+
+    if (w.vehiculo) {
+        items.push({
+            label: '🚗 Vehículo',
+            value: `${w.vehiculo.marca} ${w.vehiculo.modelo} (${w.vehiculo.placa})`
+        });
+    }
+    if (w.servicio) {
+        items.push({
+            label: '🔧 Servicio',
+            value: `${w.servicio.nombre} · ${w.servicio.duracion} min`
+        });
+    }
+    items.push({
+        label: '👤 Empleado',
+        value: w.empleado ? w.empleado.nombre : 'Sin preferencia'
+    });
+    if (w.fecha) {
+        items.push({
+            label: '📅 Fecha',
+            value: new Date(w.fecha + 'T12:00:00').toLocaleDateString('es-DO', {
+                weekday: 'long', day: 'numeric', month: 'long'
+            })
+        });
+    }
+    if (w.hora) {
+        items.push({
+            label: '🕐 Hora',
+            value: w.hora
+        });
+    }
+
+    let html = items.map(item => `
+        <div class="mc-resumen-item">
+            <span>${item.label}</span>
+            <span>${item.value}</span>
+        </div>
+    `).join('');
+
+    if (w.servicio) {
+        html += `
+            <div class="mc-resumen-total">
+                <span>💰 Total a pagar</span>
+                <strong>RD$ ${(w.servicio.precio || 0).toLocaleString()}</strong>
+            </div>
+        `;
+    }
+
+    contenedor.innerHTML = html;
+}
+// ────────────────────────────────────────────────────────────
+// CONFIRMAR CITA
+// ────────────────────────────────────────────────────────────
+window.confirmarCita = async function (event) {
+    if (event) event.preventDefault();
+
+    const w = window._wizard;
+
+    // Validar todo
+    if (!w.vehiculo) {
+        window.mostrarToast('⚠️ Falta el vehículo', 'warning');
+        return;
+    }
+    if (!w.servicio) {
+        window.mostrarToast('⚠️ Falta el servicio', 'warning');
+        return;
+    }
+    if (!w.fecha || !w.hora) {
+        window.mostrarToast('⚠️ Falta fecha y hora', 'warning');
+        return;
+    }
+
+    const saldoActual = window.user.saldo;
+    if (saldoActual < w.servicio.precio) {
+        window.mostrarToast(`⚠️ Saldo insuficiente. Necesitas RD$ ${w.servicio.precio.toFixed(2)}`, 'warning');
+        return;
+    }
+
+    if (window.citaEnviada) {
+        window.mostrarToast('⏳ Procesando...', 'warning');
+        return;
+    }
+    window.citaEnviada = true;
+
+    const btn = document.getElementById('btn-agendar-cita');
+    if (btn) { btn.disabled = true; btn.textContent = '⏳ Agendando...'; }
+
+    try {
+        // Nombre del taller
+        let tallerNombre = 'Taller';
+        if (window.tallerManager?.tieneTallerVinculado() && w.tallerId === window.tallerManager.getTallerId()) {
+            tallerNombre = window.tallerManager.getTaller()?.nombre || 'Taller';
+        } else {
+            tallerNombre = talleresDisponibles.find(t => t._id === w.tallerId)?.nombre || 'Taller';
+        }
+
+        // Notas con empleado preferido
+        const notas = w.empleado
+            ? `Cliente prefiere ser atendido por: ${w.empleado.nombre}`
+            : 'Cita agendada por el cliente';
+
+        // POST
+        const response = await apiFetch(`/citas`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                usuarioId: window.obtenerIdUsuario(),
+                datosCita: {
+                    tallerId: w.tallerId,
+                    vehiculo: w.vehiculo,
+                    fecha: w.fecha,
+                    hora: w.hora,
+                    sucursal: tallerNombre,
+                    servicio: w.servicio.nombre,
+                    metodoPago: 'SALDO',
+                    montoPagado: w.servicio.precio,
+                    empleadoPreferidoId: w.empleado?.id || null,
+                    empleadoPreferidoNombre: w.empleado?.nombre || null,
+                    notas: notas
+                }
+            })
+        });
+
+        const data = await response.json();
+
+        if (!data.exito) {
+            throw new Error(data.mensaje || 'Error al agendar');
+        }
+
+        // Descontar saldo
+        window.user.saldo = saldoActual - w.servicio.precio;
+        window.persistirUsuario();
+
+        // Toast
+        const extra = w.empleado ? ` Notificamos al taller tu preferencia por ${w.empleado.nombre}.` : '';
+        window.mostrarToast(`✅ Cita agendada.${extra}`, 'success', 5000);
+
+        // Limpiar
+        window.empleadoPreferido = null;
+
+        // Cerrar y sincronizar
+        window.cerrarModales();
+        await window.sincronizarEstadoCitas();
+
+    } catch (error) {
+        console.error('Error:', error);
+        window.mostrarToast('❌ ' + error.message, 'error');
+    } finally {
+        window.citaEnviada = false;
+        if (btn) { btn.disabled = false; btn.textContent = '✅ Confirmar cita'; }
+    }
+};
+// ============================================================================
+// 🏪 CARGAR TALLERES EN SELECT (filtrado y sin duplicados)
+// ============================================================================
+async function cargarTalleresEnSelect(tallerPreseleccionado) {
+    const select = document.getElementById('cita-sucursal');
+    if (!select) return;
+
+    select.innerHTML = '<option value="" disabled selected>🔍 Buscando talleres...</option>';
+
+    try {
+        let talleres = await window.clienteTallerService.obtenerTalleresDisponibles();
+
+        // ⭐ Filtrar solo con bahías disponibles
+        talleres = talleres.filter(t => (t.bahiasDisponibles || 0) > 0);
+
+        // ⭐ Agrupar por nombre+ciudad para evitar duplicados masivos
+        const mapa = new Map();
+        talleres.forEach(t => {
+            const key = `${t.nombre}|${t.direccion?.ciudad || ''}`;
+            if (!mapa.has(key)) {
+                mapa.set(key, t);
+            } else {
+                const actual = mapa.get(key);
+                if ((t.bahiasDisponibles || 0) > (actual.bahiasDisponibles || 0)) {
+                    mapa.set(key, t);
+                }
+            }
+        });
+
+        talleresDisponibles = [...mapa.values()];
+
+        if (talleresDisponibles.length === 0) {
+            select.innerHTML = '<option value="" disabled>No hay talleres con disponibilidad</option>';
+            return;
+        }
+
+        select.innerHTML = '<option value="" disabled selected>Selecciona un taller...</option>';
+
+        talleresDisponibles.forEach(taller => {
+            const option = document.createElement('option');
+            option.value = taller._id;
+            option.textContent = `${taller.nombre} - ${taller.direccion?.ciudad || ''} (${taller.bahiasDisponibles} bahías)`;
+            select.appendChild(option);
+        });
+
+        if (tallerPreseleccionado) {
+            select.value = tallerPreseleccionado;
+            window.alSeleccionarTaller(tallerPreseleccionado);
+        }
+    } catch (error) {
+        console.error('Error cargando talleres:', error);
+        select.innerHTML = '<option value="" disabled>Error al cargar talleres</option>';
+    }
+}
+
+window.actualizarSelectVehiculos = function () {
+    const select = document.getElementById('cita-vehiculo');
+    if (!select) return;
+
+    select.innerHTML = '<option value="" disabled selected>-- Selecciona un vehículo --</option>';
+
+    const garaje = window.user.garaje;
+    if (garaje.length > 0) {
+        garaje.forEach(auto => {
+            const option = document.createElement('option');
+            const datos = {
+                marca: auto.marca || 'Genérico',
+                modelo: auto.modelo || 'Modelo',
+                placa: auto.placa || 'S/P',
+                color: auto.color || ''
+            };
+            option.value = JSON.stringify(datos);
+            option.textContent = `${datos.marca} ${datos.modelo} (${datos.placa})`;
+            option.dataset.marca = datos.marca;
+            option.dataset.modelo = datos.modelo;
+            option.dataset.placa = datos.placa;
+            option.dataset.color = datos.color;
+            select.appendChild(option);
+        });
+    }
+};
+
+window.cerrarModalCita = function () {
+    const modal = document.getElementById('modal-cita');
+    if (modal) modal.style.display = 'none';
+};
+
+
+
+// ==================== ESTADOS Y RENDERIZADO DE CITAS ====================
+
+window.renderizarCitas = function () {
+    const contenedorHistorial = document.getElementById('contenedor-citas-historial');
+    const contenedorPendientes = document.getElementById('contenedor-citas-pendientes');
+
+    if (!window.user) return;
+
+    // Usar los getters de la clase Cliente
+    const pendientes = window.user.citasPendientes;
+    const historial = window.user.citasHistorial;
+
+    if (contenedorPendientes) {
+        contenedorPendientes.style.display = 'grid';
+        contenedorPendientes.innerHTML = '';
+
+        if (pendientes.length === 0) {
+            contenedorPendientes.innerHTML = '<p style="color:#666;text-align:center;padding:20px;">🎉 No tienes citas pendientes.</p>';
+        } else {
+            [...pendientes].reverse().forEach(cita => {
+                contenedorPendientes.appendChild(window.crearCardCita(cita, true));
+            });
+        }
+    }
+
+
+};
+
+window.renderizarCitasPendientes = function () {
+    const contenedor = document.getElementById('contenedor-citas-pendientes');
+    if (!contenedor || !window.user) return;
+
+    contenedor.innerHTML = '';
+    const pendientes = window.user.citasPendientes;
+
+    if (pendientes.length === 0) {
+        contenedor.innerHTML = '<p style="color:#666;text-align:center;padding:20px;">🎉 No tienes citas pendientes.</p>';
+        return;
+    }
+
+    [...pendientes].reverse().forEach(c => {
+        contenedor.appendChild(window.crearCardCita(c, true));
+    });
+};
+
+window.renderizarCitasHistorial = function () {
+    const contenedor = document.getElementById('contenedor-citas-historial');
+
+    if (!contenedor || !window.user) return;
+
+    contenedor.innerHTML = '';
+    const historial = window.user.citasHistorial;
+    console.log("historia", historial)
+    if (historial.length === 0) {
+        contenedor.innerHTML = '<p style="color:#666;text-align:center;padding:20px;">📭 No hay historial todavía.</p>';
+        return;
+    }
+
+    [...historial].reverse().forEach(c => {
+        contenedor.appendChild(window.crearCardCita(c, false));
+    });
+};
+
+// ==================== CREAR CARD DE CITA ====================
+
+window.crearCardCita = function (cita, esPendiente) {
+    const idFinal = cita._id || cita.id || cita.idCita;
+    const estado = (cita.estado || ESTADOS_CITA.PENDIENTE).toUpperCase();
+    const color = COLORES_ESTADO[estado] || '#00ff88';
+    const icono = ICONO_ESTADO[estado] || '📌';
+    const mensaje = MENSAJE_ESTADO[estado] || '';
+    const progreso = PROGRESO_ESTADO[estado] || 10;
+
+    const { modeloTxt, placaTxt } = obtenerDatosVehiculo(cita);
+    const tallerNombre = cita.tallerNombre || cita.tallerId.nombre || 'Taller';
+
+    const card = document.createElement('div');
+    card.className = 'cita-card-cliente';
+    card.style.cssText = `
+        background: #111820;
+        border: 1px solid #1a2530;
+        border-left: 4px solid ${color};
+        border-radius: 14px;
+        padding: 20px;
+        margin-bottom: 14px;
+        transition: all 0.3s ease;
+    `;
+
+    card.addEventListener('mouseenter', () => {
+        card.style.borderColor = color + '44';
+        card.style.boxShadow = `0 8px 25px ${color}10`;
+        card.style.transform = 'translateY(-2px)';
+    });
+    card.addEventListener('mouseleave', () => {
+        card.style.borderColor = '#1a2530';
+        card.style.boxShadow = 'none';
+        card.style.transform = 'translateY(0)';
+    });
+
+    card.innerHTML = `
+        ${crearHeaderCitaHTML(icono, modeloTxt, placaTxt, estado, color)}
+        ${crearInfoCitaHTML(cita, tallerNombre)}
+        ${crearInfoBahiaHTML(cita)}
+        ${crearBarraProgresoHTML(mensaje, color, progreso)}
+        ${crearAccionesCitaHTML(idFinal, estado, esPendiente, cita)}
+    `;
+
+    return card;
+};
+
+function obtenerDatosVehiculo(cita) {
+    let modeloTxt = "Vehículo";
+    let placaTxt = "S/P";
+
+    if (cita.vehiculo && typeof cita.vehiculo === 'object') {
+        const marca = cita.vehiculo.marca || '';
+        modeloTxt = `${marca} ${cita.vehiculo.modelo || ''}`.trim();
+        placaTxt = cita.vehiculo.placa || "S/P";
+    } else if (typeof cita.vehiculo === 'string') {
+        const partes = cita.vehiculo.split('|');
+        modeloTxt = partes[0] || "Vehículo";
+        placaTxt = partes[1] || "S/P";
+    }
+
+    return { modeloTxt, placaTxt };
+}
+
+function crearHeaderCitaHTML(icono, modeloTxt, placaTxt, estado, color) {
+    return `
+        <div style="display:flex; justify-content:space-between; align-items:start; margin-bottom:14px;">
+            <div style="display:flex; align-items:center; gap:12px;">
+                <div style="
+                    width:50px; height:50px; min-width:50px;
+                    background:${color}15;
+                    border:2px solid ${color}33;
+                    border-radius:14px;
+                    display:flex; align-items:center; justify-content:center;
+                    font-size:1.6rem;
+                ">${icono}</div>
+                <div>
+                    <h4 style="color:#fff; margin:0; font-size:1rem; font-weight:600;">${modeloTxt}</h4>
+                    <span class="car-plate" style="margin-top:3px;">${placaTxt}</span>
+                </div>
+            </div>
+            <span style="
+                background:${color}18;
+                color:${color};
+                padding:5px 12px;
+                border-radius:20px;
+                font-size:0.7rem;
+                font-weight:700;
+                letter-spacing:1px;
+                white-space:nowrap;
+            ">${estado}</span>
+        </div>`;
+}
+
+function crearInfoCitaHTML(cita, tallerNombre) {
+    console.log("este es el nombre del taller ", tallerNombre);
+    return `
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px;">
+            <div style="display:flex; align-items:center; gap:6px; color:#8892a4; font-size:0.8rem;">
+                <span>📅</span><span>${cita.fecha || 'S/F'}</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:6px; color:#8892a4; font-size:0.8rem;">
+                <span>🕐</span><span>${cita.hora || '--:--'}</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:6px; color:#8892a4; font-size:0.8rem;">
+                <span>🏪</span><span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${tallerNombre}</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:6px; color:#8892a4; font-size:0.8rem;">
+                <span>🔧</span><span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${cita.servicio.nombre || 'Servicio'}</span>
+            </div>
+        </div>`;
+}
+
+function crearInfoBahiaHTML(cita) {
+    console.log("fomacion empleado ")
+    if (!cita.bahiaAsignada && !cita.empleadoAsignado) return '';
+    return `
+        <div style="display:flex; gap:15px; margin-bottom:12px; flex-wrap:wrap;">
+            ${cita.bahiaAsignada ? `
+            <div style="display:flex; align-items:center; gap:5px; background:rgba(255,187,51,0.08); padding:5px 10px; border-radius:8px; font-size:0.7rem; color:#ffbb33;">
+                🏗️ Bahía #${cita.bahiaAsignada}
+            </div>` : ''}
+            ${cita.empleadoAsignado ? `
+            <div style="display:flex; align-items:center; gap:5px; background:rgba(0,212,255,0.08); padding:5px 10px; border-radius:8px; font-size:0.7rem; color:#00d4ff;">
+                👨‍🔧 ${typeof cita.empleadoAsignado === 'object' ? cita.empleadoAsignado.nombre : cita.empleadoAsignado}
+            </div>` : ''}
+        </div>`;
+}
+
+function crearBarraProgresoHTML(mensaje, color, progreso) {
+    return `
+        <div style="margin-bottom:14px;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                <span style="font-size:0.65rem; color:#666;">Progreso</span>
+                <span style="font-size:0.65rem; color:${color};">${mensaje}</span>
+            </div>
+            <div style="background:#1a1a1a; border-radius:8px; height:6px; overflow:hidden;">
+                <div style="background:${color}; height:100%; width:${progreso}%; border-radius:8px; transition:width 0.5s ease;"></div>
+            </div>
+        </div>`;
+}
+
+function crearAccionesCitaHTML(idFinal, estado, esPendiente, cita) {
+    let botonesHTML = '';
+
+    // ✅ Cancelar (solo en PENDIENTE o CONFIRMADA)
+    if (esPendiente && [ESTADOS_CITA.PENDIENTE, ESTADOS_CITA.CONFIRMADA].includes(estado)) {
+        botonesHTML += `<button onclick="window.cancelarCita('${idFinal}')" class="btn-cita-cancelar">❌ Cancelar</button>`;
+    }
+
+    // ✅ Confirmar Entrega (solo en LISTO)
+    if (estado === ESTADOS_CITA.LISTO) {
+        botonesHTML += `<button onclick="window.abrirModalConfirmarEntrega('${idFinal}')" class="btn-cita-confirmar">🎉 Confirmar Entrega</button>`;
+    }
+
+    // ✅ Calificar (ENTREGADO y NO tiene calificación aún)
+    if (estado === ESTADOS_CITA.ENTREGADO && !cita.calificacion?.puntuacion) {
+        botonesHTML += `<button onclick="window.calificarServicio('${idFinal}')" class="btn-cita-calificar">⭐ Calificar</button>`;
+    }
+
+    // ✅ Mostrar estrellas si YA calificó
+    if (cita.calificacion?.puntuacion && cita.calificacion.puntuacion > 0) {
+        botonesHTML += `<span style="font-size:0.85rem; color:#ffbb33; padding:8px;">${'⭐'.repeat(cita.calificacion.puntuacion)}</span>`;
+    }
+
+    // ✅ Detalle
+    if (cita.tallerId) {
+        botonesHTML += `<button onclick="window.verDetalleCita('${idFinal}')" class="btn-cita-detalle">🔍 Detalle</button>`;
+    }
+
+    return `<div style="display:flex; gap:8px; flex-wrap:wrap;">${botonesHTML}</div>`;
+}
+
+// ==================== CANCELAR CITA ====================
+
+// ==================== CANCELAR CITA (CORREGIDO PARA CITAS LOCALES) ====================
+
+// ==================== CANCELAR CITA (VERSIÓN FINAL CORREGIDA) ====================
+
+// ==================== CANCELAR CITA (VERSIÓN FINAL - FUNCIONANDO) ====================
+
+window.cancelarCita = async function (idRecibido) {
+    const cita = window.user.obtenerCita(idRecibido);
+    if (!cita) {
+        window.mostrarToast("❌ Cita no encontrada.", "error");
+        return;
+    }
+
+    const nombre = typeof cita.vehiculo === 'object' ?
+        `${cita.vehiculo.marca || ''} ${cita.vehiculo.modelo || ''}` : cita.vehiculo;
+    const montoReembolso = cita.pago?.monto || 0;
+
+    if (!confirm(`¿Cancelar cita de ${nombre}?\n\nSe reembolsará RD$ ${montoReembolso.toFixed(2)}`)) return;
+
+    try {
+        // ✅ Cancelar en CitaTaller
+        const citaId = cita._id || cita.id;
+        await apiFetch(`/citas/${citaId}/cancelar`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                usuarioId: window.obtenerIdUsuario(),
+                motivo: 'Cancelado por el cliente'
+            })
+        });
+
+        // Eliminar localmente
+        window.user.eliminarCita(idRecibido);
+
+        // Reembolsar
+        if (montoReembolso > 0) {
+            window.user.saldo += montoReembolso;
+        }
+
+        window.persistirUsuario();
+        window.renderizarCitas();
+        window.mostrarToast(`✅ Cita cancelada. RD$ ${montoReembolso.toFixed(2)} reembolsado.`, 'success');
+
+    } catch (error) {
+        window.mostrarToast("❌ Error al cancelar", "error");
+    }
+};
+
+// ==================== SINCRONIZACIÓN DE ESTADO ====================
+
+// ==================== SINCRONIZACIÓN DE ESTADO (RESPETA CANCELACIONES Y CITAS ELIMINADAS) ====================
+
+// ==================== SINCRONIZACIÓN (FILTRA CANCELADAS) ====================
+
+
+window.sincronizarEstadoCitas = async function () {
+    const userId = window.obtenerIdUsuario();
+    if (!userId) return;
+
+    try {
+        const response = await window.fetchConReintento(`/mis-citas/${userId}`);
+
+        if (response.exito) {
+            const citas = response.citas || [];
+            const activas = citas.filter(c => !['CANCELADA', 'ENTREGADO'].includes(c.estado));
+            const historial = citas.filter(c => ['ENTREGADO'].includes(c.estado));
+
+            window.user.misCitas = [...activas, ...historial];
+            window.persistirUsuario();
+
+            // ✅ Solo renderizar la pestaña activa (no las dos)
+            if (window.tabClienteActual === 'historial') {
+                window.renderizarCitasHistorial();
+            } else {
+                window.renderizarCitasPendientes();
+            }
+        }
+    } catch (error) {
+        logger.error('❌ Error:', error.message);
+    }
+};
+
+window.crearNotificacionEstado = function (citaTaller) {
+    const vehiculoNombre = `${citaTaller.vehiculo?.marca || ''} ${citaTaller.vehiculo?.modelo || ''}`.trim();
+    let mensaje = '';
+    let tipo = '';
+
+    switch (citaTaller.estado) {
+        case ESTADOS_CITA.CONFIRMADA:
+            mensaje = `✅ Cita para ${vehiculoNombre} CONFIRMADA`;
+            tipo = 'CITA_CONFIRMADA';
+            break;
+        case ESTADOS_CITA.EN_RECEPCION:
+            mensaje = `📥 ${vehiculoNombre} recibido en taller`;
+            tipo = 'VEHICULO_RECIBIDO';
+            break;
+        case ESTADOS_CITA.EN_PROCESO:
+            mensaje = `🔧 Trabajando en ${vehiculoNombre}`;
+            tipo = 'TRABAJO_INICIADO';
+            break;
+        case ESTADOS_CITA.LISTO:
+            mensaje = `🎉 ${vehiculoNombre} LISTO para recoger`;
+            tipo = 'VEHICULO_LISTO';
+            break;
+        case ESTADOS_CITA.ENTREGADO:
+            mensaje = `🏁 Servicio completado`;
+            tipo = 'VEHICULO_ENTREGADO';
+            break;
+        case ESTADOS_CITA.CANCELADA:
+            mensaje = `❌ Cita cancelada`;
+            tipo = 'CITA_CANCELADA';
+            break;
+        default:
+            mensaje = `📌 Cita actualizada: ${citaTaller.estado}`;
+            tipo = 'ESTADO_ACTUALIZADO';
+    }
+
+    if (mensaje) {
+        const notificaciones = JSON.parse(localStorage.getItem('notificaciones_clientes') || '[]');
+        const yaExiste = notificaciones.some(n => n.tipo === tipo && n.mensaje === mensaje);
+        if (!yaExiste) {
+            notificaciones.push({
+                tipo,
+                citaId: citaTaller._id,
+                mensaje,
+                fecha: new Date().toISOString(),
+                leida: false
+            });
+            localStorage.setItem('notificaciones_clientes', JSON.stringify(notificaciones));
+
+            if (tipo === 'VEHICULO_LISTO') {
+                window.mostrarToast(mensaje, 'success', 6000);
+            } else if (tipo === 'CITA_CONFIRMADA') {
+                window.mostrarToast(mensaje, 'info', 4000);
+            }
+        }
+    }
+};
+
+// ==================== CONFIRMAR ENTREGA Y CALIFICAR ====================
+
+
+window.abrirModalConfirmarEntrega = function (citaId) {
+    window.calificacionesManager?.abrirModalConfirmarEntrega(citaId);
+};
+
+window.seleccionarEstrellaConfirmar = function (numero) {
+    window.calificacionesManager?.seleccionarEstrellaConfirmar(numero);
+};
+
+window.cerrarModalConfirmar = function () {
+    window.calificacionesManager?.cerrarModalConfirmar();
+};
+
+window.confirmarEntregaConCalificacion = function () {
+    window.calificacionesManager?.confirmarEntregaConCalificacion();
+};
+
+// ==================== DETALLE DE CITA ====================
+
+window.verDetalleCita = function (citaId) {
+    const cita = window.user.obtenerCita(citaId);
+    if (!cita) return;
+
+    const vehiculo = typeof cita.vehiculo === 'object'
+        ? `${cita.vehiculo.marca || ''} ${cita.vehiculo.modelo || ''} (${cita.vehiculo.placa || ''})`
+        : cita.vehiculo;
+    console.log("esta es mi cita infomaxcio", cita.tallerId)
+    const modal = document.createElement('div');
+    modal.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); display:flex; align-items:center; justify-content:center; z-index:10000;';
+    modal.innerHTML = `
+        <div style="background:#111820; border:1px solid #1a2530; border-radius:16px; padding:25px; max-width:450px; width:90%;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h3 style="color:#fff; margin:0;">🔍 Detalle de Cita</h3>
+                <span onclick="this.closest('div').parentElement.remove()" style="font-size:1.5rem; cursor:pointer; color:#888;">&times;</span>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:10px; color:#ccc; font-size:0.9rem;">
+                <p><strong>🚗 Vehículo:</strong> ${vehiculo}</p>
+                <p><strong>📅 Fecha:</strong> ${cita.fecha || 'S/F'}</p>
+                <p><strong>🕐 Hora:</strong> ${cita.hora || '--:--'}</p>
+                <p><strong>🏪 Taller:</strong> ${cita.tallerId.nombre || 'No asignado'}</p>
+                <p><strong>🔧 Servicio:</strong> ${cita.servicio.nombre || 'No especificado'}</p>
+                <p><strong>📌 Estado:</strong> ${cita.estado || 'Pendiente'}</p>
+                ${cita.bahiaAsignada ? `<p><strong>🏗️ Bahía:</strong> #${cita.bahiaAsignada}</p>` : ''}
+                ${cita.montoPagado ? `<p><strong>💰 Monto:</strong> RD$ ${cita.montoPagado.toLocaleString()}</p>` : ''}
+            </div>
+            <button onclick="this.closest('div').parentElement.remove()" 
+                style="width:100%; margin-top:20px; padding:12px; background:#00ff88; color:#000; border:none; border-radius:8px; cursor:pointer; font-weight:600;">
+                CERRAR
+            </button>
+        </div>
+    `;
+    modal.addEventListener('click', (e) => { if (e.target === modal) modal.remove(); });
+    document.body.appendChild(modal);
+};
+
+// ==================== AGENDAR CITA CON VEHÍCULO ====================
+
+window.agendarCitaConVehiculo = function (id) {
+    const garaje = window.user.garaje;
+    const vehiculo = garaje.find(v => (v.id || v._id) == id);
+    if (!vehiculo) {
+        window.mostrarToast('⚠️ Vehículo no encontrado', 'warning');
+        return;
+    }
+
+    if (typeof window.abrirModalSolicitud === 'function') {
+        window.abrirModalSolicitud();
+
+        setTimeout(() => {
+            const selectVehiculo = document.getElementById('cita-vehiculo');
+            if (selectVehiculo) {
+                for (let i = 0; i < selectVehiculo.options.length; i++) {
+                    const option = selectVehiculo.options[i];
+                    if (option.dataset.placa === vehiculo.placa ||
+                        option.textContent.includes(vehiculo.placa)) {
+                        selectVehiculo.selectedIndex = i;
+                        break;
+                    }
+                }
+            }
+        }, 500);
+    }
+};
+
+// ==================== GALERÍA ====================
+
+// ==================== GALERÍA (FOTOS REALES DEL SERVIDOR) ====================
+
+window.renderizarGaleria = async function () {
+    const contenedor = document.getElementById('contenedor-galeria');
+    if (!contenedor) return;
+
+    contenedor.innerHTML = '<p style="color:#888;text-align:center;padding:40px;">⏳ Cargando galería...</p>';
+
+    try {
+        const userId = window.obtenerIdUsuario();
+
+        // 1. Obtener citas del cliente
+        const response = await apiFetch(`/mis-citas/${userId}`);
+        const data = await response.json();
+
+        if (!data.exito || !data.citas) {
+            contenedor.innerHTML = '<p style="color:#666;text-align:center;padding:40px;">📭 No hay trabajos en la galería.</p>';
+            return;
+        }
+
+        // 2. Filtrar solo ENTREGADAS
+        const entregadas = data.citas.filter(c => c.estado === 'ENTREGADO');
+
+        // 3. Filtros
+        const busquedaPlaca = (document.getElementById('busqueda-placa')?.value || '').toLowerCase().trim();
+        const filtroModelo = document.getElementById('filtro-modelo')?.value || 'todos';
+
+        if (entregadas.length === 0) {
+            contenedor.innerHTML = '<p style="color:#666;text-align:center;padding:40px;">📭 No tienes trabajos completados.</p>';
+            return;
+        }
+
+        // Llenar filtro de modelos
+        const modelosUnicos = [...new Set(entregadas.map(c =>
+            `${c.vehiculo?.marca || ''} ${c.vehiculo?.modelo || ''}`.trim()
+        ).filter(Boolean))];
+
+        const selectModelo = document.getElementById('filtro-modelo');
+        if (selectModelo) {
+            selectModelo.innerHTML = '<option value="todos">🚗 Todos los modelos</option>' +
+                modelosUnicos.map(m => `<option value="${m}">${m}</option>`).join('');
+        }
+
+        // Filtrar
+        let citasFiltradas = entregadas;
+        if (busquedaPlaca) {
+            citasFiltradas = citasFiltradas.filter(c =>
+                (c.vehiculo?.placa || '').toLowerCase().includes(busquedaPlaca)
+            );
+        }
+        if (filtroModelo && filtroModelo !== 'todos') {
+            citasFiltradas = citasFiltradas.filter(c => {
+                const modeloCompleto = `${c.vehiculo?.marca || ''} ${c.vehiculo?.modelo || ''}`.trim();
+                return modeloCompleto === filtroModelo;
+            });
+        }
+
+        if (citasFiltradas.length === 0) {
+            contenedor.innerHTML = '<p style="color:#666;text-align:center;padding:40px;">🔍 No hay trabajos con esos filtros.</p>';
+            return;
+        }
+
+        // Renderizar
+        contenedor.innerHTML = '';
+
+        for (const cita of citasFiltradas) {
+            const card = await crearCardGaleria(cita);
+            contenedor.appendChild(card);
+        }
+
+    } catch (error) {
+        console.error('❌ Error galería:', error);
+        contenedor.innerHTML = '<p style="color:#ff4444;text-align:center;padding:40px;">Error al cargar galería.</p>';
+    }
+};
+
+async function crearCardGaleria(cita) {
+    const card = document.createElement('div');
+    card.className = 'gallery-card';
+    card.style.cssText = `
+        background: #131c2b;
+        border: 1px solid #1e2a3a;
+        border-radius: 16px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    `;
+
+    const vehiculo = cita.vehiculo || {};
+    const modeloTxt = `${vehiculo.marca || ''} ${vehiculo.modelo || ''}`.trim() || 'Vehículo';
+    const placaTxt = vehiculo.placa || 'S/P';
+    const fecha = cita.fecha || 'S/F';
+    const servicio = cita.servicio?.nombre || cita.servicio || 'Servicio';
+    const calificacion = cita.calificacion?.puntuacion || 0;
+    const estrellas = calificacion > 0 ? '⭐'.repeat(calificacion) : '';
+
+    // Obtener fotos reales
+    let fotosAntes = [];
+    let fotosDespues = [];
+
+    try {
+        const fotosResponse = await apiFetch(`/talleres/citas/${cita._id}/fotos`);
+        const fotosData = await fotosResponse.json();
+        if (fotosData.exito) {
+            fotosAntes = fotosData.fotos?.antes || [];
+            fotosDespues = fotosData.fotos?.despues || [];
+        }
+    } catch (e) {
+        // Sin fotos
+    }
+
+    const tieneFotos = fotosAntes.length > 0 || fotosDespues.length > 0;
+
+    card.innerHTML = `
+        <div style="display:grid; grid-template-columns: ${tieneFotos ? '1fr 1fr' : '1fr'}; gap:8px; padding:15px;">
+            <div style="text-align:center;">
+                <div style="font-size:0.75rem; color:#ff6b6b; margin-bottom:8px;">🔴 ANTES</div>
+                <div style="background:#0a0e14; border-radius:12px; height:180px; display:flex; align-items:center; justify-content:center; overflow:hidden;">
+                    ${fotosAntes.length > 0 ?
+            `<img src="${fotosAntes[0].url}" style="width:100%; height:100%; object-fit:cover; cursor:pointer;" 
+                             onclick="window.verFotoCompleta('${fotosAntes[0].url}', 'ANTES - ${modeloTxt}')">` :
+            '<span style="color:#444; font-size:3rem;">📷</span>'}
+                </div>
+                ${fotosAntes.length > 1 ? `<small style="color:#888;">+${fotosAntes.length - 1} fotos más</small>` : ''}
+            </div>
+            ${tieneFotos ? `
+            <div style="text-align:center;">
+                <div style="font-size:0.75rem; color:#6bff6b; margin-bottom:8px;">🟢 DESPUÉS</div>
+                <div style="background:#0a0e14; border-radius:12px; height:180px; display:flex; align-items:center; justify-content:center; overflow:hidden;">
+                    ${fotosDespues.length > 0 ?
+                `<img src="${fotosDespues[0].url}" style="width:100%; height:100%; object-fit:cover; cursor:pointer;" 
+                             onclick="window.verFotoCompleta('${fotosDespues[0].url}', 'DESPUÉS - ${modeloTxt}')">` :
+                '<span style="color:#444; font-size:3rem;">📷</span>'}
+                </div>
+                ${fotosDespues.length > 1 ? `<small style="color:#888;">+${fotosDespues.length - 1} fotos más</small>` : ''}
+            </div>` : ''}
+        </div>
+        <div style="padding:15px; border-top:1px solid #1e2a3a;">
+            <div style="display:flex; justify-content:space-between; align-items:start;">
+                <div>
+                    <h4 style="color:#fff; margin:0 0 5px;">🚗 ${modeloTxt}</h4>
+                    <span style="color:#888; font-size:0.8rem;">🏷️ ${placaTxt}</span>
+                </div>
+                <div style="text-align:right;">
+                    <span style="color:#00ff88; font-size:0.8rem;">📅 ${fecha}</span>
+                    <br><span style="color:#ffbb33; font-size:0.75rem;">🔧 ${servicio}</span>
+                    ${estrellas ? `<br><span style="font-size:0.85rem;">${estrellas}</span>` : ''}
+                </div>
+            </div>
+        </div>
+    `;
+    return card;
+}
+
+window.verFotoCompleta = function (url, titulo) {
+    const modal = document.createElement('div');
+    modal.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); display:flex; align-items:center; justify-content:center; z-index:10000; cursor:zoom-out;';
+    modal.innerHTML = `
+        <div style="text-align:center; max-width:90vw; max-height:90vh;">
+            <p style="color:#fff; margin-bottom:15px; font-size:1.1rem;">${titulo}</p>
+            <img src="${url}" style="max-width:90vw; max-height:75vh; border-radius:12px; box-shadow:0 10px 40px rgba(0,0,0,0.5);">
+            <p style="color:#888; margin-top:15px;">Click para cerrar</p>
+        </div>
+    `;
+    modal.addEventListener('click', () => modal.remove());
+    document.body.appendChild(modal);
+};
+
+window.limpiarFiltros = function () {
+    document.getElementById('busqueda-placa').value = '';
+    document.getElementById('filtro-modelo').value = 'todos';
+    window.renderizarGaleria();
+};
+
+window.verImagenFull = function (src) {
+    if (!src) return;
+    window.verFotoCompleta(src, 'Foto');
+};
+
+
+// ==================== PERFIL ====================
+
+window.renderizarPerfil = function () {
+    const user = window.user;
+    if (!user) return;
+
+    document.getElementById('perf-nombre').value = user.nombre || '';
+    document.getElementById('perf-apellido').value = user.apellido || '';
+    document.getElementById('perf-whatsapp').value = user.whatsapp || '';
+    document.getElementById('perf-email').value = user.email || '';
+    document.getElementById('preview-foto-perfil').src = user.fotoPerfil || './assets/default-avatar.png';
+    document.getElementById('perfil-nombre-display').textContent = user.nombre || 'Usuario';
+    document.getElementById('perfil-email-display').textContent = user.email || '';
+    document.getElementById('perfil-plan-badge').textContent = 'Plan: ' + (user.planActual || 'Ninguno');
+
+    const historial = user.citasHistorial;
+    document.getElementById('perfil-total-citas').textContent = historial.length;
+    document.getElementById('perfil-total-gastado').textContent = 'RD$ ' + historial
+        .reduce((s, c) => s + (c.montoPagado || 0), 0).toLocaleString();
+    document.getElementById('perfil-vehiculos-count').textContent = user.garaje.length;
+
+    window.renderizarHistorialFinanciero();
+};
+
+window.renderizarHistorialFinanciero = function () {
+    const contenedor = document.getElementById('lista-transacciones');
+    if (!contenedor) return;
+
+    let transacciones = [];
+
+    const misCitas = window.user.misCitas;
+    misCitas.forEach(c => {
+        if (c.montoPagado > 0) {
+            transacciones.push({
+                fecha: c.fecha || c.fechaRegistro,
+                concepto: 'Cita: ' + (c.servicio || 'Servicio'),
+                monto: c.montoPagado,
+                tipo: 'PAGO'
+            });
+        }
+    });
+
+    transacciones.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+
+    if (transacciones.length === 0) {
+        contenedor.innerHTML = '<p style="color:#666;text-align:center;">No hay transacciones.</p>';
+        return;
+    }
+
+    contenedor.innerHTML = transacciones.map(t => `
+        <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #1e2a3a;">
+            <div>
+                <p style="color:#fff;font-size:0.85rem;margin:0;">${t.concepto}</p>
+                <small style="color:#888;">${new Date(t.fecha).toLocaleDateString('es-DO')}</small>
+            </div>
+            <span style="color:${t.tipo === 'RECARGA' || t.tipo === 'REEMBOLSO' ? '#00ff88' : '#ff4444'};font-weight:600;">
+                ${t.tipo === 'RECARGA' || t.tipo === 'REEMBOLSO' ? '+' : '-'} RD$ ${t.monto.toLocaleString()}
+            </span>
+        </div>`).join('');
+};
+
+window.guardarCambiosPerfil = async function (e) {
+    if (e) e.preventDefault();
+    const btn = document.getElementById('btn-guardar-perfil');
+    const orig = btn.innerHTML;
+
+    const telefono = document.getElementById('perf-whatsapp').value;
+
+    if (telefono && !validadores.telefono(telefono)) {
+        window.mostrarToast('⚠️ Formato de teléfono inválido. Use: 8095551234', 'warning');
+        return;
+    }
+
+    window.user.nombre = document.getElementById('perf-nombre').value;
+    window.user.apellido = document.getElementById('perf-apellido').value;
+    window.user.whatsapp = telefono;
+
+    btn.innerHTML = "Guardando... ✨";
+    btn.disabled = true;
+    window.estadoCarga.mostrar('Guardando perfil...');
+
+    try {
+        const exito = await window.db.sincronizarConServidor();
+        if (exito) {
+            window.persistirUsuario();
+            window.mostrarToast("✅ Perfil actualizado exitosamente.", "success");
+            window.actualizarInterfaz(window.user);
+        } else {
+            window.mostrarToast("⚠️ No se pudo sincronizar con el servidor.", "warning");
+        }
+    }
+    catch (error) {
+        logger.error('Error al guardar perfil:', error);
+        window.mostrarToast("❌ Error al guardar los cambios.", "error");
+    }
+    finally {
+        btn.innerHTML = orig;
+        btn.disabled = false;
+        window.estadoCarga.ocultar();
+    }
+};
+
+window.actualizarPassword = async function (e) {
+    if (e) e.preventDefault();
+    const actual = document.getElementById('pass-actual').value;
+    const nueva = document.getElementById('pass-nueva').value;
+    const confirma = document.getElementById('pass-confirma').value;
+
+    if (nueva !== confirma) {
+        window.mostrarToast("❌ Las contraseñas no coinciden.", "error");
+        return;
+    }
+    if (nueva.length < 8) {
+        window.mostrarToast("⚠️ La contraseña debe tener mínimo 8 caracteres.", "warning");
+        return;
+    }
+
+    const btn = e.target.querySelector('button');
+    btn.innerHTML = "Actualizando... 🔐";
+    btn.disabled = true;
+    window.estadoCarga.mostrar('Actualizando contraseña...');
+
+    try {
+        const d = await window.fetchConReintento(`/usuarios/update-password`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                email: window.user.email,
+                passwordActual: actual,
+                passwordNueva: nueva
+            })
+        });
+        if (d.exito) {
+            window.mostrarToast("✅ Contraseña actualizada exitosamente.", "success");
+            document.getElementById('form-password').reset();
+        } else {
+            window.mostrarToast("❌ " + d.mensaje, "error");
+        }
+    } catch (error) {
+        logger.error('Error al actualizar contraseña:', error);
+        window.mostrarToast("🔌 Error de conexión.", "error");
+    }
+    finally {
+        btn.innerHTML = "Actualizar Contraseña";
+        btn.disabled = false;
+        window.estadoCarga.ocultar();
+    }
+};
+
+// ==================== FOTO DE PERFIL ====================
+
+window.procesarImagenParaPerfil = async function (inputElement) {
+    const file = inputElement.files[0];
+    if (!file) return;
+
+    const tiposPermitidos = ['image/jpeg', 'image/png', 'image/webp'];
+    if (!tiposPermitidos.includes(file.type)) {
+        window.mostrarToast("⚠️ Formato no permitido. Usa JPG, PNG o WebP.", "warning");
+        return;
+    }
+
+    if (file.size > 1024 * 1024) {
+        window.mostrarToast("⚠️ Imagen muy pesada. Máximo 1MB.", "warning");
+        return;
+    }
+
+    window.estadoCarga.mostrar('Subiendo foto de perfil...');
+
+    try {
+        const formData = new FormData();
+
+        // ✅ CORREGIDO 1: Enviar con el nombre 'foto' (como espera el backend)
+        formData.append('foto', file);
+
+        // ✅ CORREGIDO 2: Enviar el usuarioId que el backend necesita
+        const usuarioId = window.user?._id || window.user?.id;
+        if (!usuarioId) {
+            window.mostrarToast("❌ Error: No se encontró el usuario", "error");
+            window.estadoCarga.ocultar();
+            return;
+        }
+        formData.append('usuarioId', usuarioId);
+
+        console.log('📤 Subiendo foto de perfil:', {
+            nombreArchivo: file.name,
+            tamaño: file.size,
+            usuarioId
+        });
+
+        const data = await window.fetchConReintento(`${API_BASE_URL}/upload/perfil`, {
+            method: 'POST',
+            body: formData
+        });
+
+        if (data.exito) {
+            window.user.fotoPerfil = data.url;
+            document.querySelectorAll('#preview-foto-perfil,#avatar-sidebar,#user-photo-header')
+                .forEach(img => img.src = data.url);
+            window.persistirUsuario();
+            await window.db.sincronizarConServidor();
+            window.mostrarToast("✅ Foto de perfil actualizada.", "success");
+
+            console.log('✅ Foto subida correctamente:', data.url);
+        } else {
+            window.mostrarToast("❌ Error al subir la imagen.", "error");
+        }
+    } catch (error) {
+        logger.error('Error al subir foto de perfil:', error);
+        window.mostrarToast("❌ Error de conexión.", "error");
+    } finally {
+        window.estadoCarga.ocultar();
+    }
+};
+
+// ==================== NAVEGACIÓN ====================
+
+window.navegar = function (event) {
+    // ⭐ FIX: Verificar que preventDefault existe
+    if (event && typeof event.preventDefault === 'function') {
+        event.preventDefault();
+    }
+
+    // ⭐ Detectar el destino de forma flexible
+    let idFinal;
+
+    // Caso A: viene de un click real (event es un Event)
+    if (event?.target && typeof event.target.closest === 'function') {
+        const dataHrefEl = event.target.closest('[data-href]');
+        const linkEl = event.target.closest('a');
+
+        if (dataHrefEl) {
+            idFinal = dataHrefEl.getAttribute('data-href')?.replace('#', '');
+        } else if (linkEl) {
+            const href = linkEl.getAttribute('href');
+            idFinal = href ? href.replace('#', '') : 'dashboard';
+        }
+    }
+
+    // Caso B: viene como objeto { target: { href: '#planes' } }
+    if (!idFinal && event?.target?.href) {
+        idFinal = event.target.href.replace('#', '');
+    }
+
+    // Caso C: se llama como string navegar('#planes')
+    if (!idFinal && typeof event === 'string') {
+        idFinal = event.replace('#', '');
+    }
+
+    // Fallback
+    idFinal = idFinal || 'dashboard';
+
+    console.log('📍 navegar →', idFinal);
+
+    if (!idFinal || idFinal === '#') return;
+
+    document.querySelectorAll('.side-links a').forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === '#' + idFinal) link.classList.add('active');
+    });
+
+    window.mostrarSeccion(idFinal);
+    window.limpiarCache?.();
+};
+
+window.mostrarSeccion = function (idDestino) {
+    // Detener actualización en tiempo real si existe
+    if (window.resenasSocial) {
+        window.resenasSocial.detenerActualizacionTiempoReal();
+    }
+
+    document.querySelectorAll('.dash-section').forEach(s => s.style.display = 'none');
+
+    const extraServices = document.querySelector('.extra-services');
+    const statsGrid = document.querySelector('.stats-grid');
+    const workshops = document.getElementById('talleres');
+    const herade = document.getElementById('moda-inicio');
+
+    if (extraServices) extraServices.style.display = 'none';
+    if (statsGrid) statsGrid.style.display = 'none';
+    if (workshops) workshops.style.display = 'none';
+
+    const seccionMostrar = document.getElementById(idDestino);
+    if (seccionMostrar) seccionMostrar.style.display = 'block';
+
+    if (idDestino === 'dashboard') {
+        if (statsGrid) statsGrid.style.display = 'grid';
+
+    }
+    if (idDestino === 'inicio') {
+        console.log('gracia mundo');
+        herade.style.display = 'grid';
+        if (extraServices) extraServices.style.display = 'block';
+        if (workshops) workshops.style.display = 'block';
+    }
+    if (idDestino === 'perfil') window.renderizarPerfil();
+    if (idDestino === 'galeria') window.galeriaTrabajos?.cargar(); // ✅ NUEVO
+    if (idDestino === 'explorar-talleres') window.cargarTalleresExplorar();
+    if (idDestino === 'mi-taller') window.cargarMiTaller?.();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+};
+
+// ==================== NOTIFICACIONES ====================
+
+window.cargarNotificaciones = function () {
+    const notificaciones = JSON.parse(localStorage.getItem('notificaciones_clientes') || '[]');
+    const noLeidas = notificaciones.filter(n => !n.leida);
+    const badge = document.getElementById('notif-badge');
+    if (badge) {
+        badge.style.display = noLeidas.length > 0 ? 'flex' : 'none';
+        badge.textContent = noLeidas.length || '0';
+    }
+};
+
+window.mostrarNotificaciones = function () {
+    const modal = document.getElementById('modal-notificaciones');
+    const lista = document.getElementById('lista-notificaciones');
+    if (!modal || !lista) return;
+
+    const notificaciones = JSON.parse(localStorage.getItem('notificaciones_clientes') || '[]');
+
+    if (notificaciones.length === 0) {
+        lista.innerHTML = '<p style="color:#666;text-align:center;padding:20px;">📭 Sin notificaciones</p>';
+    } else {
+        lista.innerHTML = notificaciones.reverse().map((notif, index) => {
+            const icono = notif.tipo === 'CITA_CONFIRMADA' ? '✅' :
+                notif.tipo === 'VEHICULO_LISTO' ? '🎉' : '📌';
+            const bg = notif.leida ? 'transparent' : 'rgba(0,255,136,0.05)';
+            const border = notif.leida ? '#333' : '#00ff88';
+            return `
+                <div style="background:${bg};border-left:3px solid ${border};padding:12px;margin-bottom:8px;border-radius:8px;cursor:pointer;" 
+                     onclick="window.marcarLeida(${index})">
+                    <div style="display:flex;align-items:start;gap:10px;">
+                        <span style="font-size:1.2rem;">${icono}</span>
+                        <div style="flex:1;">
+                            <p style="margin:0;font-size:0.9rem;color:#fff;">${notif.mensaje}</p>
+                            <small style="color:#888;">
+                                ${new Date(notif.fecha).toLocaleString('es-DO')} 
+                                ${notif.leida ? '✓' : '🔵'}
+                            </small>
+                        </div>
+                    </div>
+                </div>`;
+        }).join('');
+    }
+    modal.style.display = 'flex';
+    window.cargarNotificaciones();
+};
+
+window.marcarLeida = function (index) {
+    const notificaciones = JSON.parse(localStorage.getItem('notificaciones_clientes') || '[]');
+    const realIndex = notificaciones.length - 1 - index;
+    if (notificaciones[realIndex]) {
+        notificaciones[realIndex].leida = true;
+        localStorage.setItem('notificaciones_clientes', JSON.stringify(notificaciones));
+        window.mostrarNotificaciones();
+    }
+};
+
+window.marcarTodasLeidas = function () {
+    const notificaciones = JSON.parse(localStorage.getItem('notificaciones_clientes') || '[]');
+    notificaciones.forEach(n => n.leida = true);
+    localStorage.setItem('notificaciones_clientes', JSON.stringify(notificaciones));
+    window.mostrarNotificaciones();
+    window.cargarNotificaciones();
+    window.mostrarToast('✅ Todas las notificaciones marcadas como leídas', 'success');
+};
+
+// ==================== PESTAÑAS DE CITAS ====================
+
+window.cambiarTabCliente = function (tab) {
+    window.tabClienteActual = tab;
+
+    const contPendientes = document.getElementById('contenedor-citas-pendientes');
+    const contHistorial = document.getElementById('contenedor-citas-historial');
+    const btnP = document.getElementById('tab-pendientes-cliente');
+    const btnH = document.getElementById('tab-historial-cliente');
+
+    // Mostrar/ocultar
+    if (contPendientes) contPendientes.style.display = tab === 'pendientes' ? 'grid' : 'none';
+    if (contHistorial) contHistorial.style.display = tab === 'historial' ? 'grid' : 'none';
+
+    // Estilos de botones
+    const activo = { bg: 'rgba(0,255,136,0.1)', border: '#00ff88', color: '#00ff88' };
+    const inactivo = { bg: 'transparent', border: '#333', color: '#aaa' };
+
+    if (btnP) {
+        btnP.style.background = tab === 'pendientes' ? activo.bg : inactivo.bg;
+        btnP.style.borderColor = tab === 'pendientes' ? activo.border : inactivo.border;
+        btnP.style.color = tab === 'pendientes' ? activo.color : inactivo.color;
+    }
+    if (btnH) {
+        btnH.style.background = tab === 'historial' ? activo.bg : inactivo.bg;
+        btnH.style.borderColor = tab === 'historial' ? activo.border : inactivo.border;
+        btnH.style.color = tab === 'historial' ? activo.color : inactivo.color;
+    }
+
+    // ✅ Renderizar SOLO la pestaña activa
+    if (tab === 'pendientes') {
+        window.renderizarCitasPendientes();
+    } else {
+        window.renderizarCitasHistorial();
+    }
+};
+
+
+
+
+// ============================================================================
+// 👥 LIMPIAR LISTA DE EMPLEADOS
+// ============================================================================
+window.limpiarEmpleados = function () {
+    const contenedor = document.getElementById('mc-empleados-lista');
+    if (contenedor) {
+        contenedor.innerHTML = '<p class="mc-empleados-empty">Primero selecciona un taller</p>';
+    }
+};
+
+
+
+
+
+
+// ==================== UTILIDADES ====================
+
+window.actualizarYRenderizar = function () {
+    if (!window.user) return;
+    db.sincronizarConServidor();
+    window.actualizarInterfaz();
+    window.renderizarCitas();
+    if (typeof window.renderizarGaleria === 'function') window.renderizarGaleria();
+};
+
+window.crearTicket = function () {
+    if (confirm('¿Hablar por WhatsApp?')) window.open('https://wa.me/tu_numero_aqui', '_blank');
+};
+
+window.cerrarSesion = function () {
+    if (confirm('¿Estás seguro de cerrar sesión?')) {
+        window.detenerSincronizacion();
+        window.limpiarCache();
+        localStorage.removeItem('sesion_activa');
+        window.location.href = '../index.html';
+    }
+};
+
+//taller
+
+// ====================================================================
+// 🔍 EXPLORAR TALLERES
+// ====================================================================
+
+let talleresExplorar = [];
+let tallerSeleccionadoId = null;
+
+
+/**
+ * Llenar filtros de búsqueda
+ */
+function llenarFiltrosExplorar(talleres) {
+    // Ciudades únicas
+    const ciudades = [...new Set(talleres.map(t => t.direccion?.ciudad).filter(Boolean))];
+    const selectCiudad = document.getElementById('filtro-ciudad');
+    if (selectCiudad) {
+        selectCiudad.innerHTML = '<option value="">Todas las ciudades</option>' +
+            ciudades.map(c => `<option value="${c}">${c}</option>`).join('');
+    }
+
+    // Especialidades únicas
+    const especialidades = [...new Set(talleres.map(t => t.especialidad).filter(Boolean))];
+    const selectEspecialidad = document.getElementById('filtro-especialidad');
+    if (selectEspecialidad) {
+        selectEspecialidad.innerHTML = '<option value="">Todas las especialidades</option>' +
+            especialidades.map(e => `<option value="${e}">${e}</option>`).join('');
+    }
+}
+
+
+
+// Evento de búsqueda en tiempo real
+document.addEventListener('DOMContentLoaded', () => {
+    const inputBusqueda = document.getElementById('busqueda-taller');
+    if (inputBusqueda) {
+        inputBusqueda.addEventListener('input', () => window.filtrarTalleres());
+    }
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ==================== INICIALIZACIÓN FINAL ====================
+console.log('✅ Dashboard del cliente inicializado correctamente (v2.0 - Compatible con Clase Cliente)');
+console.log('🔧 Mejoras: Toast notifications, Sistema de logs, Cache, Reintentos, Validaciones, Compatibilidad con #privados');

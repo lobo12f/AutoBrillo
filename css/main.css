@@ -1,0 +1,68 @@
+/* ============================================================================
+   AUTOBRILLO - MAIN CSS (Punto de Entrada ÚNICO)
+   ============================================================================
+   ✅ UN SOLO LINK en el HTML
+   ✅ Todas las páginas funcionan con esto
+   ✅ Variables manipulables desde CSSManager
+   ============================================================================ */
+
+/* ================================================================
+   1/css CORE (ORDEN CRÍTICO - NO CAMBIAR)
+   ================================================================ */
+@import url('/css/core/variables.css');
+@import url('/css/core/reset.css');
+@import url('/css/core/utilities.css');
+@import url('/css/core/responsive.css');
+
+/* ================================================================
+   2/css COMPONENTS (Reutilizables)
+   ================================================================ */
+@import url('/css/components/buttons.css');
+@import url('/css/components/cards.css');
+@import url('/css/components/forms.css');
+@import url('/css/components/modals.css');
+@import url('/css/components/toast.css');
+@import url('/css/components/badges.css');
+@import url('/css/components/tema-selector.css');
+
+/* ================================================================
+   3/css LAYOUT (Estructura)
+   ================================================================ */
+@import url('/css/layout/sidebar.css');
+@import url('/css/layout/topbar.css');
+@import url('/css/layout/grid.css');
+
+/* ================================================================
+   4/css PAGES (Específicos)
+   ================================================================ */
+@import url('/css/pages/taller/taller.css');
+@import url('/css/pages/taller/dashboard.css');
+@import url('/css/pages/taller/plan.css');
+@import url('/css/pages/taller/servicio.css');
+@import url('/css/pages/taller/citas.css');
+@import url('/css/pages/taller/fotos.css');
+@import url('/css/pages/taller/login.css');
+@import url('/css/pages/taller/registro.css');
+@import url('/css/pages/taller/bahias.css');
+@import url('/css/pages/taller/empleados.css');
+@import url('/css/pages/taller/historial.css');
+@import url('/css/pages/taller/galeria.css');
+@import url('/css/pages/taller/configuracion.css');
+@import url('/css/pages/taller/resenas.css');
+@import url('/css/pages/taller/notificaciones.css');
+
+@import url('/css/pages/empleado/empleado.css');
+@import url('/css/pages/empleado/trabajos.css');
+@import url('/css/pages/empleado/configuracion.css');
+@import url('/css/pages/empleado/historial.css');
+
+@import url('/css/pages/cliente/cliente.css');
+@import url('/css/pages/cliente/paginacion.css');
+@import url('/css/pages/cliente/garaje.css');
+@import url('/css/pages/cliente/perfil.css');
+@import url('/css/pages/cliente/explorar-talleres.css');
+@import url('/css/pages/cliente/mi-taller.css');
+@import url('/css/pages/cliente/modal-taller-fullscreen.css');
+@import url('/css/pages/cliente/planes-grid-cliente.css');
+
+@import url('/css/pages/auth/auth.css');

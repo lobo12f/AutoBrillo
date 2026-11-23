@@ -1,0 +1,204 @@
+:root {
+    --primary-green:#0cf3f3;
+    --dark-bg: #1a1a1a;
+    --glass-bg: rgba(255, 255, 255, 0.1);
+}
+a{
+  color: #0cf3f3;
+}
+
+body {
+    background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), 
+                url('tu-imagen-de-coche.jpg') no-repeat center center/cover;
+    font-family: 'Inter', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+.login-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    padding: 40px;
+    border-radius: 20px;
+    border: 1px solid rgba(255,255,255,0.1);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+    width: 100%;
+    max-width: 400px;
+    color: white;
+    text-align: center;
+}
+
+.input-group {
+    text-align: left;
+    margin-bottom: 20px;
+}
+
+input[type="email"], input[type="password"] {
+    width: 100%;
+    padding: 12px;
+    margin-top: 8px;
+    border-radius: 8px;
+    border: none;
+    background: rgba(255,255,255,0.9);
+    box-sizing: border-box; /* Crucial para Parrot/Firefox */
+}
+
+.btn-primary {
+    width: 100%;
+    padding: 15px;
+    background: var(--primary-green);
+    border: none;
+    border-radius: 50px;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    transition: transform 0.2s, background 0.3s;
+}
+
+.btn-primary:hover {
+    background: var(--primary-green);
+    transform: translateY(-2px);
+}
+
+/* Animación de entrada para la tarjeta */
+.login-card {
+    animation: fadeInUp 0.8s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* El botón con "Brillo" de verdad */
+.btn-primary {
+    position: relative;
+    overflow: hidden;
+    background: #0cf3f3; /* Un verde más elegante */
+    transition: all 0.3s ease;
+}
+.options{
+  padding-bottom: 16px;
+}
+.btn-primary:after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -60%;
+    width: 20%;
+    height: 200%;
+    background: rgba(255, 255, 255, 0.4);
+    transform: rotate(30deg);
+    transition: all 0.5s;
+}
+
+.btn-primary:hover:after {
+    left: 120%;
+}
+
+.btn-primary:hover {
+    box-shadow: 0 0 20px rgba(14, 218, 133, 0.6);
+    transform: scale(1.02);
+}
+/* Estilo general para simular el look 'Premium' */
+.login-card {
+    background: rgba(30, 30, 30, 0.85); /* Fondo oscuro elegante */
+    backdrop-filter: blur(15px); /* Efecto de cristal */
+    border: 1px solid rgba(46, 204, 113, 0.3); /* Borde sutil verde */
+    border-radius: 25px;
+    padding: 50px;
+    box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+    color: #fff;
+}
+
+/* El título con un toque de estilo */
+h2 span {
+    color: #0cf3f3; /* Resaltamos "Detailing" en verde */
+    font-weight: 300;
+    margin-left: 5px;
+}
+
+/* Inputs con estilo moderno */
+input {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    color: white !important;
+    padding: 15px !important;
+    border-radius: 10px !important;
+    transition: 0.3s;
+}
+
+input:focus {
+    border-color: #2eaccc !important;
+    background: rgba(255, 255, 255, 0.1) !important;
+    outline: none;
+    box-shadow: 0 0 10px rgba(46, 204, 113, 0.4);
+}
+
+/* Botón que 'brilla' como un coche recién pulido */
+.btn-primary {
+    background: linear-gradient(135deg, #0cf3f3, #0cf3f3);
+    border: none;
+    color: white;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 5px 15px rgba(46, 204, 113, 0.3);
+}
+
+/* 1. Ajuste base del contenedor para que sea flexible */
+.login-card {
+    width: 90%; /* En pantallas pequeñas ocupará casi todo el ancho */
+    max-width: 450px; /* En pantallas grandes no se estirará más de esto */
+    margin: 20px; /* Evita que choque con los bordes del navegador */
+    padding: 40px 30px; /* Espaciado interno cómodo */
+    box-sizing: border-box;
+}
+
+/* 2. Media Query para Móviles (Pantallas menores a 480px) */
+@media (max-width: 480px) {
+    .login-card {
+        padding: 25px 20px; /* Reducimos el relleno para ganar espacio */
+        border-radius: 15px; /* Bordes un poco menos redondeados */
+    }
+
+    h2 {
+        font-size: 1.5rem; /* Título un poco más pequeño */
+    }
+
+    p {
+        font-size: 0.9rem; /* Texto de descripción más legible */
+    }
+
+    .btn-primary {
+        padding: 12px; /* Botón más fácil de tocar con el dedo */
+        font-size: 14px;
+    }
+
+    /* Hacemos que los enlaces de 'olvidaste' y 'recordar' 
+       se apilen si no caben en una sola línea */
+    .options {
+        flex-direction: column;
+        gap: 10px;
+        align-items: flex-start;
+    }
+}
+
+/* 3. Ajuste para evitar que el fondo se vea raro en móviles */
+body {
+    background-attachment: fixed; /* Mantiene el fondo quieto al hacer scroll */
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}

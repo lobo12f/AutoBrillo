@@ -1,0 +1,1144 @@
+/* ============================================================================
+   MI TALLER - Estilo app móvil (tipo Instagram)
+   ============================================================================
+   Sección donde el cliente ve su taller vinculado con toda la info.
+   ============================================================================ */
+
+/* ============================================================================
+   ESTADOS DE CARGA
+   ============================================================================ */
+.mi-taller-loading {
+    text-align: center;
+    padding: 80px 20px;
+    color: var(--text-muted, #888);
+}
+
+.mi-taller-loading .spinner {
+    width: 50px;
+    height: 50px;
+    border: 3px solid var(--border-color, #1e2a3a);
+    border-top-color: var(--accent-color, #00ff88);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 20px;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.mi-taller-empty {
+    text-align: center;
+    padding: 80px 20px;
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.mi-taller-empty .empty-icon {
+    font-size: 5rem;
+    margin-bottom: 20px;
+    opacity: 0.5;
+}
+
+.mi-taller-empty h3 {
+    color: var(--text-primary, #fff);
+    font-size: 1.5rem;
+    margin: 0 0 12px;
+}
+
+.mi-taller-empty p {
+    color: var(--text-muted, #888);
+    margin: 0 0 24px;
+    line-height: 1.6;
+}
+
+.mi-taller-empty .btn-explorar {
+    padding: 14px 32px;
+    background: var(--accent-color, #00ff88);
+    color: #000;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 1rem;
+    transition: all 0.3s;
+}
+
+.mi-taller-empty .btn-explorar:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(0, 255, 136, 0.4);
+}
+
+/* ============================================================================
+   1. HERO DEL TALLER (estilo Instagram)
+   ============================================================================ */
+.mi-taller-hero {
+    background: linear-gradient(135deg,
+            rgba(0, 255, 136, 0.08) 0%,
+            var(--bg-card, #0f1621) 50%,
+            rgba(0, 212, 255, 0.05) 100%);
+    border: 1px solid var(--border-color, #1e2a3a);
+    border-radius: 20px;
+    padding: 24px;
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+}
+
+.mi-taller-hero::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(0, 255, 136, 0.05) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+.mi-taller-hero-top {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 20px;
+    position: relative;
+    z-index: 1;
+    flex-wrap: wrap;
+}
+
+.mi-taller-hero-logo {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--accent-color, #00ff88);
+    box-shadow: 0 0 30px rgba(0, 255, 136, 0.3);
+    flex-shrink: 0;
+    background: var(--bg-input, #080c14);
+}
+
+.mi-taller-hero-logo-placeholder {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.8rem;
+    background: linear-gradient(135deg, var(--accent-color, #00ff88), var(--color-info, #00d4ff));
+    border: 3px solid var(--accent-color, #00ff88);
+    flex-shrink: 0;
+    box-shadow: 0 0 30px rgba(0, 255, 136, 0.3);
+}
+
+.mi-taller-hero-info {
+    flex: 1;
+    min-width: 250px;
+}
+
+.mi-taller-hero-nombre {
+    color: var(--text-primary, #fff);
+    font-size: 1.6rem;
+    font-weight: 800;
+    margin: 0 0 8px;
+    font-family: var(--font-family, 'Inter', sans-serif);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.mi-taller-hero-badge {
+    padding: 4px 12px;
+    border-radius: 15px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.mi-taller-hero-badge.abierto {
+    background: rgba(0, 255, 136, 0.15);
+    color: var(--accent-color, #00ff88);
+    border: 1px solid rgba(0, 255, 136, 0.3);
+}
+
+.mi-taller-hero-badge.cerrado {
+    background: rgba(255, 68, 68, 0.15);
+    color: var(--color-danger, #ff4444);
+    border: 1px solid rgba(255, 68, 68, 0.3);
+}
+
+.mi-taller-hero-rating {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--color-warning, #ffbb33);
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.mi-taller-hero-rating .rating-numero {
+    color: var(--text-primary, #fff);
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.mi-taller-hero-rating small {
+    color: var(--text-muted, #888);
+    font-weight: 400;
+}
+
+.mi-taller-hero-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    position: relative;
+    z-index: 1;
+    margin-bottom: 20px;
+}
+
+.mi-taller-hero-meta-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-secondary, #aaa);
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+.mi-taller-hero-meta-item span:first-child {
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+
+.mi-taller-hero-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    position: relative;
+    z-index: 1;
+}
+
+.btn-hero-primario {
+    flex: 2;
+    min-width: 180px;
+    padding: 14px 24px;
+    background: var(--accent-color, #00ff88);
+    color: #000;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 0.95rem;
+    transition: all 0.3s;
+    font-family: var(--font-family, 'Inter', sans-serif);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: 0 4px 15px rgba(0, 255, 136, 0.3);
+}
+
+.btn-hero-primario:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 255, 136, 0.5);
+}
+
+.btn-hero-secundario {
+    flex: 1;
+    min-width: 120px;
+    padding: 14px 20px;
+    background: transparent;
+    border: 2px solid var(--border-color, #1e2a3a);
+    border-radius: 12px;
+    color: var(--text-primary, #fff);
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.3s;
+    font-family: var(--font-family, 'Inter', sans-serif);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.btn-hero-secundario:hover {
+    border-color: var(--accent-color, #00ff88);
+    color: var(--accent-color, #00ff88);
+    background: rgba(0, 255, 136, 0.05);
+}
+
+.btn-hero-peligro {
+    padding: 14px 20px;
+    background: transparent;
+    border: 2px solid rgba(255, 68, 68, 0.3);
+    border-radius: 12px;
+    color: var(--color-danger, #ff4444);
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.3s;
+    font-family: var(--font-family, 'Inter', sans-serif);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.btn-hero-peligro:hover {
+    background: rgba(255, 68, 68, 0.1);
+    border-color: var(--color-danger, #ff4444);
+}
+
+/* ============================================================================
+   2. ACCESOS RÁPIDOS
+   ============================================================================ */
+.mi-taller-accesos {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.acceso-rapido {
+    background: var(--bg-card, #0f1621);
+    border: 1px solid var(--border-color, #1e2a3a);
+    border-radius: 16px;
+    padding: 20px 12px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+}
+
+.acceso-rapido::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(0, 255, 136, 0.05), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.acceso-rapido:hover {
+    transform: translateY(-4px);
+    border-color: var(--accent-color, #00ff88);
+    box-shadow: 0 10px 25px rgba(0, 255, 136, 0.15);
+}
+
+.acceso-rapido:hover::before {
+    opacity: 1;
+}
+
+.acceso-icon {
+    font-size: 2rem;
+    display: block;
+    margin-bottom: 8px;
+    position: relative;
+    z-index: 1;
+}
+
+.acceso-label {
+    color: var(--text-secondary, #aaa);
+    font-size: 0.8rem;
+    font-weight: 600;
+    position: relative;
+    z-index: 1;
+}
+
+/* ============================================================================
+   SECCIONES GENERALES
+   ============================================================================ */
+.mi-taller-section {
+    margin-bottom: 24px;
+}
+
+.mi-taller-section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.mi-taller-section-header h3 {
+    color: var(--text-primary, #fff);
+    font-size: 1.15rem;
+    font-weight: 700;
+    margin: 0;
+    font-family: var(--font-family, 'Inter', sans-serif);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-ver-todas {
+    background: transparent;
+    border: none;
+    color: var(--accent-color, #00ff88);
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 8px;
+    transition: all 0.2s;
+    font-family: var(--font-family, 'Inter', sans-serif);
+}
+
+.btn-ver-todas:hover {
+    background: rgba(0, 255, 136, 0.1);
+}
+
+.empty-message {
+    color: var(--text-muted, #888);
+    text-align: center;
+    padding: 30px 20px;
+    font-style: italic;
+}
+
+/* ============================================================================
+   3. PRÓXIMAS CITAS
+   ============================================================================ */
+.mi-taller-citas-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.cita-mini-card {
+    background: var(--bg-card, #0f1621);
+    border: 1px solid var(--border-color, #1e2a3a);
+    border-left: 4px solid var(--accent-color, #00ff88);
+    border-radius: 12px;
+    padding: 16px 20px;
+    transition: all 0.3s;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.cita-mini-card:hover {
+    border-color: var(--accent-color, #00ff88);
+    transform: translateX(4px);
+    box-shadow: 0 5px 20px rgba(0, 255, 136, 0.1);
+}
+
+.cita-mini-info {
+    flex: 1;
+    min-width: 200px;
+}
+
+.cita-mini-titulo {
+    color: var(--text-primary, #fff);
+    font-weight: 700;
+    font-size: 0.95rem;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.cita-mini-detalle {
+    color: var(--text-secondary, #aaa);
+    font-size: 0.8rem;
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.cita-mini-detalle span {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.cita-mini-estado {
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+}
+
+/* ============================================================================
+   4. MI PLAN ACTUAL
+   ============================================================================ */
+.mi-taller-plan-container {
+    background: linear-gradient(135deg,
+            rgba(255, 187, 51, 0.1) 0%,
+            var(--bg-card, #0f1621) 100%);
+    border: 2px solid var(--color-warning, #ffbb33);
+    border-radius: 20px;
+    padding: 24px;
+    position: relative;
+    overflow: hidden;
+}
+
+.mi-plan-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    margin-bottom: 16px;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.mi-plan-nombre {
+    color: var(--text-primary, #fff);
+    font-size: 1.3rem;
+    font-weight: 800;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.mi-plan-badge {
+    padding: 4px 12px;
+    background: rgba(255, 187, 51, 0.2);
+    color: var(--color-warning, #ffbb33);
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: 700;
+}
+
+.mi-plan-precio {
+    color: var(--color-warning, #ffbb33);
+    font-size: 1.8rem;
+    font-weight: 800;
+    margin-bottom: 8px;
+}
+
+.mi-plan-duracion {
+    color: var(--text-muted, #888);
+    font-size: 0.85rem;
+    margin-bottom: 16px;
+}
+
+.mi-plan-progreso {
+    margin-bottom: 16px;
+}
+
+.mi-plan-progreso-label {
+    display: flex;
+    justify-content: space-between;
+    color: var(--text-secondary, #aaa);
+    font-size: 0.85rem;
+    margin-bottom: 8px;
+}
+
+.mi-plan-barra {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    height: 12px;
+    overflow: hidden;
+}
+
+.mi-plan-barra-fill {
+    background: linear-gradient(90deg, var(--color-warning, #ffbb33), var(--accent-color, #00ff88));
+    height: 100%;
+    border-radius: 10px;
+    transition: width 0.8s ease;
+}
+
+.mi-plan-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+/* CTA para contratar plan */
+.mi-plan-cta {
+    text-align: center;
+    padding: 24px;
+    background: linear-gradient(135deg,
+            rgba(0, 255, 136, 0.05),
+            rgba(0, 212, 255, 0.05));
+    border: 2px dashed var(--border-color, #1e2a3a);
+    border-radius: 20px;
+}
+
+.mi-plan-cta h4 {
+    color: var(--text-primary, #fff);
+    margin: 0 0 8px;
+    font-size: 1.1rem;
+}
+
+.mi-plan-cta p {
+    color: var(--text-muted, #888);
+    margin: 0 0 16px;
+    font-size: 0.9rem;
+}
+
+.mi-plan-cta button {
+    padding: 12px 28px;
+    background: var(--accent-color, #00ff88);
+    color: #000;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 0.9rem;
+    transition: all 0.3s;
+}
+
+.mi-plan-cta button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 255, 136, 0.3);
+}
+
+/* ============================================================================
+   5. SERVICIOS
+   ============================================================================ */
+.mi-taller-servicios-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 12px;
+}
+
+.servicio-mini-card {
+    background: var(--bg-card, #0f1621);
+    border: 1px solid var(--border-color, #1e2a3a);
+    border-radius: 14px;
+    padding: 16px;
+    transition: all 0.3s;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.servicio-mini-card:hover {
+    border-color: var(--accent-color, #00ff88);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 255, 136, 0.1);
+}
+
+.servicio-mini-icono {
+    font-size: 1.8rem;
+    text-align: center;
+}
+
+.servicio-mini-nombre {
+    color: var(--text-primary, #fff);
+    font-weight: 700;
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+.servicio-mini-precio {
+    color: var(--accent-color, #00ff88);
+    font-weight: 800;
+    font-size: 1.1rem;
+    text-align: center;
+}
+
+.servicio-mini-duracion {
+    color: var(--text-muted, #888);
+    font-size: 0.75rem;
+    text-align: center;
+}
+
+.servicio-mini-btn {
+    padding: 8px;
+    background: var(--accent-color, #00ff88);
+    color: #000;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.8rem;
+    transition: all 0.2s;
+}
+
+.servicio-mini-btn:hover {
+    transform: scale(1.03);
+}
+
+/* ============================================================================
+   6. GALERÍA
+   ============================================================================ */
+.mi-taller-galeria-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 8px;
+}
+
+.foto-mini {
+    aspect-ratio: 1;
+    border-radius: 12px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.3s;
+    border: 2px solid transparent;
+    position: relative;
+}
+
+.foto-mini:hover {
+    border-color: var(--accent-color, #00ff88);
+    transform: scale(1.03);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+}
+
+.foto-mini img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* ============================================================================
+   7. RESEÑAS
+   ============================================================================ */
+.mi-taller-resenas-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.resena-mini-card {
+    background: var(--bg-card, #0f1621);
+    border: 1px solid var(--border-color, #1e2a3a);
+    border-radius: 14px;
+    padding: 16px 20px;
+    transition: all 0.3s;
+}
+
+.resena-mini-card:hover {
+    border-color: var(--accent-color, #00ff88);
+}
+
+.resena-mini-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.resena-mini-cliente {
+    color: var(--text-primary, #fff);
+    font-weight: 700;
+    font-size: 0.9rem;
+}
+
+.resena-mini-estrellas {
+    color: var(--color-warning, #ffbb33);
+    font-size: 0.9rem;
+    letter-spacing: 2px;
+}
+
+.resena-mini-texto {
+    color: var(--text-secondary, #aaa);
+    font-size: 0.85rem;
+    line-height: 1.5;
+    margin: 0;
+}
+
+.resena-mini-respuesta {
+    background: rgba(0, 255, 136, 0.05);
+    border-left: 3px solid var(--accent-color, #00ff88);
+    padding: 10px 14px;
+    border-radius: 8px;
+    margin-top: 10px;
+}
+
+.resena-mini-respuesta strong {
+    color: var(--accent-color, #00ff88);
+    font-size: 0.75rem;
+    display: block;
+    margin-bottom: 4px;
+}
+
+.resena-mini-respuesta p {
+    color: var(--text-secondary, #aaa);
+    font-size: 0.8rem;
+    margin: 0;
+    line-height: 1.4;
+}
+
+/* ============================================================================
+   8. MAPA
+   ============================================================================ */
+.mi-taller-mapa {
+    width: 100%;
+    height: 320px;
+    border-radius: 16px;
+    background: var(--bg-input, #080c14);
+    border: 1px solid var(--border-color, #1e2a3a);
+    overflow: hidden;
+    margin-bottom: 12px;
+}
+
+.mi-taller-map-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.btn-map {
+    flex: 1;
+    min-width: 130px;
+    padding: 12px 16px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 0.85rem;
+    transition: all 0.3s;
+    font-family: var(--font-family, 'Inter', sans-serif);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    text-decoration: none;
+    border: none;
+}
+
+.btn-map-google {
+    background: linear-gradient(135deg, #00ff88, #00cc6a);
+    color: #000;
+}
+
+.btn-map-waze {
+    background: linear-gradient(135deg, #33CCFF, #0099CC);
+    color: #000;
+}
+
+.btn-map-ubicacion {
+    background: transparent;
+    border: 2px solid var(--color-info, #00d4ff);
+    color: var(--color-info, #00d4ff);
+}
+
+.btn-map:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* ============================================================================
+   RESPONSIVE
+   ============================================================================ */
+@media (max-width: 768px) {
+    .mi-taller-accesos {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .mi-taller-hero-top {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .mi-taller-hero-nombre {
+        font-size: 1.3rem;
+        justify-content: center;
+    }
+
+    .mi-taller-hero-rating {
+        justify-content: center;
+    }
+
+    .mi-taller-hero-meta {
+        align-items: flex-start;
+        text-align: left;
+    }
+
+    .mi-taller-hero-actions {
+        flex-direction: column;
+    }
+
+    .btn-hero-primario,
+    .btn-hero-secundario,
+    .btn-hero-peligro {
+        width: 100%;
+    }
+
+    .mi-taller-servicios-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .mi-taller-galeria-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .mi-taller-mapa {
+        height: 250px;
+    }
+
+    .btn-map {
+        min-width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .mi-taller-hero-logo {
+        width: 70px;
+        height: 70px;
+    }
+
+    .mi-taller-hero-logo-placeholder {
+        width: 70px;
+        height: 70px;
+        font-size: 2rem;
+    }
+
+    .mi-taller-hero-nombre {
+        font-size: 1.15rem;
+    }
+
+    .mi-taller-hero-rating {
+        font-size: 0.85rem;
+    }
+
+    .mi-taller-galeria-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .mi-taller-servicios-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ============================================
+   🆕 SECCIÓN: NUESTRO EQUIPO
+   ============================================ */
+
+.mi-taller-equipo-count {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    background: var(--bg-primary);
+    padding: 4px 10px;
+    border-radius: var(--radius-full);
+    border: 1px solid var(--border-color);
+}
+
+.mi-taller-equipo-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: var(--space-md);
+}
+
+/* ===== Tarjeta de empleado ===== */
+.mi-empleado-card {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+    cursor: default;
+}
+
+.mi-empleado-card:hover {
+    transform: translateY(-3px);
+    border-color: var(--accent-color);
+    box-shadow: 0 10px 25px rgba(0, 255, 136, 0.1);
+}
+
+/* Foto / avatar */
+.mi-empleado-foto-wrap {
+    position: relative;
+    aspect-ratio: 1;
+    background: var(--bg-card);
+    overflow: hidden;
+}
+
+.mi-empleado-foto {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/* Badge de estado */
+.mi-empleado-badge {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: var(--radius-full);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.mi-empleado-badge--disponible {
+    background: var(--color-success);
+    color: #000;
+}
+
+.mi-empleado-badge--ocupado {
+    background: var(--color-warning);
+    color: #000;
+}
+
+.mi-empleado-badge--descansando {
+    background: var(--text-secondary);
+    color: #fff;
+}
+
+/* Info */
+.mi-empleado-info {
+    padding: var(--space-md);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.mi-empleado-nombre {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.mi-empleado-rol {
+    font-size: 0.75rem;
+    color: var(--accent-color);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    margin: 0;
+}
+
+.mi-empleado-especialidades {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin: 0;
+    display: -webkit-box;
+
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Rating */
+.mi-empleado-rating {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.8rem;
+    padding-top: 4px;
+}
+
+.mi-empleado-estrellas {
+    color: #ffc107;
+    letter-spacing: -1px;
+    font-size: 0.9rem;
+}
+
+.mi-empleado-promedio {
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.mi-empleado-total {
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+}
+
+/* Stats */
+.mi-empleado-stats {
+    display: flex;
+    gap: var(--space-md);
+    padding-top: 8px;
+    margin-top: 4px;
+    border-top: 1px solid var(--border-color);
+}
+
+.mi-empleado-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+}
+
+.mi-empleado-stat-valor {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--accent-color);
+    line-height: 1.2;
+}
+
+.mi-empleado-stat-label {
+    font-size: 0.65rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+    .mi-taller-equipo-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--space-sm);
+    }
+
+    .mi-empleado-info {
+        padding: 10px;
+    }
+
+    .mi-empleado-nombre {
+        font-size: 0.9rem;
+    }
+}
+
+/* ===== Filtros por especialidad ===== */
+.mi-taller-equipo-filtros {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: var(--space-md);
+    padding: var(--space-sm);
+    overflow-x: auto;
+}
+
+.mi-filtro-chip {
+    padding: 8px 16px;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    border-radius: var(--radius-full);
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+    user-select: none;
+}
+
+.mi-filtro-chip:hover {
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+}
+
+.mi-filtro-chip.activo {
+    background: var(--accent-color);
+    color: #000;
+    border-color: var(--accent-color);
+    font-weight: 700;
+}
+
+.mi-filtro-chip .mi-filtro-count {
+    opacity: 0.7;
+    font-size: 0.7rem;
+    margin-left: 4px;
+}
+
+/* Cursor pointer en tarjetas clickeables */
+.mi-empleado-card {
+    cursor: pointer;
+}

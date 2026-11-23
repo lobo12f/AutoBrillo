@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Panel | AutoBrillo Detailing</title>
+    <link rel="stylesheet" href="../../css/main.css">
+    <link rel="stylesheet" href="../../css/dashboard.css">
+    <link rel="stylesheet" href="../../css/secionesExpeciales.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&display=swap" rel="stylesheet">
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <!-- Leaflet JS -->
+</head>
+
+<body class="dashboard-body">
+
+    <nav class="sidebar">
+        <div class="logo">AUTOBRILLO<span>D.</span></div>
+        <ul class="side-links">
+            <li><a href="#dashboard" class="active" onclick="window.navegar(event)">Resumen</a></li>
+            <li><a href="#explorar-talleres" onclick="window.navegar(event)">🔍 Explorar Talleres</a></li>
+            <li><a href="#citas-agendadas" onclick="window.navegar(event)">Citas Agendadas</a></li>
+            <li><a href="#galeria" onclick="window.navegar(event)">Mi Galería</a></li>
+            <li><a href="#planes" onclick="window.navegar(event)">Planes</a></li>
+            <li><a href="#perfil" onclick="window.navegar(event)">👤 Mi Perfil</a></li>
+            <li><a href="#contacto" onclick="window.navegar(event)">Soporte</a></li>
+            <li><a href="#" class="logout-btn" onclick="window.cerrarSesion()">Cerrar Sesión</a></li>
+        </ul>
+    </nav>
+
+    <main class="main-content">
+        <header class="dash-header">
+            <h1>Bienvenido de nuevo, <span id="user-name">...</span></h1>
+            <div class="header-actions">
+                <div id="not-cliente" class="notificaciones-cliente" onclick="window.mostrarNotificaciones()"
+                    style="position:relative; cursor:pointer; margin-right:15px;">
+                    <span style="font-size:1.5rem;">🔔</span>
+                    <span id="notif-badge"
+                        style="position:absolute; top:-5px; right:-8px; background:#ff4444; color:white; font-size:0.7rem; font-weight:bold; width:20px; height:20px; border-radius:50%; display:none; align-items:center; justify-content:center;">0</span>
+                </div>
+                <div class="taller-selector"
+                    style="display:flex; align-items:center; gap:8px; background:#131c2b; padding:8px 15px; border-radius:25px; border:1px solid #1e2a3a; cursor:pointer;"
+                    onclick="window.tallerManager.mostrarSelector()">
+                    <span style="font-size:1.2rem;">🏪</span>
+                    <span id="taller-actual-nombre" style="color:#00ff88; font-weight:600;">Seleccionar taller</span>
+                    <span style="color:#888; font-size:0.7rem;">▾</span>
+
+                    <span id="taller-btn-desvincular"
+                        style="color:#888; font-size:0.9rem; cursor:pointer; display:none; padding:2px 6px; border-radius:50%;"
+                        onclick="event.stopPropagation(); window.tallerManager.desvincular()"
+                        title="Desvincular taller">✕</span>
+
+                </div>
+                <button class="btn-primary"
+                    onclick="if (window.abrirRecarga) window.abrirRecarga(); else alert('Cargando...');">RECARGAR
+                    SALDO</button>
+            </div>
+        </header>
+
+        <section id="dashboard" class="dash-section">
+            <div class="profile-layout">
+                <!-- Tarjeta de usuario -->
+                <div class="user-main-card">
+                    <div class="avatar-edit">
+                        <img src="https://ui-avatars.com/api/?name=Usuario&background=00ff88&color=000"
+                            id="foto-perfil-grande">
+                        <div class="avatar-overlay" onclick="document.getElementById('input-foto-perfil').click()">
+                            <span>📷</span>
+                        </div>
+                        <input type="file" id="input-foto-perfil" style="display: none;" accept="image/*"
+                            onchange="window.procesarImagenParaPerfil(this)">
+                    </div>
+                    <h2 id="display-nombre">Cargando...</h2>
+                    <p id="display-email">correo@ejemplo.com</p>
+                    <div class="plan-badge-container">
+                        <span id="badge-plan" class="badge-plan">Plan: Ninguno</span>
+                    </div>
+                    <div class="user-stats-mini">
+                        <div class="user-stat-item">
+                            <span class="user-stat-value" id="user-total-citas">0</span>
+                            <span class="user-stat-label">Citas</span>
+                        </div>
+                        <div class="user-stat-item">
+                            <span class="user-stat-value" id="user-vehiculos">0</span>
+                            <span class="user-stat-label">Vehículos</span>
+                        </div>
+                        <div class="user-stat-item">
+                            <span class="user-stat-value" id="user-antiguedad">-</span>
+                            <span class="user-stat-label">Meses</span>
+                        </div>
+                    </div>
+                    <div class="user-actions">
+                        <button class="btn-user-action" onclick="window.navegar(event)" data-href="#perfil">✏️ Editar
+                            Perfil</button>
+                        <button class="btn-user-action" onclick="if(window.abrirRecarga)window.abrirRecarga()">💰
+                            Recargar</button>
+                    </div>
+                </div>
+
+                <!-- Garaje -->
+                <div class="garage-container">
+                    <div class="garage-header">
+                        <h3>🚗 MI GARAJE</h3>
+                        <div style="display:flex; gap:8px; align-items:center;">
+                            <span id="garage-count" style="color:#888; font-size:0.8rem;">0 vehículos</span>
+                            <button class="btn-add-car"
+                                onclick="if (window.abrirModalVehiculo) window.abrirModalVehiculo();">+ AÑADIR</button>
+                        </div>
+                    </div>
+                    <div id="contenedor-vehiculos" class="garage-grid"
+                        style="max-height: 500px; overflow-y: auto; padding-right: 5px;"></div>
+                </div>
+
+                <!-- Accesos rápidos -->
+                <div
+                    style="display:grid; grid-template-columns:repeat(auto-fit, minmax(140px, 1fr)); gap:12px; margin-top:20px;">
+                    <div onclick="window.navegar(event)" data-href="#citas-agendadas"
+                        style="background:#131c2b; border:1px solid #1e2a3a; border-radius:12px; padding:20px; text-align:center; cursor:pointer; transition:all 0.3s;"
+                        onmouseover="this.style.borderColor='#00ff88'" onmouseout="this.style.borderColor='#1e2a3a'">
+                        <div style="font-size:2rem;">📅</div>
+                        <p style="color:#fff; margin:8px 0 0; font-weight:600;">Mis Citas</p>
+                    </div>
+                    <div onclick="if(window.abrirModalSolicitud)window.abrirModalSolicitud()"
+                        style="background:#131c2b; border:1px solid #1e2a3a; border-radius:12px; padding:20px; text-align:center; cursor:pointer; transition:all 0.3s;"
+                        onmouseover="this.style.borderColor='#00ff88'" onmouseout="this.style.borderColor='#1e2a3a'">
+                        <div style="font-size:2rem;">➕</div>
+                        <p style="color:#fff; margin:8px 0 0; font-weight:600;">Agendar Cita</p>
+                    </div>
+                    <div onclick="window.navegar(event)" data-href="#galeria"
+                        style="background:#131c2b; border:1px solid #1e2a3a; border-radius:12px; padding:20px; text-align:center; cursor:pointer; transition:all 0.3s;"
+                        onmouseover="this.style.borderColor='#00ff88'" onmouseout="this.style.borderColor='#1e2a3a'">
+                        <div style="font-size:2rem;">🖼️</div>
+                        <p style="color:#fff; margin:8px 0 0; font-weight:600;">Galería</p>
+                    </div>
+                    <div onclick="window.navegar(event)" data-href="#planes"
+                        style="background:#131c2b; border:1px solid #1e2a3a; border-radius:12px; padding:20px; text-align:center; cursor:pointer; transition:all 0.3s;"
+                        onmouseover="this.style.borderColor='#00ff88'" onmouseout="this.style.borderColor='#1e2a3a'">
+                        <div style="font-size:2rem;">💎</div>
+                        <p style="color:#fff; margin:8px 0 0; font-weight:600;">Planes</p>
+                    </div>
+                </div>
+        </section>
+
+        <!-- Modal de Recarga de Saldo -->
+        <div id="modal-recarga" class="modal" style="display: none;">
+            <div class="modal-content">
+                <h3>💳 Recargar Saldo</h3>
+                <p>Usuario: <span id="recarga-usuario-nombre" style="font-weight: bold;"></span></p>
+                <form onsubmit="window.procesarRecarga(event)">
+                    <div class="form-group">
+                        <label>Monto a recargar ($):</label>
+                        <input type="number" id="monto-recarga" placeholder="Ej: 50.00" min="50" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Método de Pago:</label>
+                        <select id="metodo-pago" required>
+                            <option value="efectivo">Efectivo (En Taller)</option>
+                            <option value="transferencia">Transferencia Bancaria</option>
+                            <option value="tarjeta">Tarjeta de Crédito/Débito</option>
+                        </select>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="btn-secondary" onclick="window.cerrarModales()">CANCELAR</button>
+                        <button type="submit" class="btn-primary">CONFIRMAR RECARGA</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Modal: Confirmar Entrega y Calificar -->
+        <div id="modal-confirmar-entrega" class="modal" style="display:none;">
+            <div class="modal-content" style="max-width:450px; text-align:center;">
+                <h3 style="color:#fff; margin-bottom:5px;">🎉 ¡Tu vehículo está listo!</h3>
+                <p style="color:#888; margin-bottom:20px;">Confirma que recibiste tu vehículo y califica el servicio</p>
+
+                <!-- Estrellas interactivas -->
+                <div style="margin-bottom:15px;">
+                    <label style="color:#888; display:block; margin-bottom:8px;">⭐ Califica el servicio</label>
+                    <div id="estrellas-confirmar"
+                        style="display:flex; justify-content:center; gap:8px; font-size:2rem;">
+                        <span onclick="window.seleccionarEstrellaConfirmar(1)" data-estrella="1"
+                            style="cursor:pointer; color:#444; transition:all 0.2s;">★</span>
+                        <span onclick="window.seleccionarEstrellaConfirmar(2)" data-estrella="2"
+                            style="cursor:pointer; color:#444; transition:all 0.2s;">★</span>
+                        <span onclick="window.seleccionarEstrellaConfirmar(3)" data-estrella="3"
+                            style="cursor:pointer; color:#444; transition:all 0.2s;">★</span>
+                        <span onclick="window.seleccionarEstrellaConfirmar(4)" data-estrella="4"
+                            style="cursor:pointer; color:#444; transition:all 0.2s;">★</span>
+                        <span onclick="window.seleccionarEstrellaConfirmar(5)" data-estrella="5"
+                            style="cursor:pointer; color:#444; transition:all 0.2s;">★</span>
+                    </div>
+                    <small id="texto-estrellas-confirmar" style="color:#888;">Selecciona una calificación</small>
+                </div>
+
+                <!-- Comentario -->
+                <div class="form-group" style="margin-bottom:20px;">
+                    <label style="color:#888;">💬 Comentario (opcional)</label>
+                    <textarea id="comentario-confirmar" rows="2" placeholder="Cuéntanos tu experiencia..."
+                        style="width:100%; padding:10px; background:#080c14; border:1px solid #1e2a3a; border-radius:8px; color:#fff; resize:vertical;"></textarea>
+                </div>
+
+                <!-- Botones -->
+                <div style="display:flex; gap:10px;">
+                    <button onclick="window.cerrarModalConfirmar()"
+                        style="flex:1; padding:12px; background:transparent; border:1px solid #333; color:#fff; border-radius:8px; cursor:pointer;">
+                        Cancelar
+                    </button>
+                    <button onclick="window.confirmarEntregaConCalificacion()"
+                        style="flex:1; padding:12px; background:#00ff88; color:#000; border:none; border-radius:8px; cursor:pointer; font-weight:700; font-size:1rem;">
+                        ✅ Confirmar Entrega
+                    </button>
+                </div>
+
+                <input type="hidden" id="cita-confirmar-id" value="">
+            </div>
+        </div>
+        <!-- Modal de Vehículo -->
+        <div id="modal-vehiculo" class="modal" style="display:none;">
+            <div class="modal-content">
+                <span class="close-btn" onclick="window.cerrarModalVehiculo()">&times;</span>
+                <h3>Registrar Nuevo Vehículo</h3>
+                <form onsubmit="window.añadirVehiculo(event)">
+                    <div class="form-group">
+                        <label>Marca del Vehículo:</label>
+                        <select id="car-marca" onchange="window.actualizarModelos()" required></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Modelo:</label>
+                        <select id="car-modelo" disabled required>
+                            <option value="" disabled selected>Primero selecciona una marca...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Placa / Matrícula:</label>
+                        <input type="text" id="car-placa" placeholder="Ej: A123456" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Color:</label>
+                        <input type="color" id="car-color" value="#33d17a">
+                    </div>
+                    <div class="form-group">
+                        <label>Foto del Vehículo:</label>
+                        <input type="file" id="car-foto" accept="image/*">
+                        <small style="color:#888;">Formatos: JPG, PNG. Máximo 1MB recomendado.</small>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="btn-secondary"
+                            onclick="window.cerrarModalVehiculo()">CANCELAR</button>
+                        <button type="submit" class="btn-primary">AÑADIR AL GARAJE</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Input oculto para cambiar foto -->
+        <input type="file" id="input-cambiar-foto-auto" style="display:none;" accept="image/*"
+            onchange="window.confirmarCambioFotoAuto(event)">
+        <!-- Stats Grid -->
+        <section class="stats-grid">
+            <div class="stat-card">
+                <h3>SALDO ACTUAL</h3>
+                <p class="stat-value">$<span id="saldo-cuenta">0.00</span></p>
+                <small>Válido para servicios extra</small>
+            </div>
+            <div class="stat-card featured-stat">
+                <h3>SERVICIOS DISPONIBLES</h3>
+                <p class="stat-value"><span id="servicios-qty">0</span></p>
+                <small id="plan-actual-texto">Sin plan activo</small>
+            </div>
+            <div class="stat-card">
+                <h3>PRÓXIMA CITA</h3>
+                <p class="stat-value-sm" id="proxima-cita">No hay citas</p>
+                <small id="sucursal-cita">Sucursal San Pedro</small>
+            </div>
+        </section>
+
+        <!-- Citas Agendadas -->
+        <section id="citas-agendadas" class="dash-section">
+            <div class="section-header">
+                <div class="header-flex">
+                    <div>
+                        <h2>MIS CITAS</h2>
+                        <p>Administra tus próximas visitas.</p>
+                    </div>
+                    <div style="display:flex; gap:8px; align-items:center;">
+                        <button id="tab-pendientes-cliente" class="tab-activo-cliente"
+                            onclick="cambiarTabCliente('pendientes')"
+                            style="padding:8px 15px; border:1px solid #00ff88; border-radius:20px; background:rgba(0,255,136,0.1); color:#00ff88; cursor:pointer; font-size:0.8rem; font-weight:600;">⏳
+                            Pendientes</button>
+                        <button id="tab-historial-cliente" class="tab-inactivo-cliente"
+                            onclick="cambiarTabCliente('historial')"
+                            style="padding:8px 15px; border:1px solid #333; border-radius:20px; background:transparent; color:#aaa; cursor:pointer; font-size:0.8rem;">📋
+                            Historial</button>
+                        <button class="btn-primary"
+                            onclick="if (window.abrirModalSolicitud) window.abrirModalSolicitud(); else alert('Cargando...');">NUEVA
+                            CITA +</button>
+                    </div>
+                </div>
+            </div>
+            <div id="contenedor-citas-pendientes" class="citas-grid"></div>
+            <div id="contenedor-citas-historial" class="citas-grid" style="display:none;"></div>
+        </section>
+
+        <!-- ==================== SECCIÓN: GALERÍA DE TRABAJOS ==================== -->
+        <section id="galeria" class="dash-section">
+            <div class="section-header">
+                <div>
+                    <h2>🖼️ Galería de Trabajos</h2>
+                    <p>Fotos de tus servicios completados</p>
+                </div>
+                <button class="btn-add" onclick="window.galeriaTrabajos.cargar()">🔄 Actualizar</button>
+            </div>
+
+            <!-- Filtros avanzados -->
+            <div
+                style="display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap; background:#131c2b; padding:15px; border-radius:12px; border:1px solid #1e2a3a;">
+                <input type="text" id="busqueda-galeria" placeholder="🔍 Buscar por vehículo, placa o servicio..."
+                    oninput="window.galeriaTrabajos.aplicarFiltros()"
+                    style="flex:2; min-width:200px; padding:12px; background:#080c14; border:1px solid #1e2a3a; border-radius:8px; color:#fff; font-size:0.9rem;">
+
+                <select id="filtro-galeria-servicio" onchange="window.galeriaTrabajos.aplicarFiltros()"
+                    style="flex:1; min-width:150px; padding:12px; background:#080c14; border:1px solid #1e2a3a; border-radius:8px; color:#fff; font-size:0.9rem;">
+                    <option value="todos">🔧 Todos los servicios</option>
+                </select>
+
+                <select id="filtro-galeria-tipo" onchange="window.galeriaTrabajos.aplicarFiltros()"
+                    style="flex:1; min-width:130px; padding:12px; background:#080c14; border:1px solid #1e2a3a; border-radius:8px; color:#fff; font-size:0.9rem;">
+                    <option value="todas">📸 Todas las fotos</option>
+                    <option value="antes">🔴 Antes</option>
+                    <option value="durante">🟡 Durante</option>
+                    <option value="despues">🟢 Después</option>
+                </select>
+
+                <select id="filtro-galeria-fecha" onchange="window.galeriaTrabajos.aplicarFiltros()"
+                    style="flex:1; min-width:120px; padding:12px; background:#080c14; border:1px solid #1e2a3a; border-radius:8px; color:#fff; font-size:0.9rem;">
+                    <option value="todas">📅 Todas las fechas</option>
+                </select>
+
+                <button onclick="window.galeriaTrabajos.limpiarFiltros()"
+                    style="padding:12px 20px; background:transparent; border:1px solid #ff4444; color:#ff4444; border-radius:8px; cursor:pointer; font-size:0.9rem;">
+                    🧹 Limpiar filtros
+                </button>
+            </div>
+
+            <!-- Grid de fotos tipo Pinterest/Masonry -->
+            <div id="contenedor-galeria" style="columns:3 280px; gap:15px;">
+                <p style="color:#888;text-align:center;padding:40px;column-span:all;">⏳ Cargando galería...</p>
+            </div>
+        </section>
+
+        <!-- Servicios Extra -->
+        <section class="extra-services">
+            <h2>SERVICIOS ADICIONALES</h2>
+            <div class="extra-grid">
+                <div class="extra-item">
+                    <span>Pulido de Faros</span>
+                    <strong>$25.00</strong>
+                    <button class="btn-pay-extra"
+                        onclick="if (window.pagarServicioExtra) window.pagarServicioExtra('Pulido de Faros', 25);">Pagar
+                        con Saldo</button>
+                </div>
+                <div class="extra-item">
+                    <span>Tratamiento de Ozono</span>
+                    <strong>$15.00</strong>
+                    <button class="btn-pay-extra"
+                        onclick="if (window.pagarServicioExtra) window.pagarServicioExtra('Tratamiento de Ozono', 15);">Pagar
+                        con Saldo</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Talleres -->
+        <section id="talleres" class="dash-section workshops-section">
+            <div class="section-header">
+                <div class="header-flex">
+                    <div>
+                        <h2>CENTROS DE SERVICIO EN VIVO</h2>
+                        <p>Monitoreo de bahías libres en San Pedro de Macorís.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="workshops-grid">
+                <div class="workshop-card available">
+                    <div class="availability-indicator"><span class="pulse-green"></span> 2 LIBRES</div>
+                    <div class="workshop-img"><img
+                            src="https://images.unsplash.com/photo-1494905998402-395d579af36f?auto=format&fit=crop&q=80&w=500"
+                            alt="Taller"></div>
+                    <div class="workshop-info">
+                        <h3>AutoBrillo Este</h3>
+                        <p>📍 Autopista del Este, KM 2</p>
+                        <button class="btn-instant"
+                            onclick="if (window.abrirModalSolicitud) window.abrirModalSolicitud('AutoBrillo Este');">SOLICITAR
+                            AHORA</button>
+                    </div>
+                </div>
+                <div class="workshop-card available">
+                    <div class="availability-indicator"><span class="pulse-green"></span> 1 LIBRE</div>
+                    <div class="workshop-img"><img
+                            src="https://images.unsplash.com/photo-1517524008697-84bbe3c3fd98?auto=format&fit=crop&q=80&w=500"
+                            alt="Taller Central"></div>
+                    <div class="workshop-info">
+                        <h3>Sucursal Central</h3>
+                        <p>📍 Av. Caamaño Deñó</p>
+                        <button type="button" class="btn-instant"
+                            onclick="if (window.abrirModalSolicitud) window.abrirModalSolicitud('Sucursal Central');">SOLICITAR
+                            AHORA</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== SECCIÓN: EXPLORAR TALLERES ==================== -->
+        <section id="explorar-talleres" class="dash-section">
+            <div class="section-header">
+                <h2>🔍 Explorar Talleres</h2>
+                <p>Encuentra el mejor taller para tu vehículo</p>
+            </div>
+
+            <!-- Búsqueda y Filtros -->
+            <div class="filtros-explorar" style="display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap;">
+                <input type="text" id="busqueda-taller" placeholder="🔍 Buscar taller..."
+                    style="flex:2; min-width:200px; padding:12px; background:#080c14; border:1px solid #1e2a3a; border-radius:8px; color:#fff; font-size:0.9rem;">
+                <select id="filtro-ciudad" onchange="window.filtrarTalleres()"
+                    style="flex:1; min-width:150px; padding:12px; background:#080c14; border:1px solid #1e2a3a; border-radius:8px; color:#fff; font-size:0.9rem;">
+                    <option value="">Todas las ciudades</option>
+                </select>
+                <select id="filtro-especialidad" onchange="window.filtrarTalleres()"
+                    style="flex:1; min-width:150px; padding:12px; background:#080c14; border:1px solid #1e2a3a; border-radius:8px; color:#fff; font-size:0.9rem;">
+                    <option value="">Todas las especialidades</option>
+                </select>
+            </div>
+
+            <!-- Lista de Talleres -->
+            <div id="lista-talleres"
+                style="display:grid; grid-template-columns:repeat(auto-fill, minmax(320px, 1fr)); gap:15px; margin-bottom:25px;">
+                <p style="color:#888; grid-column:1/-1; text-align:center; padding:30px;">Cargando talleres...</p>
+            </div>
+
+            <!-- Detalle del Taller Seleccionado -->
+            <div id="taller-detalle"
+                style="display:none; background:#111820; border:1px solid #1e2a3a; border-radius:15px; padding:25px; margin-top:20px;">
+                <!-- Se llena dinámicamente -->
+                <!-- Sistema de Calificaciones -->
+                <div style="margin-top:20px; padding-top:20px; border-top:1px solid #1e2a3a;">
+                    <h4 style="color:#ffbb33; margin-bottom:15px;">⭐ Calificaciones y Reseñas</h4>
+
+                    <!-- Resumen de calificación -->
+                    <div style="display:flex; align-items:center; gap:20px; margin-bottom:20px; flex-wrap:wrap;">
+                        <div style="text-align:center;">
+                            <div style="font-size:3rem; font-weight:700; color:#ffbb33;" id="calificacion-promedio">-
+                            </div>
+                            <div style="color:#ffbb33; font-size:1.2rem;" id="calificacion-estrellas"></div>
+                            <small style="color:#888;" id="calificacion-total"></small>
+                        </div>
+                        <div style="flex:1; min-width:200px;">
+                            <div id="barras-calificacion">
+                                <!-- Barras de 5,4,3,2,1 estrellas -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Formulario para dejar reseña -->
+                    <div id="form-resena"
+                        style="background:#080c14; border:1px solid #1e2a3a; border-radius:10px; padding:15px; margin-bottom:15px;">
+                        <h5 style="color:#fff; margin-bottom:10px;">📝 Dejar una reseña</h5>
+                        <div style="display:flex; gap:5px; margin-bottom:10px;" id="estrellas-seleccion">
+                            <span onclick="window.seleccionarEstrellas(1)" style="font-size:1.5rem; cursor:pointer;"
+                                class="estrella">☆</span>
+                            <span onclick="window.seleccionarEstrellas(2)" style="font-size:1.5rem; cursor:pointer;"
+                                class="estrella">☆</span>
+                            <span onclick="window.seleccionarEstrellas(3)" style="font-size:1.5rem; cursor:pointer;"
+                                class="estrella">☆</span>
+                            <span onclick="window.seleccionarEstrellas(4)" style="font-size:1.5rem; cursor:pointer;"
+                                class="estrella">☆</span>
+                            <span onclick="window.seleccionarEstrellas(5)" style="font-size:1.5rem; cursor:pointer;"
+                                class="estrella">☆</span>
+                        </div>
+                        <textarea id="resena-comentario" rows="2"
+                            placeholder="Comparte tu experiencia con este taller..."
+                            style="width:100%; padding:10px; background:#080c14; border:1px solid #1e2a3a; border-radius:8px; color:#fff; resize:vertical; margin-bottom:8px;"></textarea>
+                        <button type="button" onclick="window.enviarResena()"
+                            style="padding:10px 20px; background:#ffbb33; color:#000; border:none; border-radius:8px; cursor:pointer; font-weight:600;">📤
+                            Enviar Reseña</button>
+                    </div>
+
+                    <!-- Lista de reseñas -->
+                    <div id="lista-resenas" style="max-height:400px; overflow-y:auto;">
+                        <p style="color:#888; text-align:center;">Cargando reseñas...</p>
+                    </div>
+                </div>
+                <!-- Galería de Fotos -->
+                <div style="margin-top:20px; padding-top:20px; border-top:1px solid #1e2a3a;">
+                    <h4 style="color:#00d4ff; margin-bottom:15px;">📸 Galería de Trabajos</h4>
+                    <div id="galeria-taller"
+                        style="display:grid; grid-template-columns:repeat(auto-fill, minmax(150px, 1fr)); gap:10px;">
+                        <p style="color:#888; grid-column:1/-1; text-align:center;">Cargando fotos...</p>
+                    </div>
+                </div>
+                <!-- 🗺️ Mapa Interactivo Moderno -->
+                <div style="margin-top:25px; padding-top:25px; border-top:1px solid #1e2a3a;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                        <h4 style="color:#00d4ff; margin:0; display:flex; align-items:center; gap:8px;">
+                            <span style="font-size:1.3rem;">🗺️</span> Ubicación del Taller
+                        </h4>
+                        ${t.direccion?.coordenadas?.lat ? `
+                        <span
+                            style="background:rgba(0,255,136,0.1); color:#00ff88; padding:5px 12px; border-radius:20px; font-size:0.7rem; font-weight:600; display:flex; align-items:center; gap:5px;">
+                            <span
+                                style="width:8px; height:8px; background:#00ff88; border-radius:50%; animation:pulse 2s infinite;"></span>
+                            Ubicación verificada
+                        </span>` : `
+                        <span
+                            style="background:rgba(255,187,51,0.1); color:#ffbb33; padding:5px 12px; border-radius:20px; font-size:0.7rem; font-weight:600;">
+                            ⚠️ Ubicación aproximada
+                        </span>`}
+                    </div>
+
+                    <!-- Contenedor del mapa con bordes redondeados y sombra -->
+                    <div
+                        style="position:relative; border-radius:16px; overflow:hidden; border:2px solid #1e2a3a; box-shadow:0 8px 30px rgba(0,0,0,0.3);">
+                        <div id="mapa-taller-${tallerId}" style="width:100%; height:320px; background:#080c14;"></div>
+
+                        <!-- Overlay de información en la parte inferior del mapa -->
+                        <div
+                            style="position:absolute; bottom:0; left:0; right:0; background:linear-gradient(transparent, rgba(0,0,0,0.9)); padding:40px 15px 15px; pointer-events:none;">
+                            <div style="display:flex; align-items:center; gap:8px; color:#fff;">
+                                <span style="font-size:1.2rem;">🏪</span>
+                                <div>
+                                    <p style="margin:0; font-weight:600; font-size:0.9rem;">${t.nombre}</p>
+                                    <p style="margin:2px 0 0; font-size:0.75rem; color:#aaa;">📍 ${direccion}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Barra de acciones debajo del mapa -->
+                    <div style="display:flex; gap:8px; margin-top:12px; flex-wrap:wrap;">
+                        ${t.direccion?.coordenadas?.lat ? `
+                        <!-- Botón Google Maps -->
+                        <a href="https://www.google.com/maps/dir/?api=1&destination=${t.direccion.coordenadas.lat},${t.direccion.coordenadas.lng}"
+                            target="_blank"
+                            style="flex:1; min-width:130px; padding:12px 15px; background:linear-gradient(135deg, #00ff88, #00cc6a); color:#000; border:none; border-radius:12px; cursor:pointer; text-decoration:none; font-weight:700; font-size:0.85rem; text-align:center; display:flex; align-items:center; justify-content:center; gap:6px; transition:all 0.3s; box-shadow:0 4px 15px rgba(0,255,136,0.2);"
+                            onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 25px rgba(0,255,136,0.4)';"
+                            onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(0,255,136,0.2)';">
+                            <span style="font-size:1.1rem;">🗺️</span> Cómo llegar
+                        </a>
+
+                        <!-- Botón Waze -->
+                        <a href="https://waze.com/ul?ll=${t.direccion.coordenadas.lat},${t.direccion.coordenadas.lng}&navigate=yes"
+                            target="_blank"
+                            style="flex:1; min-width:100px; padding:12px 15px; background:linear-gradient(135deg, #33CCFF, #0099CC); color:#000; border:none; border-radius:12px; cursor:pointer; text-decoration:none; font-weight:700; font-size:0.85rem; text-align:center; display:flex; align-items:center; justify-content:center; gap:6px; transition:all 0.3s;"
+                            onmouseover="this.style.transform='translateY(-2px)';"
+                            onmouseout="this.style.transform='translateY(0)';">
+                            <span style="font-size:1.1rem;">🚗</span> Waze
+                        </a>
+
+                        <!-- Botón Mi ubicación -->
+                        <button type="button"
+                            onclick="window.mapaTaller?.obtenerUbicacionCliente().then(() => window.mapaTaller?.inicializar('${tallerId}', '${direccion}', '${t.nombre}', '{lat:${t.direccion.coordenadas.lat}, lng:${t.direccion.coordenadas.lng}}'))"
+                            style="flex:1; min-width:120px; padding:12px 15px; background:transparent; border:2px solid #00d4ff; color:#00d4ff; border-radius:12px; cursor:pointer; font-weight:600; font-size:0.85rem; text-align:center; display:flex; align-items:center; justify-content:center; gap:6px; transition:all 0.3s;"
+                            onmouseover="this.style.background='rgba(0,212,255,0.1)'; this.style.transform='translateY(-2px)';"
+                            onmouseout="this.style.background='transparent'; this.style.transform='translateY(0)';">
+                            <span style="font-size:1.1rem;">📍</span> Mi ubicación
+                        </button>
+
+                        ` : `
+                        <!-- Si no hay coordenadas exactas -->
+                        <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(direccion)}"
+                            target="_blank"
+                            style="flex:1; padding:12px; background:#00d4ff; color:#000; border:none; border-radius:12px; cursor:pointer; text-decoration:none; font-weight:700; font-size:0.85rem; text-align:center; transition:all 0.3s;"
+                            onmouseover="this.style.transform='translateY(-2px)';"
+                            onmouseout="this.style.transform='translateY(0)';">
+                            🔗 Ver en Google Maps
+                        </a>
+                        `}
+
+                        <!-- Input para buscar ubicación manual -->
+                        <div style="display:flex; gap:6px; margin-bottom:10px;">
+                            <input type="text" id="input-mi-ubicacion-${tallerId}"
+                                placeholder="📍 Busca tu ubicación (ej: Calle, Ciudad)..."
+                                style="flex:1; padding:10px; background:#080c14; border:1px solid #1e2a3a; border-radius:8px; color:#fff; font-size:0.8rem;">
+                            <button type="button"
+                                onclick="window.buscarMiUbicacionManual('${tallerId}', '${direccion}', '${t.nombre}', '${t.direccion?.coordenadas?.lat || 0}, ${t.direccion?.coordenadas?.lng || 0}')"
+                                style="padding:10px 15px; background:#00d4ff; color:#000; border:none; border-radius:8px; cursor:pointer; font-weight:600; font-size:0.8rem; white-space:nowrap;">
+                                🔍 Buscar
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Dirección -->
+                    <div
+                        style="display:flex; align-items:center; gap:8px; margin-top:10px; padding:10px; background:#080c14; border-radius:10px;">
+                        <span style="font-size:1.2rem;">📍</span>
+                        <span style="color:#aaa; font-size:0.8rem;">${direccion}</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- Planes -->
+        <section id="planes" class="dash-section">
+            <h2>NUESTROS PLANES</h2>
+            <div id="contenedor-planes-cards" class="planes-grid">
+                <p style="color:#888; text-align:center;">Cargando planes disponibles...</p>
+            </div>
+        </section>
+
+        <!-- Perfil -->
+        <section id="perfil" class="dash-section" style="display:none;">
+            <div class="section-header">
+                <h2>👤 MI PERFIL</h2>
+                <p>Gestiona tu información personal y seguridad.</p>
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+                <div>
+                    <div
+                        style="background:#131c2b; border:1px solid #1e2a3a; border-radius:15px; padding:25px; text-align:center; margin-bottom:20px;">
+                        <div style="position:relative; display:inline-block;">
+                            <img id="preview-foto-perfil"
+                                src="https://ui-avatars.com/api/?name=Usuario&background=00ff88&color=000"
+                                style="width:100px; height:100px; border-radius:50%; border:3px solid #00ff88; object-fit:cover;">
+                            <button type="button" onclick="document.getElementById('input-foto-perfil').click()"
+                                style="position:absolute; bottom:0; right:0; background:#00ff88; color:#000; border:none; border-radius:50%; width:30px; height:30px; cursor:pointer; font-size:0.8rem;">📷</button>
+                        </div>
+                        <h3 id="perfil-nombre-display" style="color:#fff; margin:15px 0 5px;">Cargando...</h3>
+                        <p id="perfil-email-display" style="color:#888; font-size:0.9rem;">correo@ejemplo.com</p>
+                        <span id="perfil-plan-badge"
+                            style="background:rgba(0,255,136,0.1); color:#00ff88; padding:5px 15px; border-radius:20px; font-size:0.75rem;">Plan:
+                            Ninguno</span>
+                    </div>
+                    <div
+                        style="background:#131c2b; border:1px solid #1e2a3a; border-radius:15px; padding:25px; margin-bottom:20px;">
+                        <h4 style="color:#fff; margin-bottom:15px;">📊 Mis Estadísticas</h4>
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
+                            <div style="text-align:center;">
+                                <div style="font-size:1.5rem; font-weight:700; color:#00ff88;" id="perfil-total-citas">0
+                                </div><small style="color:#888;">Citas Realizadas</small>
+                            </div>
+                            <div style="text-align:center;">
+                                <div style="font-size:1.5rem; font-weight:700; color:#00d4ff;"
+                                    id="perfil-total-gastado">RD$ 0</div><small style="color:#888;">Total
+                                    Gastado</small>
+                            </div>
+                            <div style="text-align:center;">
+                                <div style="font-size:1.5rem; font-weight:700; color:#ffbb33;"
+                                    id="perfil-vehiculos-count">0</div><small style="color:#888;">Vehículos</small>
+                            </div>
+                            <div style="text-align:center;">
+                                <div style="font-size:1.5rem; font-weight:700; color:#ff44ff;" id="perfil-antiguedad">-
+                                </div><small style="color:#888;">Cliente desde</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <div
+                        style="background:#131c2b; border:1px solid #1e2a3a; border-radius:15px; padding:25px; margin-bottom:20px;">
+                        <h4 style="color:#fff; margin-bottom:15px;">✏️ Editar Información</h4>
+                        <form id="form-perfil" onsubmit="window.guardarCambiosPerfil(event)">
+                            <div class="form-group"><label>Nombre</label><input type="text" id="perf-nombre"
+                                    placeholder="Tu nombre" required
+                                    style="width:100%; padding:12px; background:#080c14; border:1px solid #1e2a3a; border-radius:8px; color:#fff;">
+                            </div>
+                            <div class="form-group"><label>Apellido</label><input type="text" id="perf-apellido"
+                                    placeholder="Tu apellido"
+                                    style="width:100%; padding:12px; background:#080c14; border:1px solid #1e2a3a; border-radius:8px; color:#fff;">
+                            </div>
+                            <div class="form-group"><label>Email</label><input type="email" id="perf-email"
+                                    placeholder="tu@email.com" readonly
+                                    style="width:100%; padding:12px; background:#080c14; border:1px solid #1e2a3a; border-radius:8px; color:#888;"><small
+                                    style="color:#888;">El email no se puede cambiar</small></div>
+                            <div class="form-group"><label>Teléfono / WhatsApp</label><input type="tel"
+                                    id="perf-whatsapp" placeholder="Ej: 809-555-1234"
+                                    style="width:100%; padding:12px; background:#080c14; border:1px solid #1e2a3a; border-radius:8px; color:#fff;">
+                            </div>
+                            <button type="submit" id="btn-guardar-perfil"
+                                style="width:100%; padding:12px; background:#00ff88; color:#000; border:none; border-radius:8px; cursor:pointer; font-weight:600;">💾
+                                Guardar Cambios</button>
+                        </form>
+                    </div>
+                    <div
+                        style="background:#131c2b; border:1px solid #1e2a3a; border-radius:15px; padding:25px; margin-bottom:20px;">
+                        <h4 style="color:#fff; margin-bottom:15px;">🔒 Cambiar Contraseña</h4>
+                        <form id="form-password" onsubmit="window.actualizarPassword(event)">
+                            <div class="form-group"><label>Contraseña Actual</label><input type="password"
+                                    id="pass-actual" required
+                                    style="width:100%; padding:12px; background:#080c14; border:1px solid #1e2a3a; border-radius:8px; color:#fff;">
+                            </div>
+                            <div class="form-group"><label>Nueva Contraseña</label><input type="password"
+                                    id="pass-nueva" required minlength="8"
+                                    style="width:100%; padding:12px; background:#080c14; border:1px solid #1e2a3a; border-radius:8px; color:#fff;">
+                            </div>
+                            <div class="form-group"><label>Confirmar Nueva Contraseña</label><input type="password"
+                                    id="pass-confirma" required
+                                    style="width:100%; padding:12px; background:#080c14; border:1px solid #1e2a3a; border-radius:8px; color:#fff;">
+                            </div>
+                            <button type="submit"
+                                style="width:100%; padding:12px; background:#ffbb33; color:#000; border:none; border-radius:8px; cursor:pointer; font-weight:600;">🔐
+                                Actualizar Contraseña</button>
+                        </form>
+                    </div>
+                    <div style="background:#131c2b; border:1px solid #1e2a3a; border-radius:15px; padding:25px;">
+                        <h4 style="color:#fff; margin-bottom:15px;">💳 Historial de Transacciones</h4>
+                        <div id="lista-transacciones" style="max-height:300px; overflow-y:auto;">
+                            <p style="color:#666; text-align:center;">Cargando...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Soporte -->
+        <section id="contacto" class="dash-section support-section">
+            <div class="section-header">
+                <h2>CENTRO DE SOPORTE</h2>
+                <p>¿Tienes algún problema? Estamos aquí para ayudarte.</p>
+            </div>
+            <div class="support-grid">
+                <div class="support-card featured-support">
+                    <div class="support-icon">💬</div>
+                    <h3>WhatsApp</h3>
+                    <a href="https://wa.me/18090000000" class="btn-primary-support">CHATEAR AHORA</a>
+                </div>
+                <div class="support-card">
+                    <div class="support-icon">✉️</div>
+                    <h3>Ticket</h3>
+                    <button type="button" class="btn-outline-support"
+                        onclick="if (window.crearTicket) window.crearTicket();">CREAR
+                        TICKET</button>
+                </div>
+            </div>
+        </section>
+
+        <footer class="dash-footer">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <div class="logo">AUTOBRILLO<span>D.</span></div>
+                    <p>Estética Vehicular de Élite en San Pedro de Macorís.</p>
+                </div>
+                <div class="footer-copy">
+                    <p>&copy; 2026 AutoBrillo Detailing. Todos los derechos reservados.</p>
+                </div>
+            </div>
+        </footer>
+    </main>
+    <!-- Modal: Seleccionar Taller -->
+    <div id="modal-selector-taller" class="modal" style="display:none;">
+        <div class="modal-content" style="max-width:600px; max-height:80vh; overflow-y:auto;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h3 style="color:#fff; margin:0;">🏪 Seleccionar Mi Taller de Confianza</h3>
+                <span onclick="document.getElementById('modal-selector-taller').style.display='none'"
+                    style="font-size:1.5rem; cursor:pointer; color:#888;">&times;</span>
+            </div>
+            <p style="color:#888; margin-bottom:15px;">Elige un taller para personalizar tu experiencia, ver sus planes
+                exclusivos y agendar citas fácilmente.</p>
+
+            <!-- Búsqueda rápida -->
+            <input type="text" id="busqueda-taller-selector" placeholder="🔍 Buscar taller por nombre o ciudad..."
+                oninput="window.filtrarTalleresSelector?.()"
+                style="width:100%; padding:12px 15px; background:#080c14; border:1px solid #1e2a3a; border-radius:8px; color:#fff; margin-bottom:15px; font-size:0.9rem;">
+
+            <!-- Lista de talleres -->
+            <div style="display:grid; gap:10px; max-height:350px; overflow-y:auto;" id="lista-talleres-selector">
+                <p style="color:#888; text-align:center; padding:30px;">🔍 Cargando talleres disponibles...</p>
+            </div>
+
+            <!-- Opción de explorar -->
+            <div style="margin-top:15px; padding-top:15px; border-top:1px solid #1e2a3a; text-align:center;">
+                <small style="color:#888;">¿Quieres ver todos los talleres?</small><br>
+                <a href="#explorar-talleres"
+                    onclick="document.getElementById('modal-selector-taller').style.display='none'; window.navegar?.(event)"
+                    style="color:#00d4ff; text-decoration:none; font-size:0.9rem; display:inline-block; margin-top:5px;">
+                    🔍 Explorar todos los talleres
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Agendar Cita -->
+    <div id="modal-cita" class="modal" style="display:none;">
+        <div class="modal-content">
+            <span class="close-btn" onclick="window.cerrarModales()">&times;</span>
+            <h3>📅 Agendar Nueva Cita</h3>
+            <form onsubmit="window.confirmarCita(event)">
+                <div class="form-group">
+                    <label>Selecciona tu Vehículo:</label>
+                    <select id="cita-vehiculo" required></select>
+                </div>
+                <div class="form-group">
+                    <label>Tipo de Servicio:</label>
+                    <select id="cita-servicio" required>
+                        <option value="" disabled selected>Selecciona un servicio</option>
+                        <option value="Lavado Básico" data-precio="500">Lavado Básico (RD$ 500)</option>
+                        <option value="Lavado Premium" data-precio="1200">Lavado Premium (RD$ 1,200)</option>
+                        <option value="Detallado Interior" data-precio="2500">Detallado Interior (RD$ 2,500)</option>
+                        <option value="Pulido Completo" data-precio="3500">Pulido Completo (RD$ 3,500)</option>
+                        <option value="Tratamiento Cerámico" data-precio="5000">Tratamiento Cerámico (RD$ 5,000)
+                        </option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>🏪 Selecciona un Taller:</label>
+                    <select id="cita-sucursal" required onchange="window.alSeleccionarTaller(this.value)">
+                        <option value="" disabled selected>Cargando talleres...</option>
+                    </select>
+                    <small id="taller-info" style="color:#00ff88; font-size:0.75rem; display:none;"></small>
+                </div>
+                <div class="form-group">
+                    <label>📅 Fecha:</label>
+                    <input type="date" id="cita-fecha" required min="" onchange="window.alCambiarFecha()">
+                </div>
+                <div class="form-group">
+                    <label>🕐 Hora:</label>
+                    <select id="cita-hora" required>
+                        <option value="" disabled selected>Primero selecciona fecha</option>
+                    </select>
+                    <small id="disponibilidad-info" style="color:#ffbb33; font-size:0.75rem;"></small>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" onclick="window.cerrarModales()">CANCELAR</button>
+                    <button type="button" class="btn-primary" id="btn-agendar-cita"
+                        onclick="window.confirmarCita()">AGENDAR CITA</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal de Notificaciones -->
+    <div id="modal-notificaciones" class="modal" style="display:none;">
+        <div class="modal-content" style="max-width:500px; max-height:70vh; overflow-y:auto;">
+            <span class="close-btn"
+                onclick="document.getElementById('modal-notificaciones').style.display='none'">&times;</span>
+            <h3>🔔 Notificaciones</h3>
+            <div id="lista-notificaciones" style="margin-top:15px;">
+                <p style="color:#666; text-align:center;">No tienes notificaciones</p>
+            </div>
+            <div class="modal-actions" style="margin-top:15px;">
+                <button type="button" class="btn-secondary"
+                    onclick="document.getElementById('modal-notificaciones').style.display='none'">CERRAR</button>
+                <button class="btn-primary" onclick="window.marcarTodasLeidas()">✅ Marcar todas leídas</button>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+    <script type="module" src="../../javascript/cliente/dashboard-cliente.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+
+
+</body>
+
+</html>

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Workshop Pro | Gestión</title>
+        <!-- ⭐ CSS UNIFICADO -->
+    <!-- ⭐ CSS MANAGER -->
+        <!-- CSS UNIFICADO -->
+    <link rel="stylesheet" href="../css/main.css">
+    <script type="module" src="../javascript/css-manager.js"></script>
+</head>
+<body>
+
+    <nav class="sidebar">
+        <div class="logo">Workshop<span>PRO</span></div>
+        <ul class="nav-links">
+            <li onclick="showSection('section-dash')" class="active">📊 Dashboard</li>
+            <li onclick="showSection('section-citas')">📅 Agenda de Citas</li>
+            <li onclick="showSection('section-servicios')">📋 Catálogo/Precios</li>
+            <li onclick="showSection('section-empleados')">👷 Empleados</li>
+            <li onclick="showSection('section-clientes')">👤 Historial Clientes</li>
+        </ul>
+        <div class="balance-sidebar">
+            <small>Caja Total</small>
+            <div id="caja-total">RD$ 0</div>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        
+       <section id="section-citas" class="section-page" style="display:none;">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h1>📅 Agenda de Citas</h1>
+        <button class="btn-add" onclick="alert('Próximamente: Abrir Calendario')">+ Nueva Cita Manual</button>
+    </div>
+
+    <div class="card">
+        <p style="color: #888; margin-bottom: 20px;">Gestiona las reservas del día y asigna trabajos a los empleados libres.</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Hora</th>
+                    <th>Estado</th>
+                    <th>Cliente</th>
+                    <th>Vehículo</th>
+                    <th>Servicio</th>
+                    <th>Acción</th>
+                </tr>
+            </thead>
+            <tbody id="tabla-citas">
+                </tbody>
+        </table>
+    </div>
+</section>
+
+     <section id="section-dash" class="section-page">
+    <h1>Resumen del Taller</h1>
+    <div class="stats-grid">
+        <div class="stat-card"><h3>Servicios Hoy</h3><p id="stat-hoy">0</p></div>
+        <div class="stat-card"><h3>Ingresos Taller</h3><p id="caja-total-dash">RD$ 0</p></div>
+    </div>
+    <div class="card" style="border-color: #ffc107; background: #2b2100;">
+    <h4>🔔 Avisos del Taller (Por Cobrar)</h4>
+    <div id="lista-avisos" class="avisos-container">
+        <p style="color: #888;">No hay servicios pendientes de cobro...</p>
+    </div>
+</div>
+    <h3>🖼️ Galería de Control de Calidad (Últimos Trabajos)</h3>
+    <div id="galeria-trabajos" class="tasks-grid">
+        </div>
+
+    <h3>🛠️ Trabajos en Curso</h3>
+    <div id="contenedor-tareas" class="tasks-grid"></div>
+</section>
+        <section id="section-servicios" class="section-page" style="display:none;">
+            <h1>Configuración de Servicios</h1>
+            <div class="card">
+                <div class="input-group">
+                    <input type="text" id="srv-nombre" placeholder="Nombre del Servicio">
+                    <input type="number" id="srv-precio" placeholder="Precio RD$">
+                    <button onclick="agregarServicioCatalogo()" class="btn-add">Añadir</button>
+                </div>
+                <div id="lista-servicios-completa" class="catalogo-list"></div>
+            </div>
+        </section>
+
+        <section id="section-empleados" class="section-page" style="display:none;">
+            <h1>Gestión de Personal</h1>
+            <div class="card">
+                <div class="input-group">
+                    <input type="text" id="emp-nombre" placeholder="Nombre del Empleado">
+                    <button onclick="agregarEmpleado()" class="btn-add">Registrar</button>
+                </div>
+                <table>
+                    <thead>
+                        <tr><th>ID</th><th>Nombre</th><th>Estado</th><th>Ganancia Acum.</th></tr>
+                    </thead>
+                    <tbody id="tabla-empleados"></tbody>
+                </table>
+            </div>
+        </section>
+       
+<section id="section-clientes" class="section-page" style="display:none;">
+    <h1>Historial de Clientes y Vehículos</h1>
+    <div class="card">
+        <table>
+            <thead>
+                <tr><th>Cliente</th><th>Vehículo</th><th>Último Servicio</th><th>Total Invertido</th></tr>
+            </thead>
+            <tbody id="tabla-clientes"></tbody>
+        </table>
+    </div>
+</section>
+
+
+
+    </main>
+
+    <script src="../../javascript/servicioTallar.js"></script>
+</body>
+</html>

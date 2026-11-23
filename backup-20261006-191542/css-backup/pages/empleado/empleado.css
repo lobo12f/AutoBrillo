@@ -1,0 +1,153 @@
+/* ====================================================================
+   PÁGINA: EMPLEADO - AUTOBRILLO DETALLING
+   ====================================================================
+   Estilos específicos del dashboard del empleado.
+   ==================================================================== */
+
+/* ================================================================
+   BOTTOM NAV (móvil)
+   ================================================================ */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: var(--bottom-nav-height);
+    background: var(--bg-secondary);
+    border-top: 1px solid var(--border-color);
+    display: none;
+    align-items: center;
+    justify-content: space-around;
+    z-index: 100;
+}
+
+.bottom-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: var(--spacing-xs);
+    color: var(--text-secondary);
+    font-size: var(--font-size-xs);
+    cursor: pointer;
+    transition: color var(--transition-base);
+    text-decoration: none;
+    position: relative;
+}
+
+.bottom-nav-item.active {
+    color: var(--color-primary);
+}
+
+.bottom-nav-icon {
+    font-size: var(--font-size-xl);
+    line-height: 1;
+}
+
+.bottom-nav-badge {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: var(--color-danger);
+    color: white;
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-bold);
+    padding: 1px 4px;
+    border-radius: var(--border-radius-full);
+    min-width: 14px;
+    text-align: center;
+    line-height: 1;
+}
+
+/* ================================================================
+   CHECKLIST
+   ================================================================ */
+.checklist {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+    margin: var(--spacing-md) 0;
+}
+
+.checklist-item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: 10px 12px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-md);
+    cursor: pointer;
+    transition: all var(--transition-base);
+}
+
+.checklist-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.checklist-item.completed {
+    background: rgba(0, 255, 136, 0.05);
+    border-color: rgba(0, 255, 136, 0.3);
+}
+
+.checklist-checkbox {
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--border-color);
+    border-radius: var(--border-radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all var(--transition-base);
+    font-size: var(--font-size-sm);
+}
+
+.checklist-item.completed .checklist-checkbox {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: #000;
+}
+
+.checklist-text {
+    flex: 1;
+    font-size: var(--font-size-md);
+    color: var(--text-secondary);
+}
+
+.checklist-item.completed .checklist-text {
+    color: var(--color-primary);
+    text-decoration: line-through;
+}
+
+/* ================================================================
+   BARRA DE PROGRESO
+   ================================================================ */
+.progress-bar {
+    width: 100%;
+    height: 8px;
+    background: var(--bg-tertiary);
+    border-radius: var(--border-radius-sm);
+    overflow: hidden;
+    margin: var(--spacing-xs) 0;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(to right, var(--color-primary), var(--color-secondary));
+    border-radius: var(--border-radius-sm);
+    transition: width var(--transition-slow);
+}
+
+/* ================================================================
+   RESPONSIVE
+   ================================================================ */
+@media (max-width: 767px) {
+    .bottom-nav {
+        display: flex;
+    }
+
+    .main-content {
+        padding-bottom: var(--bottom-nav-height);
+    }
+}

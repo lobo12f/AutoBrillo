@@ -1,0 +1,54 @@
+/* ============================================================================
+   AUTOBRILLO - BADGES
+   ============================================================================ */
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: 4px 12px;
+    border-radius: var(--radius-pill);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    line-height: 1;
+    white-space: nowrap;
+}
+
+.badge-accent {
+    background: var(--accent-bg);
+    color: var(--accent-color);
+    border: 1px solid var(--accent-border);
+}
+
+.badge-success {
+    background: rgba(var(--color-success-rgb), 0.1);
+    color: var(--color-success);
+}
+
+.badge-warning {
+    background: rgba(var(--color-warning-rgb), 0.1);
+    color: var(--color-warning);
+}
+
+.badge-danger {
+    background: rgba(var(--color-danger-rgb), 0.1);
+    color: var(--color-danger);
+}
+
+.badge-info {
+    background: rgba(var(--color-info-rgb), 0.1);
+    color: var(--color-info);
+}
+
+/* Estados de cita */
+.estado-pendiente { background: rgba(var(--color-warning-rgb), 0.15); color: var(--color-warning); }
+.estado-confirmada { background: rgba(var(--color-info-rgb), 0.15); color: var(--color-info); }
+.estado-en_proceso, .estado-en-proceso { background: rgba(var(--accent-color-rgb), 0.15); color: var(--accent-color); }
+.estado-listo { background: rgba(0, 128, 255, 0.15); color: #0080ff; }
+.estado-entregado { background: rgba(136, 146, 164, 0.15); color: var(--text-secondary); }
+
+/* Estados de empleado */
+.estado-disponible { background: rgba(var(--accent-color-rgb), 0.1); color: var(--accent-color); }
+.estado-ocupado { background: rgba(var(--color-warning-rgb), 0.1); color: var(--color-warning); }
+.estado-descansando { background: rgba(var(--color-info-rgb), 0.1); color: var(--color-info); }
+.estado-inactivo { background: rgba(136, 146, 164, 0.1); color: var(--text-muted); }

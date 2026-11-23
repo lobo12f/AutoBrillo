@@ -1,0 +1,47 @@
+/* ============================================================================
+   EMPLEADO - HISTORIAL
+   ============================================================================ */
+
+#stats-historial,
+.historial-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: var(--space-sm);
+    width: 100%;
+}
+
+#tabla-historial {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 800px;
+    background: var(--bg-card);
+}
+
+#tabla-historial th {
+    padding: var(--space-md);
+    text-align: left;
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-wide);
+    border-bottom: 2px solid var(--border-color);
+    background: var(--bg-secondary);
+}
+
+#tabla-historial td {
+    padding: var(--space-md);
+    color: var(--text-primary);
+    font-size: var(--font-size-base);
+    border-bottom: 1px solid var(--border-color);
+}
+
+#tabla-historial tbody tr:hover {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+#paginacion-historial {
+    display: flex;
+    justify-content: center;
+    gap: var(--space-sm);
+    margin-top: var(--space-lg);
+}

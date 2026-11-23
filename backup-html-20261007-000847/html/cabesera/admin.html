@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel | AutoBrillo Detailing</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <!-- ⭐ CSS UNIFICADO -->
+    <link rel="stylesheet" href="../../css/main.css">
+    <!-- ⭐ CSS MANAGER -->
+    <script type="module" src="../../javascript/css-manager.js"></script>
+</head>
+<body class="dashboard-body">
+
+    <nav class="sidebar">
+        <div class="logo">ADMIN<span>AB</span></div>
+        <ul class="side-links">
+            <li><a href="#" class="active">Panel Control</a></li>
+            <li><a href="#">Lista Clientes</a></li>
+            <li><a href="#">Reportes</a></li>
+            <li><a href="index.html" class="logout">Salir</a></li>
+        </ul>
+    </nav>
+
+    <main class="main-content">
+        <header class="dash-header">
+            <h1>Panel de <span>Administración</span></h1>
+            <div class="user-info-admin">📍 Sucursal: Central San Pedro</div>
+        </header>
+
+        <div class="admin-grid">
+            <section class="admin-card">
+                <h3>Estado del Taller</h3>
+                <p class="admin-subtitle">Cambia la disponibilidad que ven los clientes en tiempo real.</p>
+                
+                <div class="status-toggle">
+                    <span>Estado Actual: <strong id="status-text">LIBRE</strong></span>
+                    <button class="btn-primary" onclick="toggleStatus()" id="btn-toggle">MARCAR COMO LLENO</button>
+                </div>
+                
+                <div class="form-group-admin">
+                    <label>Tiempo de espera estimado (min):</label>
+                    <input type="number" id="wait-time" placeholder="Ej: 30">
+                </div>
+            </section>
+
+            <section class="admin-card">
+                <h3>Registrar Servicio</h3>
+                <form id="uploadService">
+                    <div class="form-group-admin">
+                        <label>Cliente (Nombre o Cédula):</label>
+                        <input type="text" placeholder="Buscar en base de datos...">
+                    </div>
+                    <div class="form-group-admin">
+                        <label>Servicio:</label>
+                        <select id="tipoServicio">
+                            <option>Lavado Premium</option>
+                            <option>Encerado Manual</option>
+                            <option>Limpieza Interior</option>
+                        </select>
+                    </div>
+                    <div class="form-group-admin">
+                        <label>Foto del Resultado:</label>
+                        <input type="file" accept="image/*" id="img-input">
+                        <div class="preview-img" id="preview">Vista previa de la foto</div>
+                    </div>
+                    <button type="button" class="btn-save" onclick="confirmarSubida()">PUBLICAR EN GALERÍA</button>
+                </form>
+            </section>
+        </div>
+
+        <section class="admin-card table-section">
+            <h3>Turnos "Solicitados Ahora"</h3>
+            <div class="admin-table-container">
+                <div class="extra-item">
+                    <span><strong>AB-452</strong> - Carlos Pérez (Corolla Negro)</span>
+                    <strong class="arrival-time">Llega en 8 min</strong>
+                    <button class="btn-receive" onclick="marcarLlegada(this)">RECIBIR</button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="../../javascript/admin.js"></script>
+</body>
+</html>

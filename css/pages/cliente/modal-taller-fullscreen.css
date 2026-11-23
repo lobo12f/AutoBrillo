@@ -1,0 +1,229 @@
+/* ============================================================================
+   MODAL TALLER FULLSCREEN - ESTILOS COMPLETOS
+   ============================================================================ */
+
+/* Estilos base generales del modal y scroll */
+.modal-taller-fullscreen {
+    position: fixed;
+    inset: 0;
+    background: #080c14;
+    z-index: 10000;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    color: #fff;
+}
+
+.modal-taller-fullscreen.d-none {
+    display: none !important;
+}
+
+/* Header Sticky */
+.modal-taller-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 16px;
+    background: rgba(15, 22, 33, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid #1e2a3a;
+    min-height: 60px;
+}
+
+.modal-taller-btn-cerrar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    background: transparent;
+    border: 1px solid #1e2a3a;
+    border-radius: 10px;
+    color: #8892a4;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.modal-taller-btn-cerrar:hover {
+    background: #00ff88;
+    color: #000;
+    border-color: #00ff88;
+}
+
+.modal-taller-header-titulo {
+    flex: 1;
+    text-align: center;
+    color: #fff;
+    font-size: 0.95rem;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.modal-taller-btn-accion {
+    width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: 1px solid #1e2a3a;
+    border-radius: 10px;
+    color: #8892a4;
+    cursor: pointer;
+    font-size: 1.1rem;
+    transition: all 0.2s ease;
+}
+
+.modal-taller-btn-accion:hover {
+    background: rgba(0, 255, 136, 0.1);
+    border-color: #00ff88;
+    color: #00ff88;
+}
+
+/* Cuerpo Scrolleable */
+.modal-taller-body {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 20px 16px;
+    padding-bottom: 80px;
+    -webkit-overflow-scrolling: touch;
+}
+
+.modal-taller-body::-webkit-scrollbar {
+    width: 6px;
+}
+
+.modal-taller-body::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.modal-taller-body::-webkit-scrollbar-thumb {
+    background: #1e2a3a;
+    border-radius: 10px;
+}
+
+.modal-taller-body::-webkit-scrollbar-thumb:hover {
+    background: #00ff88;
+}
+
+/* Hero Section */
+.modal-taller-hero {
+    background: #131c2b;
+    border: 1px solid #1e2a3a;
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.modal-taller-hero-top {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.modal-taller-logo {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #00ff88;
+    background: #080c14;
+    flex-shrink: 0;
+}
+
+.modal-taller-info-principal {
+    flex: 1;
+}
+
+.modal-taller-nombre {
+    color: #fff;
+    margin: 0 0 6px 0;
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+
+.modal-taller-rating {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.85rem;
+    color: #ffbb33;
+    flex-wrap: wrap;
+}
+
+.modal-taller-badge {
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 0.65rem;
+    font-weight: 600;
+}
+
+.modal-taller-descripcion {
+    color: #aaa;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin: 0 0 15px 0;
+}
+
+.modal-taller-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    border-top: 1px solid #1e2a3a;
+    padding-top: 12px;
+}
+
+.modal-taller-meta-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #8892a4;
+    font-size: 0.85rem;
+}
+
+/* Secciones generales (Servicios, Planes, Reseñas) */
+.modal-taller-section {
+    margin-bottom: 25px;
+}
+
+.modal-taller-section-title {
+    color: #00ff88;
+    font-size: 1.05rem;
+    margin: 0 0 15px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Filtros de Reseñas */
+.btn-filtro-resena {
+    transition: all 0.2s ease;
+}
+
+.btn-filtro-resena:hover {
+    border-color: #00ff88 !important;
+    color: #00ff88 !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+    .modal-taller-body {
+        padding: 12px 10px;
+    }
+
+    .modal-taller-hero {
+        padding: 15px;
+    }
+}

@@ -1,0 +1,396 @@
+/* ============================================================================
+   AUTOBRILLO - VARIABLES GLOBALES v3 (DEFINITIVO)
+   ============================================================================
+   ✅ Sistema canónico + TODOS los aliases legacy
+   ✅ 100% compatible con el código existente
+   ✅ Manipulable desde CSSManager
+   ✅ Importar SOLO este archivo en todos los HTML
+   ============================================================================ */
+
+:root {
+   /* ========================================================================
+       🎨 COLORES PRINCIPALES (canónico: --color-*)
+       ======================================================================== */
+   --color-primary: #00ff88;
+   --color-primary-dark: #00cc6a;
+   --color-primary-light: #66ffb3;
+   --color-secondary: #00d4ff;
+   --color-warning: #ffbb33;
+   --color-danger: #ff4444;
+   --color-magenta: #ff44ff;
+   --color-info: #00d4ff;
+   --color-success: #00ff88;
+   --color-purple: #ff44ff;
+   --color-gold: #ffd700;
+   --color-blue-alt: #0080ff;
+
+   /* RGB para transparencias */
+   --color-primary-rgb: 0, 255, 136;
+   --color-secondary-rgb: 0, 212, 255;
+   --color-warning-rgb: 255, 187, 51;
+   --color-danger-rgb: 255, 68, 68;
+   --color-info-rgb: 0, 212, 255;
+   --color-success-rgb: 0, 255, 136;
+   --color-purple-rgb: 255, 68, 255;
+   --color-gold-rgb: 255, 215, 0;
+
+   /* ========================================================================
+       🎯 ACENTO (alias principal para manipulación JS)
+       ======================================================================== */
+   --accent-color: var(--color-primary);
+   --accent-color-rgb: var(--color-primary-rgb);
+   --accent-glow: rgba(0, 255, 136, 0.15);
+   --accent-bg: rgba(0, 255, 136, 0.1);
+   --accent-border: rgba(0, 255, 136, 0.3);
+   --accent-hover: #00e07a;
+   --accent-active: #00c46a;
+
+   /* Legacy aliases de acento */
+   --accent: var(--accent-color);
+   --primary: var(--accent-color);
+   --primary-green: var(--accent-color);
+   --taller-color: var(--accent-color);
+   --accent-danger: var(--color-danger);
+   --accent-warning: var(--color-warning);
+   --accent-secondary: var(--color-secondary);
+   --accent-purple: var(--color-purple);
+
+   /* ========================================================================
+       🖼️ FONDOS (canónico: --bg-*)
+       ======================================================================== */
+   --bg-primary: #080c14;
+   --bg-secondary: #0f1621;
+   --bg-tertiary: #1e2a3a;
+   --bg-card: #131c2b;
+   --bg-card-alt: #131c2b;
+   --bg-input: #080c14;
+   --bg-hover: rgba(255, 255, 255, 0.05);
+   --bg-overlay: rgba(0, 0, 0, 0.85);
+   --bg-sidebar: #0a0e14;
+   --bg-header: #0f1621;
+   --bg-modal: #0f1621;
+   --bg-tooltip: #1e2a3a;
+   --bg-badge: rgba(0, 255, 136, 0.1);
+
+   /* Legacy aliases de fondo */
+   --bg: var(--bg-primary);
+   --bg-dark: var(--bg-primary);
+   --main-bg: var(--bg-primary);
+   --card-bg: var(--bg-card);
+   --card: var(--bg-card);
+   --sidebar-bg: var(--bg-sidebar);
+   --glass-bg: rgba(255, 255, 255, 0.05);
+
+   /* ========================================================================
+       ✍️ TEXTO (canónico: --text-*)
+       ======================================================================== */
+   --text-primary: #ffffff;
+   --text-secondary: #8892a4;
+   --text-muted: #5a6478;
+   --text-disabled: #555555;
+   --text-inverse: #000000;
+   --text-heading: #ffffff;
+   --text-light: #cccccc;
+
+   /* Legacy aliases de texto */
+   --text: var(--text-primary);
+   --text-main: var(--text-primary);
+   --text-dim: var(--text-secondary);
+
+   /* ========================================================================
+       🔲 BORDES
+       ======================================================================== */
+   --border-color: #1e2a3a;
+   --border-color-light: #2a3749;
+   --border-color-strong: #3a4a5a;
+   --border-width: 1px;
+   --border-width-thick: 2px;
+   --border-width-heavy: 3px;
+
+   /* Legacy */
+   --border: var(--border-color);
+   --border-light: var(--border-color-light);
+   --border-accent: var(--accent-color);
+
+   /* ========================================================================
+       ⭕ BORDER RADIUS
+       ======================================================================== */
+   --radius-xs: 4px;
+   --radius-sm: 6px;
+   --radius-md: 10px;
+   --radius-lg: 15px;
+   --radius-xl: 20px;
+   --radius-2xl: 24px;
+   --radius-3xl: 25px;
+   --radius-pill: 25px;
+   --radius-full: 50%;
+   --radius-circle: 50%;
+
+   /* Legacy aliases */
+   --radius: var(--radius-md);
+   --border-radius-sm: var(--radius-sm);
+   --border-radius-md: var(--radius-md);
+   --border-radius-lg: var(--radius-lg);
+   --border-radius-xl: var(--radius-xl);
+   --border-radius-full: var(--radius-circle);
+
+   /* ========================================================================
+       📐 ESPACIADO
+       ======================================================================== */
+   --space-xxs: 4px;
+   --space-xs: 6px;
+   --space-sm: 8px;
+   --space-md: 12px;
+   --space-lg: 15px;
+   --space-xl: 20px;
+   --space-2xl: 25px;
+   --space-3xl: 30px;
+   --space-4xl: 40px;
+   --space-5xl: 50px;
+
+   /* Legacy aliases */
+   --spacing-xs: var(--space-xs);
+   --spacing-sm: var(--space-sm);
+   --spacing-md: var(--space-md);
+   --spacing-lg: var(--space-lg);
+   --spacing-xl: var(--space-xl);
+   --spacing-2xl: var(--space-2xl);
+   --gap-sm: var(--space-sm);
+   --gap-md: var(--space-md);
+   --gap-lg: var(--space-lg);
+
+   /* ========================================================================
+       📝 TIPOGRAFÍA
+       ======================================================================== */
+   --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+   --font-family-mono: 'Courier New', monospace;
+
+   --font-size-xs: 0.65rem;
+   --font-size-sm: 0.75rem;
+   --font-size-md: 0.875rem;
+   --font-size-base: 0.9rem;
+   --font-size-lg: 1rem;
+   --font-size-xl: 1.125rem;
+   --font-size-2xl: 1.25rem;
+   --font-size-3xl: 1.5rem;
+   --font-size-4xl: 2rem;
+   --font-size-5xl: 2.5rem;
+
+   --font-weight-light: 300;
+   --font-weight-normal: 400;
+   --font-weight-medium: 500;
+   --font-weight-semibold: 600;
+   --font-weight-bold: 700;
+   --font-weight-extrabold: 800;
+
+   --line-height-tight: 1.2;
+   --line-height-normal: 1.5;
+   --line-height-relaxed: 1.6;
+
+   --letter-spacing-tight: -0.02em;
+   --letter-spacing-normal: 0;
+   --letter-spacing-wide: 0.5px;
+   --letter-spacing-wider: 1px;
+   --letter-spacing-widest: 2px;
+
+   /* ========================================================================
+       🌫️ SOMBRAS
+       ======================================================================== */
+   --shadow-xs: 0 1px 3px rgba(0, 0, 0, 0.3);
+   --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+   --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
+   --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
+   --shadow-xl: 0 20px 60px rgba(0, 0, 0, 0.5);
+   --shadow-2xl: 0 30px 100px rgba(0, 0, 0, 0.8);
+   --shadow-accent: 0 4px 16px rgba(0, 255, 136, 0.2);
+   --shadow-glow: 0 0 20px var(--accent-glow);
+   --shadow-neon: 0 0 15px var(--accent-glow);
+   --shadow-color: rgba(0, 0, 0, 0.3);
+
+   /* ========================================================================
+       ⚡ TRANSICIONES
+       ======================================================================== */
+   --transition-fast: 0.15s ease;
+   --transition-base: 0.3s ease;
+   --transition-normal: 0.3s ease;
+   --transition-slow: 0.5s ease;
+   --transition-bounce: 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+   --transition: all 0.3s ease;
+
+   /* ========================================================================
+       📏 LAYOUT
+       ======================================================================== */
+   --sidebar-width: 250px;
+   --sidebar-width-collapsed: 70px;
+   --header-height: 70px;
+   --topbar-height: 60px;
+   --bottom-nav-height: 65px;
+   --container-max-width: 1400px;
+   --content-padding: 25px;
+
+   /* ========================================================================
+       🔢 Z-INDEX
+       ======================================================================== */
+   --z-base: 1;
+   --z-dropdown: 100;
+   --z-sticky: 200;
+   --z-sidebar: 300;
+   --z-header: 400;
+   --z-overlay: 900;
+   --z-modal: 1000;
+   --z-modal-top: 10000;
+   --z-tooltip: 1100;
+   --z-toast: 100000;
+
+   /* ========================================================================
+       🎨 GRADIENTES
+       ======================================================================== */
+   --gradient-accent: linear-gradient(135deg, #00ff88, #00d4ff);
+   --gradient-card: linear-gradient(145deg, #1a2332, #0f1621);
+   --gradient-ingreso: linear-gradient(135deg, #ffbb33, #ff8800);
+
+   /* ========================================================================
+       🎚️ DENSIDAD Y FUENTE (manipulables)
+       ======================================================================== */
+   --density-multiplier: 1;
+   --font-scale: 1;
+   --card-padding: 20px;
+
+   /* ========================================================================
+       🎯 EXTRAS
+       ======================================================================== */
+   --table-header-text: #666666;
+   --row-hover-bg: #1a2640;
+   --overlay-modal: rgba(0, 0, 0, 0.8);
+   --on-accent: #000000;
+   --white: #ffffff;
+
+   /* ========================================================================
+       🗺️ LEAFLET / MAPA
+       ======================================================================== */
+   --map-bg: #080c14;
+   --map-control-bg: #0f1621;
+   --map-control-color: #ffffff;
+}
+
+/* ============================================================================
+   TEMAS (activables con data-tema="nombre")
+   ============================================================================ */
+[data-tema="dark-neon"] {
+   --color-primary: #00ff88;
+   --color-primary-rgb: 0, 255, 136;
+}
+
+[data-tema="light-clean"] {
+   --bg-primary: #f5f7fa;
+   --bg-secondary: #ffffff;
+   --bg-tertiary: #f0f2f5;
+   --bg-card: #ffffff;
+   --bg-card-alt: #f9fafb;
+   --bg-input: #f0f2f5;
+   --bg-sidebar: #ffffff;
+   --bg-header: #ffffff;
+   --text-primary: #1a1a2e;
+   --text-secondary: #5a6577;
+   --text-muted: #8892a4;
+   --text-inverse: #ffffff;
+   --border-color: #e1e4e8;
+   --border-color-light: #edf2f7;
+   --color-primary: #0066ff;
+   --color-primary-rgb: 0, 102, 255;
+}
+
+[data-tema="ocean-blue"] {
+   --bg-primary: #0a1628;
+   --bg-secondary: #0f1f3a;
+   --bg-card: #132744;
+   --color-primary: #00b4ff;
+   --color-primary-rgb: 0, 180, 255;
+}
+
+[data-tema="rose-gold"] {
+   --bg-primary: #1a0f14;
+   --bg-secondary: #24161c;
+   --bg-card: #2d1a23;
+   --color-primary: #ff69b4;
+   --color-primary-rgb: 255, 105, 180;
+}
+
+[data-tema="forest-green"] {
+   --bg-primary: #0c1410;
+   --bg-secondary: #121c16;
+   --bg-card: #1a2a1f;
+   --color-primary: #00cc55;
+   --color-primary-rgb: 0, 204, 85;
+}
+
+[data-tema="midnight-purple"] {
+   --bg-primary: #100c1a;
+   --bg-secondary: #18132a;
+   --bg-card: #201a35;
+   --color-primary: #8a2be2;
+   --color-primary-rgb: 138, 43, 226;
+}
+
+/* ============================================================================
+   DENSIDAD
+   ============================================================================ */
+[data-densidad="compacto"],
+[data-density="compacto"] {
+   --density-multiplier: 0.7;
+   --card-padding: 15px;
+   --space-md: 8px;
+   --space-lg: 10px;
+   --space-xl: 14px;
+}
+
+[data-densidad="comodo"],
+[data-density="comodo"] {
+   --density-multiplier: 1;
+   --card-padding: 20px;
+}
+
+[data-densidad="amplio"],
+[data-density="amplio"] {
+   --density-multiplier: 1.4;
+   --card-padding: 28px;
+   --space-md: 16px;
+   --space-lg: 20px;
+   --space-xl: 28px;
+}
+
+/* ============================================================================
+   TAMAÑO FUENTE
+   ============================================================================ */
+[data-font-size="pequeno"] {
+   --font-scale: 0.875;
+}
+
+[data-font-size="normal"] {
+   --font-scale: 1;
+}
+
+[data-font-size="grande"] {
+   --font-scale: 1.15;
+}
+
+html {
+   font-size: calc(16px * var(--font-scale));
+}
+
+/* ============================================================================
+   MODO CLARO
+   ============================================================================ */
+[data-mode="light"] {
+   --bg-primary: #f5f7fa;
+   --bg-secondary: #ffffff;
+   --bg-card: #ffffff;
+   --bg-card-alt: #f9fafb;
+   --bg-input: #ffffff;
+   --text-primary: #1a202c;
+   --text-secondary: #4a5568;
+   --text-muted: #718096;
+   --text-inverse: #ffffff;
+   --border-color: #e2e8f0;
+   --border-color-light: #edf2f7;
+}

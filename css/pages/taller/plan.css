@@ -1,0 +1,541 @@
+/* =============================================================
+       ANIMACIONES
+       ============================================================= */
+@keyframes slideUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* =============================================================
+       CONTENEDOR PRINCIPAL (2 columnas)
+       ============================================================= */
+.modal-plan-container {
+    display: flex;
+    gap: 0;
+    max-width: 1050px;
+    width: 96%;
+    max-height: 88vh;
+    border-radius: 20px;
+    overflow: hidden;
+    animation: slideUp 0.3s ease;
+    box-shadow: 0 40px 120px rgba(0, 0, 0, 0.9);
+}
+
+/* =============================================================
+       COLUMNA IZQUIERDA: FORMULARIO
+       ============================================================= */
+.modal-plan-form {
+    flex: 1;
+    background: linear-gradient(180deg, #0f1621 0%, #0a0e14 100%);
+    overflow-y: auto;
+    max-height: 88vh;
+    position: relative;
+}
+
+/* Línea decorativa dorada */
+.modal-plan-decorator {
+    height: 3px;
+    background: linear-gradient(90deg, #ffbb33, #ff8800, #ffbb33);
+}
+
+/* Header sticky */
+.modal-plan-header {
+    padding: 30px 30px 20px;
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    background: linear-gradient(180deg, #0f1621 0%, #0f162180 90%, transparent 100%);
+}
+
+/* Botón cerrar */
+.modal-plan-close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    font-size: 1rem;
+    cursor: pointer;
+    color: #888;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.3s;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.modal-plan-close:hover {
+    background: #ff444422;
+    color: #ff4444;
+    border-color: #ff4444;
+}
+
+/* Icono y título del header */
+.modal-plan-header-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 5px;
+}
+
+.modal-plan-icon {
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, #ffbb33, #ff8800);
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    box-shadow: 0 8px 25px rgba(255, 187, 51, 0.3);
+}
+
+.modal-plan-title {
+    color: #fff;
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.modal-plan-subtitle {
+    color: #888;
+    font-size: 0.72rem;
+    margin: 2px 0 0;
+}
+
+/* Cuerpo del formulario */
+.modal-plan-body {
+    padding: 0 30px 30px;
+}
+
+/* Labels */
+.form-label {
+    color: #aaa;
+    font-size: 0.7rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 6px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.label-icon {
+    color: #ffbb33;
+}
+
+/* Inputs */
+.form-input {
+    width: 100%;
+    padding: 14px 16px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    color: #fff;
+    font-size: 0.9rem;
+    transition: all 0.3s;
+    font-family: Inter, sans-serif;
+    margin-bottom: 16px;
+}
+
+.form-input:focus {
+    border-color: #ffbb33;
+    background: rgba(255, 255, 255, 0.05);
+    box-shadow: 0 0 0 4px rgba(255, 187, 51, 0.08);
+    outline: none;
+}
+
+/* Grid de 4 columnas */
+.form-grid-4 {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+/* Cards del grid */
+.form-card {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 14px 12px;
+}
+
+.form-card-label {
+    color: #aaa;
+    font-size: 0.6rem;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-bottom: 6px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.form-card-input {
+    width: 100%;
+    padding: 6px 0;
+    background: transparent;
+    border: none;
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 700;
+    transition: all 0.3s;
+    font-family: Inter, sans-serif;
+}
+
+.form-card-input:focus {
+    outline: none;
+}
+
+.form-card-input-gold {
+    color: #ffbb33;
+}
+
+.form-card-input-blue {
+    color: #00d4ff;
+}
+
+.form-card-input-purple {
+    color: #ff44ff;
+}
+
+/* Fila de servicios */
+.form-servicios-row {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 8px;
+}
+
+.form-select {
+    flex: 2;
+    padding: 12px 14px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    color: #fff;
+    font-size: 0.8rem;
+    transition: all 0.3s;
+    font-family: Inter, sans-serif;
+}
+
+.form-select:focus {
+    border-color: #ffbb33;
+    outline: none;
+}
+
+.form-precio-input {
+    flex: 1;
+    padding: 12px 10px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    color: #ffbb33;
+    font-size: 0.8rem;
+    font-weight: 600;
+    transition: all 0.3s;
+    font-family: Inter, sans-serif;
+}
+
+.form-precio-input:focus {
+    border-color: #ffbb33;
+    outline: none;
+}
+
+/* Botón Agregar servicio */
+.btn-agregar-servicio {
+    padding: 12px 16px;
+    background: linear-gradient(135deg, #ffbb33, #ff8800);
+    color: #000;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 0.8rem;
+    white-space: nowrap;
+    transition: all 0.3s;
+    box-shadow: 0 4px 15px rgba(255, 187, 51, 0.2);
+}
+
+.btn-agregar-servicio:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 187, 51, 0.4);
+}
+
+/* Contenedor de tags de servicios */
+.servicios-container {
+    min-height: 20px;
+}
+
+/* Botones inferiores */
+.form-buttons {
+    display: flex;
+    gap: 8px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.btn-cancelar {
+    flex: 1;
+    padding: 13px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    background: transparent;
+    color: #aaa;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 500;
+    transition: all 0.3s;
+}
+
+.btn-cancelar:hover {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.btn-guardar-plan {
+    flex: 2;
+    padding: 13px;
+    border: none;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #ffbb33, #ff8800);
+    color: #000;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 0.85rem;
+    transition: all 0.3s;
+    box-shadow: 0 4px 15px rgba(255, 187, 51, 0.3);
+}
+
+.btn-guardar-plan:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(255, 187, 51, 0.5);
+}
+
+.btn-eliminar-plan {
+    display: none;
+    flex: 1;
+    padding: 13px;
+    border: 1px solid rgba(255, 68, 68, 0.3);
+    border-radius: 10px;
+    background: transparent;
+    color: #ff4444;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 500;
+    transition: all 0.3s;
+}
+
+.btn-eliminar-plan:hover {
+    background: rgba(255, 68, 68, 0.08);
+}
+
+/* =============================================================
+       COLUMNA DERECHA: VISTA PREVIA
+       ============================================================= */
+.modal-plan-preview {
+    width: 380px;
+    min-width: 380px;
+    background: linear-gradient(180deg, #131c2b 0%, #0a0e14 100%);
+    border-left: 1px solid rgba(255, 255, 255, 0.06);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    max-height: 88vh;
+    position: relative;
+}
+
+/* Brillo decorativo */
+.preview-glow {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, rgba(255, 187, 51, 0.08) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+/* Header de vista previa */
+.preview-header {
+    padding: 30px 25px 0;
+    text-align: center;
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    background: linear-gradient(180deg, #131c2b 0%, #131c2b80 90%, transparent 100%);
+}
+
+.preview-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255, 187, 51, 0.1);
+    border: 1px solid rgba(255, 187, 51, 0.2);
+    padding: 6px 16px;
+    border-radius: 20px;
+    margin-bottom: 15px;
+    font-size: 0.8rem;
+    color: #ffbb33;
+}
+
+.preview-badge span {
+    font-size: 0.65rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Card del plan */
+.preview-card {
+    padding: 10px 25px 30px;
+    text-align: center;
+    position: relative;
+    z-index: 2;
+}
+
+/* Badge de nivel */
+.preview-nivel {
+    background: linear-gradient(135deg, #ffbb33, #ff8800);
+    color: #000;
+    padding: 8px 20px;
+    border-radius: 25px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: 0 8px 30px rgba(255, 187, 51, 0.3);
+}
+
+/* Nombre */
+.preview-nombre {
+    color: #fff;
+    margin: 18px 0 6px;
+    font-size: 1.3rem;
+    font-weight: 700;
+}
+
+/* Precio */
+.preview-precio-box {
+    margin: 20px 0;
+    padding: 20px;
+    background: linear-gradient(135deg, rgba(255, 187, 51, 0.1), rgba(255, 136, 0, 0.05));
+    border: 1px solid rgba(255, 187, 51, 0.2);
+    border-radius: 16px;
+}
+
+.preview-precio {
+    font-size: 2.8rem;
+    font-weight: 800;
+    color: #ffbb33;
+    line-height: 1;
+}
+
+.preview-duracion {
+    color: #888;
+    font-size: 0.8rem;
+    margin: 5px 0 0;
+}
+
+/* Servicios */
+.preview-servicios-box {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 14px;
+    padding: 18px;
+    margin: 15px 0;
+    text-align: left;
+}
+
+.preview-servicios-title {
+    color: #ffbb33;
+    font-size: 0.7rem;
+    font-weight: 600;
+    margin: 0 0 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.preview-servicios-empty {
+    text-align: center;
+    padding: 15px;
+    color: #666;
+    font-size: 0.8rem;
+}
+
+.preview-servicios-empty span {
+    font-size: 2rem;
+    display: block;
+    margin-bottom: 8px;
+}
+
+/* Estadísticas */
+.preview-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 14px;
+    overflow: hidden;
+    padding: 1px;
+}
+
+.preview-stat {
+    background: #131c2b;
+    padding: 16px 10px;
+}
+
+.preview-stat-valor {
+    font-size: 1.4rem;
+    font-weight: 700;
+}
+
+.preview-stat-green {
+    color: #00ff88;
+}
+
+.preview-stat-blue {
+    color: #00d4ff;
+}
+
+.preview-stat-purple {
+    color: #ff44ff;
+}
+
+.preview-stat small {
+    color: #888;
+    font-size: 0.6rem;
+    text-transform: uppercase;
+}
+
+/* Botón contratar */
+.preview-btn-contratar {
+    width: 100%;
+    margin-top: 18px;
+    padding: 14px;
+    background: linear-gradient(135deg, #ffbb33, #ff8800);
+    color: #000;
+    border: none;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    cursor: default;
+    box-shadow: 0 8px 30px rgba(255, 187, 51, 0.25);
+}
+
+/* Texto footer */
+.preview-footer-text {
+    color: #555;
+    font-size: 0.6rem;
+    margin-top: 10px;
+}

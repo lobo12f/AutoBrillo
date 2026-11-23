@@ -1,0 +1,825 @@
+/* ============================================================================
+   TALLER - MODAL DE FOTOS (Antes / Durante / Después)
+   ============================================================================
+   Estilos para el sistema de subida y visualización de fotos de las citas.
+   
+   Estructura:
+   - Overlay modal
+   - Header con icono
+   - Info de la cita (vehículo, servicio, fecha)
+   - Tabs: Antes / Durante / Después
+   - Upload area (drag & drop)
+   - Preview de fotos
+   - Barra de progreso
+   - Galería de fotos ya subidas
+   ============================================================================ */
+
+/* ============================================================================
+   OVERLAY DEL MODAL
+   ============================================================================ */
+.modal-fotos-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.92);
+    z-index: var(--z-modal-top, 10000);
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    padding: var(--space-xl);
+    overflow-y: auto;
+}
+
+/* Mostrar overlay cuando NO tiene d-none y tiene display flex inline */
+.modal-fotos-overlay:not(.d-none),
+.modal-fotos-overlay[style*="display: flex"],
+.modal-fotos-overlay[style*="display:flex"] {
+    display: flex !important;
+}
+
+/* ============================================================================
+   CONTENEDOR PRINCIPAL
+   ============================================================================ */
+.modal-fotos-container {
+    max-width: 750px;
+    width: 100%;
+    max-height: 88vh;
+    overflow-y: auto;
+    background: linear-gradient(180deg, var(--bg-card, #0f1621) 0%, var(--bg-input, #0a0e14) 100%);
+    border: 1px solid var(--border-color, #1e2a3a);
+    border-radius: var(--radius-xl, 20px);
+    animation: slideUp 0.35s ease;
+    box-shadow: 0 40px 120px rgba(0, 0, 0, 0.9);
+    position: relative;
+}
+
+/* Scroll personalizado del contenedor */
+.modal-fotos-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+.modal-fotos-container::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.modal-fotos-container::-webkit-scrollbar-thumb {
+    background: var(--accent-color, #00ff88);
+    border-radius: 10px;
+    border: 2px solid var(--bg-card, #0f1621);
+}
+
+/* ============================================================================
+   HEADER
+   ============================================================================ */
+.modal-fotos-header {
+    padding: var(--space-3xl, 30px) var(--space-3xl, 30px) var(--space-lg, 15px);
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    background: linear-gradient(180deg, 
+        var(--bg-card, #0f1621) 0%, 
+        var(--bg-card, #0f1621) 80%, 
+        transparent 100%);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+.modal-fotos-close {
+    position: absolute;
+    top: var(--space-xl, 20px);
+    right: var(--space-xl, 20px);
+    font-size: var(--font-size-lg, 1rem);
+    cursor: pointer;
+    color: var(--text-muted, #888);
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-circle, 50%);
+    transition: all var(--transition-base, 0.3s);
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    z-index: 10;
+}
+
+.modal-fotos-close:hover {
+    background: rgba(var(--color-danger-rgb, 255, 68, 68), 0.15);
+    color: var(--color-danger, #ff4444);
+    border-color: var(--color-danger, #ff4444);
+    transform: rotate(90deg);
+}
+
+.modal-fotos-header-content {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md, 12px);
+}
+
+.modal-fotos-icon {
+    width: 55px;
+    height: 55px;
+    background: linear-gradient(135deg, 
+        var(--accent-color, #00ff88), 
+        color-mix(in srgb, var(--accent-color, #00ff88) 60%, #000));
+    border-radius: var(--radius-md, 12px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--font-size-4xl, 1.6rem);
+    box-shadow: 0 8px 25px var(--accent-glow, rgba(0, 255, 136, 0.25));
+    animation: pulse-fotos 2s infinite;
+    flex-shrink: 0;
+}
+
+@keyframes pulse-fotos {
+    0%, 100% {
+        box-shadow: 0 8px 25px var(--accent-glow, rgba(0, 255, 136, 0.25));
+    }
+    50% {
+        box-shadow: 0 8px 40px var(--accent-glow, rgba(0, 255, 136, 0.5));
+    }
+}
+
+.modal-fotos-title {
+    color: var(--text-primary, #fff);
+    margin: 0;
+    font-size: var(--font-size-xl, 1.1rem);
+    font-weight: var(--font-weight-bold, 700);
+    font-family: var(--font-family, 'Inter', sans-serif);
+}
+
+.modal-fotos-subtitle {
+    color: var(--text-muted, #888);
+    font-size: var(--font-size-sm, 0.75rem);
+    margin: 3px 0 0;
+    font-family: var(--font-family, 'Inter', sans-serif);
+}
+
+/* ============================================================================
+   INFO DE LA CITA
+   ============================================================================ */
+.modal-fotos-info {
+    margin: 5px var(--space-3xl, 30px) var(--space-xl, 20px);
+    padding: var(--space-xl, 20px);
+    background: linear-gradient(135deg, 
+        rgba(var(--color-warning-rgb, 255, 187, 51), 0.06), 
+        rgba(var(--color-warning-rgb, 255, 187, 51), 0.02));
+    border: 1px solid rgba(var(--color-warning-rgb, 255, 187, 51), 0.15);
+    border-radius: var(--radius-lg, 16px);
+}
+
+.modal-fotos-info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-md, 12px);
+}
+
+.modal-fotos-vehiculo {
+    color: var(--text-primary, #fff);
+    font-size: var(--font-size-lg, 1rem);
+    font-weight: var(--font-weight-semibold, 600);
+    font-family: var(--font-family, 'Inter', sans-serif);
+}
+
+.modal-fotos-servicio {
+    color: var(--text-secondary, #aaa);
+    margin: var(--space-xs, 6px) 0 0;
+    font-size: var(--font-size-base, 0.85rem);
+    font-family: var(--font-family, 'Inter', sans-serif);
+}
+
+.modal-fotos-fecha {
+    color: var(--text-muted, #888);
+    margin: 2px 0 0;
+    font-size: var(--font-size-sm, 0.75rem);
+    font-family: var(--font-family, 'Inter', sans-serif);
+}
+
+.modal-fotos-estado {
+    padding: 6px 16px;
+    border-radius: var(--radius-pill, 20px);
+    font-size: var(--font-size-sm, 0.72rem);
+    font-weight: var(--font-weight-bold, 700);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-family: var(--font-family, 'Inter', sans-serif);
+}
+
+/* ============================================================================
+   TABS (Antes / Durante / Después)
+   ============================================================================ */
+.modal-fotos-tabs {
+    display: flex;
+    gap: var(--space-sm, 8px);
+    margin: 0 var(--space-3xl, 30px) var(--space-xl, 20px);
+    padding: 4px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: var(--radius-md, 14px);
+}
+
+.tab-foto {
+    flex: 1;
+    padding: var(--space-lg, 14px) var(--space-md, 10px);
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-sm, 10px);
+    color: var(--text-muted, #666);
+    cursor: pointer;
+    font-weight: var(--font-weight-semibold, 600);
+    font-size: var(--font-size-base, 0.85rem);
+    transition: all var(--transition-base, 0.3s);
+    font-family: var(--font-family, 'Inter', sans-serif);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-xs, 4px);
+}
+
+.tab-foto::before {
+    font-size: var(--font-size-2xl, 1.2rem);
+    line-height: 1;
+}
+
+.tab-foto[data-tipo="antes"]::before { content: '🔴'; }
+.tab-foto[data-tipo="durante"]::before { content: '🟡'; }
+.tab-foto[data-tipo="despues"]::before { content: '🟢'; }
+
+.tab-foto.active {
+    background: rgba(255, 107, 107, 0.15);
+    color: #ff6b6b;
+    font-weight: var(--font-weight-bold, 700);
+    box-shadow: 0 4px 15px rgba(255, 107, 107, 0.15);
+}
+
+.tab-foto:hover:not(.active) {
+    color: var(--text-secondary, #aaa);
+    background: rgba(255, 255, 255, 0.03);
+}
+
+/* Color específico por tipo de tab */
+.tab-foto.active[data-tipo="antes"] {
+    background: rgba(255, 68, 68, 0.15);
+    color: var(--color-danger, #ff4444);
+    box-shadow: 0 4px 15px rgba(255, 68, 68, 0.15);
+}
+
+.tab-foto.active[data-tipo="durante"] {
+    background: rgba(255, 187, 51, 0.15);
+    color: var(--color-warning, #ffbb33);
+    box-shadow: 0 4px 15px rgba(255, 187, 51, 0.15);
+}
+
+.tab-foto.active[data-tipo="despues"] {
+    background: rgba(0, 255, 136, 0.15);
+    color: var(--accent-color, #00ff88);
+    box-shadow: 0 4px 15px var(--accent-glow, rgba(0, 255, 136, 0.15));
+}
+
+/* ============================================================================
+   ÁREA DE UPLOAD (Drag & Drop)
+   ============================================================================ */
+.modal-fotos-upload {
+    margin: 0 var(--space-3xl, 30px) var(--space-xl, 20px);
+    border: 2px dashed rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-lg, 16px);
+    padding: 50px var(--space-3xl, 30px);
+    text-align: center;
+    cursor: pointer;
+    transition: all var(--transition-base, 0.3s);
+    background: rgba(255, 255, 255, 0.01);
+    position: relative;
+}
+
+.modal-fotos-upload:hover {
+    border-color: var(--accent-color, #00ff88);
+    background: rgba(var(--accent-color-rgb, 0, 255, 136), 0.03);
+    transform: scale(1.01);
+}
+
+.modal-fotos-upload.dragover {
+    border-color: var(--accent-color, #00ff88);
+    background: rgba(var(--accent-color-rgb, 0, 255, 136), 0.08);
+    border-style: solid;
+    transform: scale(1.02);
+}
+
+.modal-fotos-upload-icon {
+    font-size: 3.5rem;
+    margin-bottom: var(--space-md, 12px);
+    display: block;
+    line-height: 1;
+}
+
+.modal-fotos-upload-text {
+    color: var(--text-secondary, #ccc);
+    margin: var(--space-md, 10px) 0 var(--space-xs, 5px);
+    font-size: var(--font-size-lg, 1rem);
+    font-weight: var(--font-weight-medium, 500);
+    font-family: var(--font-family, 'Inter', sans-serif);
+}
+
+.modal-fotos-upload-hint {
+    color: var(--text-muted, #666);
+    font-size: var(--font-size-sm, 0.75rem);
+    font-family: var(--font-family, 'Inter', sans-serif);
+}
+
+/* ============================================================================
+   CONTADOR DE FOTOS
+   ============================================================================ */
+.modal-fotos-contador {
+    margin: 0 var(--space-3xl, 30px) var(--space-lg, 15px);
+    padding: var(--space-sm, 8px) var(--space-lg, 16px);
+    background: rgba(var(--accent-color-rgb, 0, 255, 136), 0.08);
+    border: 1px solid rgba(var(--accent-color-rgb, 0, 255, 136), 0.2);
+    border-radius: var(--radius-pill, 20px);
+    color: var(--accent-color, #00ff88);
+    font-size: var(--font-size-base, 0.8rem);
+    font-weight: var(--font-weight-semibold, 600);
+    display: none;
+    align-items: center;
+    gap: var(--space-xs, 6px);
+    font-family: var(--font-family, 'Inter', sans-serif);
+    width: fit-content;
+}
+
+.modal-fotos-contador.activo {
+    display: inline-flex;
+}
+
+/* ============================================================================
+   PREVIEW DE FOTOS SELECCIONADAS
+   ============================================================================ */
+.modal-fotos-preview {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: var(--space-md, 10px);
+    margin: 0 var(--space-3xl, 30px) var(--space-xl, 20px);
+}
+
+.modal-fotos-preview:empty {
+    display: none;
+}
+
+.foto-preview-item {
+    position: relative;
+    aspect-ratio: 1;
+    border-radius: var(--radius-md, 10px);
+    overflow: hidden;
+    border: 2px solid rgba(255, 255, 255, 0.05);
+    transition: all var(--transition-base, 0.3s);
+}
+
+.foto-preview-item:hover {
+    border-color: var(--accent-color, #00ff88);
+    transform: scale(1.03);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+.foto-preview-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.foto-preview-remove {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 24px;
+    height: 24px;
+    border-radius: var(--radius-circle, 50%);
+    background: rgba(var(--color-danger-rgb, 255, 68, 68), 0.9);
+    color: white;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--font-size-sm, 0.75rem);
+    font-weight: var(--font-weight-bold, 700);
+    opacity: 0;
+    transition: all var(--transition-fast, 0.2s);
+    z-index: 2;
+}
+
+.foto-preview-item:hover .foto-preview-remove {
+    opacity: 1;
+}
+
+.foto-preview-remove:hover {
+    background: var(--color-danger, #ff4444);
+    transform: scale(1.15);
+}
+
+/* ============================================================================
+   DESCRIPCIÓN
+   ============================================================================ */
+.modal-fotos-descripcion {
+    margin: 0 var(--space-3xl, 30px) var(--space-xl, 20px);
+}
+
+.modal-fotos-descripcion label {
+    color: var(--text-secondary, #aaa);
+    font-size: var(--font-size-sm, 0.75rem);
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs, 5px);
+    margin-bottom: var(--space-sm, 8px);
+    font-weight: var(--font-weight-medium, 500);
+    font-family: var(--font-family, 'Inter', sans-serif);
+}
+
+.modal-fotos-descripcion input {
+    width: 100%;
+    padding: var(--space-lg, 14px) var(--space-lg, 16px);
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: var(--radius-md, 12px);
+    color: var(--text-primary, #fff);
+    font-size: var(--font-size-base, 0.85rem);
+    transition: all var(--transition-base, 0.3s);
+    font-family: var(--font-family, 'Inter', sans-serif);
+}
+
+.modal-fotos-descripcion input:focus {
+    border-color: var(--accent-color, #00ff88);
+    background: rgba(255, 255, 255, 0.05);
+    box-shadow: 0 0 0 4px var(--accent-glow, rgba(0, 255, 136, 0.06));
+    outline: none;
+}
+
+.modal-fotos-descripcion input::placeholder {
+    color: var(--text-muted, #555);
+}
+
+/* ============================================================================
+   BARRA DE PROGRESO
+   ============================================================================ */
+.modal-fotos-progreso {
+    margin: 0 var(--space-3xl, 30px) var(--space-xl, 20px);
+}
+
+.modal-fotos-progreso.d-none {
+    display: none;
+}
+
+.modal-fotos-progreso-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-sm, 8px);
+    color: var(--text-secondary, #aaa);
+    font-size: var(--font-size-base, 0.8rem);
+    font-family: var(--font-family, 'Inter', sans-serif);
+}
+
+.modal-fotos-progreso-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: var(--radius-pill, 20px);
+    height: 10px;
+    overflow: hidden;
+    position: relative;
+}
+
+.modal-fotos-progreso-fill {
+    background: linear-gradient(90deg, 
+        var(--accent-color, #00ff88), 
+        var(--color-info, #00d4ff));
+    height: 100%;
+    width: 0%;
+    border-radius: var(--radius-pill, 20px);
+    transition: width 0.4s ease;
+    box-shadow: 0 0 10px var(--accent-glow, rgba(0, 255, 136, 0.5));
+}
+
+/* ============================================================================
+   FOTOS YA SUBIDAS
+   ============================================================================ */
+.modal-fotos-ya-subidas {
+    margin: 0 var(--space-3xl, 30px) var(--space-xl, 20px);
+    padding-top: var(--space-xl, 20px);
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.modal-fotos-ya-subidas h4 {
+    color: var(--text-secondary, #aaa);
+    margin-bottom: var(--space-md, 12px);
+    font-size: var(--font-size-base, 0.85rem);
+    font-weight: var(--font-weight-semibold, 600);
+    font-family: var(--font-family, 'Inter', sans-serif);
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs, 6px);
+}
+
+.modal-fotos-galeria {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+    gap: var(--space-md, 10px);
+}
+
+.modal-fotos-galeria .foto-subida {
+    aspect-ratio: 1;
+    border-radius: var(--radius-md, 10px);
+    overflow: hidden;
+    border: 2px solid rgba(255, 255, 255, 0.05);
+    transition: all var(--transition-base, 0.3s);
+    cursor: pointer;
+    position: relative;
+}
+
+.modal-fotos-galeria .foto-subida:hover {
+    border-color: var(--accent-color, #00ff88);
+    transform: scale(1.05);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+}
+
+.modal-fotos-galeria .foto-subida img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.foto-subida-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--font-size-3xl, 1.5rem);
+    opacity: 0;
+    transition: opacity var(--transition-fast, 0.2s);
+}
+
+.foto-subida:hover .foto-subida-overlay {
+    opacity: 1;
+}
+
+.modal-fotos-vacio {
+    color: var(--text-muted, #666);
+    font-size: var(--font-size-base, 0.8rem);
+    text-align: center;
+    padding: var(--space-3xl, 30px);
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: var(--radius-md, 12px);
+    border: 1px dashed rgba(255, 255, 255, 0.05);
+    font-family: var(--font-family, 'Inter', sans-serif);
+}
+
+/* ============================================================================
+   BOTONES
+   ============================================================================ */
+.modal-fotos-buttons {
+    display: flex;
+    gap: var(--space-md, 10px);
+    padding: var(--space-xl, 20px) var(--space-3xl, 30px) var(--space-3xl, 30px);
+    border-top: 1px solid rgba(255, 255, 255, 0.04);
+    background: rgba(0, 0, 0, 0.2);
+    position: sticky;
+    bottom: 0;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+.modal-fotos-btn-cancelar {
+    flex: 1;
+    padding: var(--space-lg, 15px);
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-md, 12px);
+    color: var(--text-secondary, #aaa);
+    cursor: pointer;
+    font-size: var(--font-size-base, 0.85rem);
+    font-weight: var(--font-weight-medium, 500);
+    transition: all var(--transition-base, 0.3s);
+    font-family: var(--font-family, 'Inter', sans-serif);
+}
+
+.modal-fotos-btn-cancelar:hover {
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--text-primary, #fff);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.modal-fotos-btn-subir {
+    flex: 2;
+    padding: var(--space-lg, 15px);
+    background: linear-gradient(135deg, 
+        var(--accent-color, #00ff88), 
+        color-mix(in srgb, var(--accent-color, #00ff88) 80%, #000));
+    color: var(--on-accent, #000);
+    border: none;
+    border-radius: var(--radius-md, 12px);
+    cursor: pointer;
+    font-weight: var(--font-weight-bold, 700);
+    font-size: var(--font-size-base, 0.9rem);
+    transition: all var(--transition-base, 0.3s);
+    box-shadow: 0 6px 20px var(--accent-glow, rgba(0, 255, 136, 0.3));
+    font-family: var(--font-family, 'Inter', sans-serif);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-xs, 6px);
+}
+
+.modal-fotos-btn-subir:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px var(--accent-glow, rgba(0, 255, 136, 0.5));
+}
+
+.modal-fotos-btn-subir:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* ============================================================================
+   MODAL DE GALERÍA (Ver fotos grandes)
+   ============================================================================ */
+#modal-galeria {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.95);
+    z-index: var(--z-modal-top, 10000);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-xl, 20px);
+}
+
+#modal-galeria:not(.d-none) {
+    display: flex;
+}
+
+#modal-galeria .modal-content {
+    max-width: 900px;
+    max-height: 90vh;
+    overflow-y: auto;
+    background: var(--bg-card, #0f1621);
+    border: 1px solid var(--border-color, #1e2a3a);
+    border-radius: var(--radius-xl, 20px);
+    padding: var(--space-2xl, 25px);
+}
+
+.galeria-comparativa {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-xl, 20px);
+    margin-top: var(--space-xl, 20px);
+}
+
+.galeria-columna h4 {
+    text-align: center;
+    margin-bottom: var(--space-md, 12px);
+    font-family: var(--font-family, 'Inter', sans-serif);
+}
+
+.galeria-columna[data-tipo="antes"] h4 {
+    color: var(--color-danger, #ff4444);
+}
+
+.galeria-columna[data-tipo="despues"] h4 {
+    color: var(--accent-color, #00ff88);
+}
+
+/* ============================================================================
+   ANIMACIONES
+   ============================================================================ */
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInFotos {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* ============================================================================
+   RESPONSIVE
+   ============================================================================ */
+@media (max-width: 768px) {
+    .modal-fotos-overlay {
+        padding: var(--space-sm, 8px);
+        align-items: flex-end;
+    }
+    
+    .modal-fotos-container {
+        max-height: 95vh;
+        border-radius: var(--radius-xl, 20px) var(--radius-xl, 20px) 0 0;
+    }
+    
+    .modal-fotos-header {
+        padding: var(--space-xl, 20px) var(--space-xl, 20px) var(--space-md, 12px);
+    }
+    
+    .modal-fotos-info,
+    .modal-fotos-tabs,
+    .modal-fotos-upload,
+    .modal-fotos-contador,
+    .modal-fotos-preview,
+    .modal-fotos-descripcion,
+    .modal-fotos-progreso,
+    .modal-fotos-ya-subidas {
+        margin-left: var(--space-xl, 20px);
+        margin-right: var(--space-xl, 20px);
+    }
+    
+    .modal-fotos-buttons {
+        padding: var(--space-lg, 15px) var(--space-xl, 20px);
+        flex-direction: column-reverse;
+    }
+    
+    .modal-fotos-btn-cancelar,
+    .modal-fotos-btn-subir {
+        width: 100%;
+        padding: var(--space-md, 12px);
+    }
+    
+    .modal-fotos-icon {
+        width: 45px;
+        height: 45px;
+        font-size: var(--font-size-3xl, 1.3rem);
+    }
+    
+    .modal-fotos-upload {
+        padding: 30px var(--space-lg, 15px);
+    }
+    
+    .modal-fotos-upload-icon {
+        font-size: 2.5rem;
+    }
+    
+    .tab-foto {
+        font-size: var(--font-size-sm, 0.75rem);
+        padding: var(--space-md, 10px) var(--space-xs, 6px);
+    }
+    
+    .modal-fotos-preview {
+        grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    }
+    
+    .galeria-comparativa {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .modal-fotos-header-content {
+        gap: var(--space-sm, 8px);
+    }
+    
+    .modal-fotos-title {
+        font-size: var(--font-size-lg, 1rem);
+    }
+    
+    .modal-fotos-info-row {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .modal-fotos-info-row > div:first-child {
+        width: 100%;
+    }
+    
+    .modal-fotos-estado {
+        align-self: flex-start;
+        margin-top: var(--space-xs, 6px);
+    }
+}
+
+/* ============================================================================
+   ACCESIBILIDAD
+   ============================================================================ */
+@media (prefers-reduced-motion: reduce) {
+    .modal-fotos-icon,
+    .modal-fotos-container,
+    .modal-fotos-preview img {
+        animation: none;
+        transition: none;
+    }
+}
+
+/* Focus visible para accesibilidad */
+.tab-foto:focus-visible,
+.modal-fotos-close:focus-visible,
+.modal-fotos-btn-cancelar:focus-visible,
+.modal-fotos-btn-subir:focus-visible {
+    outline: 2px solid var(--accent-color, #00ff88);
+    outline-offset: 2px;
+}

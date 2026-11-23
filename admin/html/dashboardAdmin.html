@@ -1,0 +1,470 @@
+
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]>      <html class="no-js"> <!-<![endif]-->
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>AutoBrillo D. - Dashboard Admin</title>
+        <meta name="description" content="Dashboard Administrativo - AutoBrillo Detailing">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+            <!-- ⭐ CSS UNIFICADO -->
+    <link rel="stylesheet" href="../../css/main.css">
+    <!-- ⭐ CSS MANAGER -->
+    <script type="module" src="../../javascript/css-manager.js"></script>
+</head>
+    <body>
+       <div id="admin-dashboard" class="glass-container">
+    
+    <aside class="sidebar-carbon">
+        <div class="logo">AutoBrillo <span>D.</span></div>
+        <nav>
+            <button onclick="showSection('resumen')" class="active">📊 Resumen</button>
+            <button onclick="showSection('agenda')">📅 Agenda</button>
+            <button onclick="showSection('empleados')">👥 Personal</button>
+              <button  onclick="showSection('pendiente')">Sevicio Pendiente</button>
+            <button onclick="showSection('finanzas')" id="btn-finanzas" style="display:none;">💰 Finanzas</button>
+        </nav>
+    </aside>
+    <main class="main-carbon">
+     <nav class="navbar">
+        <div class="logo">AUTOBRILLO<span>Detailing</span></div>
+        <ul class="nav-links">
+            <li><a href="#" class="active">Inicio</a></li>
+            <li><a href="#" onclick="showSection('citas')">citas <span id="numero-citas-nav">3</span></a></li>
+            <li><a href="#" onclick="showSection('crear_sevicios')" >crear sevicios</a></li>
+            <li><a  href="#" onclick="showSection('empleados')" >empleados</a></li>
+            <li><a href="#" onclick="showSection('estadisticas')">estadisticas</a></li>
+            <li><a href="#" onclick="showSection('finanzas')">finanzas</a></li>
+            <li class="_regitro"><a href="./clientes/regitroNuevoUsuario.html">Crear Cuenta</a></li>
+        </ul>
+        <div class="navbar-right">
+            <div class="notification-bell">
+                <button class="btn-notification" onclick="toggleNotifications()">
+                    🔔 <span class="notification-badge">2</span>
+                </button>
+                <div class="notification-dropdown">
+                    <div class="notification-item">
+                        <p>Nueva cita programada</p>
+                        <small>Hace 5 min</small>
+                    </div>
+                    <div class="notification-item">
+                        <p>Empleado completó servicio</p>
+                        <small>Hace 15 min</small>
+                    </div>
+                </div>
+            </div>
+            <div class="user-profile">
+                <img src="../../imagen/user-avatar.png" alt="Admin" class="user-avatar">
+                <span>Admin</span>
+                <div class="user-dropdown">
+                    <a href="#">Mi Perfil</a>
+                    <a href="#">Configuración</a>
+                    <a href="#" onclick="logout()">Cerrar Sesión</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- SECCIÓN DE RESUMEN PRINCIPAL -->
+    <section id="resumen" class="dashboard-section">
+        <div class="dashboard-header">
+            <h1>Dashboard Administrativo</h1>
+            <p class="dashboard-date">Hoy, <span id="current-date"></span></p>
+        </div>
+
+        <!-- Métricas Principales -->
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-icon">💰</div>
+                <div class="metric-content">
+                    <h3>Ingresos del Día</h3>
+                    <p class="metric-value" id="ingresos-hoy">RD$ 0.00</p>
+                    <span class="metric-change positive">+12.5%</span>
+                </div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-icon">🚗</div>
+                <div class="metric-content">
+                    <h3>Vehículos Hoy</h3>
+                    <p class="metric-value" id="vehiculos-hoy">0</p>
+                    <span class="metric-change positive">+8</span>
+                </div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-icon">👥</div>
+                <div class="metric-content">
+                    <h3>Empleados Activos</h3>
+                    <p class="metric-value" id="empleados-activos">5</p>
+                    <span class="metric-change neutral">Estable</span>
+                </div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-icon">📅</div>
+                <div class="metric-content">
+                    <h3>Citas Pendientes</h3>
+                    <p class="metric-value" id="citas-pendientes">3</p>
+                    <span class="metric-change warning">Requiere atención</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gráficos y Estadísticas -->
+        <div class="dashboard-charts">
+            <div class="chart-container">
+                <h3>Ingresos Semanales</h3>
+                <div class="chart-placeholder">
+                    <canvas id="weekly-chart"></canvas>
+                </div>
+            </div>
+            <div class="chart-container">
+                <h3>Servicios Más Solicitados</h3>
+                <div class="services-list">
+                    <div class="service-item">
+                        <span>Lavado Completo</span>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 85%"></div>
+                        </div>
+                        <span>85%</span>
+                    </div>
+                    <div class="service-item">
+                        <span>Pulido Profesional</span>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 72%"></div>
+                        </div>
+                        <span>72%</span>
+                    </div>
+                    <div class="service-item">
+                        <span>Detailing Interior</span>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 58%"></div>
+                        </div>
+                        <span>58%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actividad Reciente -->
+        <div class="recent-activity">
+            <h3>Actividad Reciente</h3>
+            <div class="activity-list">
+                <div class="activity-item">
+                    <div class="activity-icon">✅</div>
+                    <div class="activity-content">
+                        <p>Servicio completado - Toyota Corolla (ABC-123)</p>
+                        <small>Hace 15 minutos</small>
+                    </div>
+                </div>
+                <div class="activity-item">
+                    <div class="activity-icon">🆕</div>
+                    <div class="activity-content">
+                        <p>Nueva cita programada - Honda Civic (XYZ-789)</p>
+                        <small>Hace 32 minutos</small>
+                    </div>
+                </div>
+                <div class="activity-item">
+                    <div class="activity-icon">👤</div>
+                    <div class="activity-content">
+                        <p>Empleado Juan Pérez inició sesión</p>
+                        <small>Hace 1 hora</small>
+                    </div>
+                </div>
+                <div class="activity-item">
+                    <div class="activity-icon">💰</div>
+                    <div class="activity-content">
+                        <p>Pago recibido - RD$ 2,500.00</p>
+                        <small>Hace 2 horas</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+         <div class="dashboard-grid">
+            <div class="card glass">
+                <h3>Ganancia Neta</h3>
+                <p id="txt-ganancia" class="text-emerald">RD$ 0.00</p>
+            </div>
+            <div class="card glass">
+                <h3>Vehículos Hoy</h3>
+                <p id="txt-vehiculos-hoy">0</p>
+            </div>
+            <div class="card glass">
+                <h3>Alertas Stock</h3>
+                <p id="txt-alertas" class="text-warning">Cargando...</p>
+            </div>
+         </div> 
+    </section>
+        <section  id="citas">
+               <div id="conter-cita">
+                <h2>citas pediente  <samp id="numero-citas">3</samp></h2>
+                   <div id="box-cita">
+                         <div id="cont-cita-pendiente">
+                            <img src="../../imagen/a.jpeg" alt="">
+                              <div class="info-cita">
+                                <p>nombre cliente</p>
+                               <p>numero de placa </p>
+                               <div id="ifon-sevicio">
+                                    <ul>
+                                    <li>servicio 1</li>
+                                    <li>servicio 2</li>
+                                    <li>servicio 3</li>   
+                                 </ul>
+                               </div>
+                               <p>servicios extra</p>
+                               <p>precio</p>
+                              </div>
+                               <button type="submit">cancelar cita</button>
+                                <button type="submit">confimar cita</button>
+                               
+                         </div>
+                          <div id="cont-cita-pendiente">
+                              <h3><span>citapendiente</span></h3>
+
+                            <img src="../../imagen/a.jpeg" alt="">
+                              <p>nombre cliente</p>
+                               <p>numero de placa </p>
+                               <p>sevicios a realizar </p>
+                               <p>servicios extra</p>
+                               <p>precio</p>
+                               <button type="submit">cancelar cita</button>
+                                <button type="submit">confimar cita</button>
+                               
+                         </div>
+                         <div id="cont-cita-pendiente">
+                            <img src="../../imagen/a.jpeg" alt="">
+                              <p>nombre cliente</p>
+                               <p>numero de placa </p>
+                               <p>sevicios a realizar </p>
+                               <p>servicios extra</p>
+                               <p>precio</p>
+                               <button type="submit">cancelar cita</button>
+                                <button type="submit">confimar cita</button>
+                               
+                         </div>
+
+
+                   </div>
+               </div>
+        </section>
+
+        <section id="empleados" class="empedod-sec">
+            <div>
+                <div>
+                    <h2>empleados</h2>
+                    <h3>disponibles</h3>
+                </div>
+                 
+               <div id="cont-empleado">
+                  <div id="box-empleado">
+                    <img src="../../imagen/a.jpeg" alt="">
+                    <p>nombre empleado</p>
+                    <p>numero de telefono </p>
+                    <p>direccion </p>
+                    <p>fecha de nacimiento </p>
+                    <p>documento de identidad </p>
+                    <label for="">agregar cliente disponible a empleado</label>
+                   <select name="obtenel cliente" id="">
+                     <option value="">misael</option>
+                     <option value="">misael1</option>
+                     <option value="">misael2</option>
+                   </select>
+                  
+                   <input type="button" value="confirmar-cita">
+                  </div>
+               </div>
+             
+               <div id="cont-reg-empl">
+               <h3>registro de nuevo empleado</h3>
+                <div class="input-group">
+                  <form id="form-registro" action="get">
+                      <label>nombre completo</label>
+                      <input type="text" id="reg-nombre" placeholder="nombre completo" required>
+                        <label>correo electronico</label>
+                        <input type="email" id="reg-correo" placeholder="correo electronico" required>
+                        <label>numero de telefono</label>
+                        <input type="text" id="reg-telefono" placeholder="numero de telefono" required>
+                        <label>direccion</label>
+                        <input type="text" id="reg-direccion" placeholder="direccion" required>
+                        <label>fecha de nacimiento</label>
+                        <input type="date" id="reg-fecha" required>
+                         <label for="">documento de identidad</label>
+                         <input type="text" id="reg-documento" placeholder="documento de identidad" required>
+                  </form>
+
+                    <button type="submit" class="btn-01" id="reg_persona_boton">agregar empleado</button>
+                </div>
+               </div>  
+
+            </div>
+        </section>
+
+     <section id="crear_sevicios" class="glass-card">
+    <h2>Crear Servicio</h2>
+    <div id="cont-servicio">
+        <form id="form-servicio" class="form_servicio">
+            <label for="serv-nombre">Nombre del Servicio</label>
+            <input type="text" id="serv-nombre" placeholder="(Ej: Lavado Premium)" required>
+             <label for="serv-descripcion">¿Qué incluye el servicio?</label>
+            <textarea id="serv-descripcion" placeholder="¿Qué incluye el servicio?"></textarea>
+            <label for="serv-precio">Precio del Servicio</label>
+            <input type="number" id="serv-precio" placeholder="(RD$)" required>
+            <label for="serv-tiempo">Tiempo estimado</label>
+            <input type="text" id="serv-tiempo" placeholder="(Ej: 45 min)">
+            
+            <button type="submit" class="btn-guardar">Agregar al Catálogo</button>
+        </form>
+
+        <div class="tabla-contenedor">
+            <table class="table-carbon">
+                <thead>
+                    <tr>
+                       <th>Servicio</th>
+                       <th>Precio</th>
+                       <th>Descripción</th>
+                       <th>Acción</th> 
+                    </tr>
+                </thead> 
+                <tbody id="lista-servicios-body" class="table-tasks">
+                   </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+      
+        <section id="agenda">
+        <div class="agenda-container">
+
+            <!-- SERVICIOS -->
+            <div class="servicios">
+            <h2>Servicios</h2>
+
+            <div class="servicio" onclick="seleccionarServicio('Asesoría', 60)">
+                <h3>Asesoría</h3>
+                <p>Duración: 1 hora</p>
+            </div>
+
+            <div class="servicio" onclick="seleccionarServicio('Diseño', 90)">
+                <h3>Diseño</h3>
+                <p>Duración: 1.5 horas</p>
+            </div>
+
+            <div class="servicio" onclick="seleccionarServicio('Construcción', 120)">
+                <h3>Construcción</h3>
+                <p>Duración: 2 horas</p>
+            </div>
+            </div>
+
+            <!-- CALENDARIO -->
+            <div class="calendario">
+            <h2>Selecciona fecha</h2>
+            <input type="date" id="fecha">
+
+            <h2>Horas disponibles</h2>
+            <div id="horas"></div>
+            </div>
+
+            <!-- FORMULARIO -->
+            <div class="formulario">
+            <h2>Confirmar cita</h2>
+
+            <input type="text" id="nombre" placeholder="Tu nombre">
+            <input type="tel" id="telefono" placeholder="Teléfono">
+
+            <button onclick="reservar()">Reservar</button>
+
+            <p id="mensaje"></p>
+            </div>
+
+        </div>
+        </section>
+
+            <section id="finanzas" class="hidden">
+    <div class="card glass carbon-texture">
+        <h2 class="text-emerald">💰 Resumen de Caja - Hoy</h2>
+        <div class="caja-stats">
+            <div class="stat-item">
+                <span>Ingresos Brutos:</span>
+                <span id="caja-bruto" class="text-white">RD$ 0.00</span>
+            </div>
+            <div class="stat-item">
+                <span>Comisiones por Pagar:</span>
+                <span id="caja-deuda" style="color: #ff4d4d;">RD$ 0.00</span>
+            </div>
+            <hr>
+            <div class="stat-item total">
+                <span>Utilidad Real:</span>
+                <span id="caja-neto" class="text-emerald">RD$ 0.00</span>
+            </div>
+        </div>
+        <button class="btn-primary" onclick="procesarCierre()">Cerrar Caja y Cortar</button>
+    </div>
+            </section>
+
+        <section id="pendiente" class="pendiente" >
+            <div class="header-actions">
+                <h2>Vehículos en Taller</h2>
+                <button class="btn-primary" onclick="openNewTaskModal()">+ Nuevo Ingreso</button>
+            </div>
+            <table class="table-carbon">
+                <thead>
+                    <tr>
+                        <th>Placa</th>
+                        <th>Plan</th>
+                        <th>Empleado</th>
+                        <th>Estado</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+                     <tbody id="table-tasks">
+                        <td>A123456</td>
+                        <td>basico</td>
+                        <td>Juan Pérez</td>
+                        <td>Pendiente</td>
+                        <td><button class="btn-primary">comfimar</button></td>
+
+                     </tbody>
+            </table>
+        </section>
+
+        <!-- Footer del Sistema -->
+        <footer class="dashboard-footer">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>AutoBrillo D.</h4>
+                    <p>Sistema de gestión para detailing automotriz</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Estado del Sistema</h4>
+                    <div class="system-status">
+                        <span class="status-indicator online"></span>
+                        <span>Servidor: Online</span>
+                    </div>
+                    <div class="system-status">
+                        <span class="status-indicator online"></span>
+                        <span>Base de Datos: Online</span>
+                    </div>
+                    <div class="system-status">
+                        <span class="status-indicator warning"></span>
+                        <span>Última copia: 2h atrás</span>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <h4>Versión</h4>
+                    <p>v2.1.0 - Build 2024.04.15</p>
+                    <p>&copy; 2024 AutoBrillo Detailing</p>
+                </div>
+            </div>
+        </footer>
+    </main>
+</div>
+
+        <script src="../js/dashboardAdmin.js"></script>
+          <script src="../js2/registroPersona.js"></script>
+          <script src="../js2/listarPersonas.js"></script>
+          <script src="../js2/gestionServicios.js"></script>
+        <script src="" async defer></script>
+    </body>
+</html>>
+   

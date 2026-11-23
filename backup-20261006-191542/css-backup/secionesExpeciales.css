@@ -1,0 +1,15 @@
+.cnt-sevicio-taller {
+    width: 244px;
+    font-size: 20px;
+    gap: 10px;
+    display: flex;
+    position: relative;
+    flex-direction: column;
+    align-content: center;
+    align-items: center;
+}
+
+.cnt-sevicio-taller .nombre-sevico-taller h3 {
+
+    font-weight: 800;
+}

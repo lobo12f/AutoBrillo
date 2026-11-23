@@ -1,0 +1,1840 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Taller | AutoBrillo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <!-- Leaflet CSS -->
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <!-- ⭐ CSS UNIFICADO -->
+    <link rel="stylesheet" href="../../css/main.css">
+    <!-- ⭐ CSS MANAGER -->
+    <script type="module" src="../../javascript/css-manager.js"></script>
+</head>
+
+<!-- Sidebar -->
+<!-- ✅ SIDEBAR: Contenedor para posicionar el botón toggle (NUEVO) -->
+<div style="position:relative; display:flex;">
+
+    <nav class="taller-sidebar">
+        <div class="sidebar-header">
+            <!-- ✅ Logo del taller (se actualiza al guardar configuración) -->
+            <img id="sidebar-taller-logo" src=""
+                style="width:60px; height:60px; border-radius:50%; object-fit:cover; border:2px solid #00ff88; margin-bottom:10px; display:none;"
+                onerror="this.style.display='none';">
+            <div class="taller-logo" id="sidebar-taller-icon">🏪</div>
+            <div class="taller-name" id="sidebar-taller-name">Mi Taller</div>
+        </div>
+
+        <!-- ✅ Menú con data-titulo para tooltips al colapsar (ACTUALIZADO) -->
+        <ul class="sidebar-menu">
+            <li><a href="#panel" class="active" data-section="panel" data-titulo="Panel Principal">📊 Panel
+                    Principal</a></li>
+            <li><a href="#citas" data-section="citas" data-titulo="Citas del Día">📅 Citas del Día</a></li>
+            <li><a href="#servicios" data-section="servicios" data-titulo="Servicios">🔧 Servicios</a></li>
+            <li><a href="#planes" data-section="planes" data-titulo="Planes">📦 Planes</a></li>
+            <li><a href="#bahias" data-section="bahias" data-titulo="Bahías">🔧 Bahías</a></li>
+            <li><a href="#empleados" data-section="empleados" data-titulo="Empleados">👥 Empleados</a></li>
+            <li><a href="#comisiones" data-section="comisiones" data-titulo="Comisiones">💰 Comisiones</a></li>
+            <li><a href="#rendimiento" data-section="rendimiento" data-titulo="Rendimiento">📈 Rendimiento</a></li>
+            <li><a href="#resenas" data-section="resenas" data-titulo="Reseñas">⭐ Reseñas</a></li>
+            <li><a href="#galeria" data-section="galeria" data-titulo="Galería">🖼️ Galería</a></li>
+            <li><a href="#historial" data-section="historial" data-titulo="Historial">📋 Historial</a></li>
+            <li><a href="#historial-pagos" data-section="historial-pagos" data-titulo="Pagos">💳 Pagos</a></li>
+            <li><a href="#configuracion" data-section="configuracion" data-titulo="Configuración">⚙️
+                    Configuración</a>
+            </li>
+        </ul>
+        <div class="sidebar-footer">
+            <button class="btn-logout" onclick="cerrarSesionTaller()">🚪 Cerrar Sesión</button>
+        </div>
+    </nav>
+</div>
+<!-- Contenido Principal -->
+<main class="taller-main">
+    <!-- Header -->
+    <header class="taller-header">
+        <div class="header-left">
+            <h1 id="header-title">Panel Principal</h1>
+            <p id="fecha-actual"></p>
+        </div>
+        <div class="header-right">
+            <!-- ✅ CAMPANITA DE NOTIFICACIONES -->
+            <div class="notificaciones-taller" onclick="window.mostrarNotificaciones()"
+                style="position:relative; cursor:pointer; margin-right:20px;">
+                <span style="font-size:1.5rem;">🔔</span>
+                <span id="badge-notificaciones" style="
+                position:absolute; top:-5px; right:-8px;
+                background:#ff4444; color:white;
+                font-size:0.7rem; font-weight:bold;
+                width:20px; height:20px;
+                border-radius:50%;
+                display:none;
+                align-items:center;
+                justify-content:center;
+            ">0</span>
+            </div>
+            <div class="user-info">
+                <span id="header-propietario">Propietario</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Sección: Panel Principal -->
+    <section id="panel" class="dashboard-section d-none">
+        <!-- Stats Cards -->
+        <div class="stats-grid">
+            <div class="stat-card"
+                style="background:linear-gradient(135deg, var(--accent-color, #00ff88)15, var(--accent-color, #00ff88)03); border:1px solid var(--accent-color, #00ff88)30;">
+                <div class="stat-icon"
+                    style="background:var(--accent-color, #00ff88)18; border:2px solid var(--accent-color, #00ff88)40;">
+                    📅</div>
+                <div class="stat-info">
+                    <h3>Citas Hoy</h3>
+                    <p class="stat-value" id="citas-hoy" style="color:var(--accent-color, #00ff88);">0</p>
+                </div>
+            </div>
+            <div class="stat-card"
+                style="background:linear-gradient(135deg, #00d4ff15, #00d4ff03); border:1px solid #00d4ff30;">
+                <div class="stat-icon" style="background:#00d4ff18; border:2px solid #00d4ff40;">🔧</div>
+                <div class="stat-info">
+                    <h3>En Proceso</h3>
+                    <p class="stat-value" id="en-proceso" style="color:#00d4ff;">0</p>
+                </div>
+            </div>
+            <div class="stat-card"
+                style="background:linear-gradient(135deg, #ffbb3315, #ffbb3303); border:1px solid #ffbb3330;">
+                <div class="stat-icon" style="background:#ffbb3318; border:2px solid #ffbb3340;">✅</div>
+                <div class="stat-info">
+                    <h3>Completados Hoy</h3>
+                    <p class="stat-value" id="completados-hoy" style="color:#ffbb33;">0</p>
+                </div>
+            </div>
+            <div class="stat-card"
+                style="background:linear-gradient(135deg, #ff44ff15, #ff44ff03); border:1px solid #ff44ff30;">
+                <div class="stat-icon" style="background:#ff44ff18; border:2px solid #ff44ff40;">💰</div>
+                <div class="stat-info">
+                    <h3>Ingresos del Día</h3>
+                    <p class="stat-value" id="ingresos-dia" style="color:#ff44ff;">RD$ 0</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================================================================
+         🏗️ BAHÍAS STATUS - DISEÑO PREMIUM
+         ================================================================ -->
+        <div class="section-card"
+            style="background:linear-gradient(180deg, var(--bg-card, #131c2b) 0%, var(--bg-input, #0a0e14) 100%); border:1px solid var(--border-color, #1e2a3a); border-radius:16px; padding:20px; margin-bottom:20px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                <h2
+                    style="color:var(--text-primary, #fff); margin:0; font-size:1rem; font-weight:700; display:flex; align-items:center; gap:8px;">
+                    <span style="font-size:1.2rem;">🏗️</span> Estado de Bahías
+                </h2>
+                <span
+                    style="background:var(--accent-bg, rgba(0,255,136,0.1)); color:var(--accent-color, #00ff88); padding:4px 12px; border-radius:15px; font-size:0.7rem; font-weight:600;">TIEMPO
+                    REAL</span>
+            </div>
+            <div class="bahias-grid" id="bahias-status"
+                style="display:grid; grid-template-columns:repeat(auto-fill, minmax(200px, 1fr)); gap:12px;">
+                <!-- Se llena dinámicamente -->
+                <p style="color:var(--text-muted, #888); text-align:center; padding:20px;">⏳ Cargando bahías...</p>
+            </div>
+        </div>
+
+        <!-- ================================================================
+         📅 PRÓXIMAS CITAS - DISEÑO PREMIUM
+         ================================================================ -->
+        <div class="section-card"
+            style="background:linear-gradient(180deg, var(--bg-card, #131c2b) 0%, var(--bg-input, #0a0e14) 100%); border:1px solid var(--border-color, #1e2a3a); border-radius:16px; padding:20px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                <h2
+                    style="color:var(--text-primary, #fff); margin:0; font-size:1rem; font-weight:700; display:flex; align-items:center; gap:8px;">
+                    <span style="font-size:1.2rem;">📅</span> Próximas Citas
+                </h2>
+                <button onclick="window.cargarDashboard?.()"
+                    style="background:transparent; border:1px solid var(--border-color, #1e2a3a); color:var(--text-secondary, #888); padding:4px 12px; border-radius:15px; cursor:pointer; font-size:0.7rem; transition:all 0.3s;"
+                    onmouseover="this.style.borderColor='var(--accent-color, #00ff88)'; this.style.color='var(--accent-color, #00ff88)';"
+                    onmouseout="this.style.borderColor='var(--border-color, #1e2a3a)'; this.style.color='var(--text-secondary, #888)';">
+                    🔄 Actualizar
+                </button>
+            </div>
+            <div class="citas-list" id="proximas-citas" style="display:flex; flex-direction:column;">
+                <p class="empty-state" style="color:var(--text-muted, #888); text-align:center; padding:20px;">No hay
+                    citas
+                    pendientes para hoy</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sección: Citas del Día -->
+    <section id="citas" class="dashboard-section">
+        <div class="section-header">
+            <h2>Gestión de Citas</h2>
+            <div class="filtros">
+                <select id="filtro-estado">
+                    <option value="TODAS">Todas</option>
+                    <option value="PENDIENTE">Pendientes</option>
+                    <option value="CONFIRMADA">Confirmadas</option>
+                    <option value="EN_PROCESO">En Proceso</option>
+                    <option value="LISTO">Listas</option>
+                </select>
+                <input type="date" id="filtro-fecha" value="">
+            </div>
+        </div>
+        <div class="citas-taller-grid" id="citas-taller-lista">
+            <p class="empty-state">Cargando citas...</p>
+        </div>
+    </section>
+    <!-- ==================== SECCIÓN: SERVICIOS ==================== -->
+    <section id="servicios" class="dashboard-section">
+        <div class="section-header">
+            <h2>🔧 Mis Servicios</h2>
+            <button class="btn-add" onclick="window.abrirModalServicio()">+ Nuevo Servicio</button>
+        </div>
+        <div id="servicios-lista"
+            style="display:grid; grid-template-columns:repeat(auto-fill, minmax(300px, 1fr)); gap:15px;">
+            <p class="empty-state">Cargando servicios...</p>
+        </div>
+    </section>
+
+    <!-- ================================================================
+         🔧 MODAL DE SERVICIOS - AUTOBRILLO DETALLING
+         ================================================================ -->
+    <div id="modal-servicio" class="modal-servicio-overlay d-none">
+        <div class="modal-servicio-container-2col">
+
+            <!-- ============ COLUMNA IZQUIERDA: FORMULARIO ============ -->
+            <div class="modal-servicio-form">
+                <div class="modal-servicio-decorator"></div>
+
+                <div class="modal-servicio-header">
+                    <span class="modal-servicio-close"
+                        onclick="document.getElementById('modal-servicio').style.display='none'">✕</span>
+                    <div class="modal-servicio-header-content">
+                        <div id="modal-servicio-icono" class="modal-servicio-icon">🔧</div>
+                        <div>
+                            <h3 id="modal-servicio-titulo" class="modal-servicio-title">Nuevo Servicio</h3>
+                            <p class="modal-servicio-subtitle">Completa la información del servicio</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="form-servicio" class="modal-servicio-body">
+                    <input type="hidden" id="servicio-id" value="">
+
+                    <div class="form-group-servicio">
+                        <label class="form-label-servicio">🏷️ Nombre del Servicio</label>
+                        <input type="text" id="servicio-nombre" class="form-input-servicio"
+                            placeholder="Ej: Lavado Premium" required>
+                    </div>
+
+                    <div class="form-group-servicio">
+                        <label class="form-label-servicio">📋 ¿Qué incluye este servicio?</label>
+                        <div id="servicio-incluye-container" class="servicio-tags-container"></div>
+                        <div class="servicio-incluye-row">
+                            <select id="servicio-incluye-select" class="form-select-servicio">
+                                <option value="">Seleccionar...</option>
+                                <option value="Lavado exterior">🧽 Lavado exterior</option>
+                                <option value="Lavado interior">🫧 Lavado interior</option>
+                                <option value="Aspirado">🔫 Aspirado</option>
+                                <option value="Encerado">✨ Encerado</option>
+                                <option value="Pulido de carrocería">💎 Pulido de carrocería</option>
+                                <option value="Pulido de faros">🔦 Pulido de faros</option>
+                                <option value="Limpieza de tapicería">🪑 Limpieza de tapicería</option>
+                                <option value="Limpieza de vidrios">🪟 Limpieza de vidrios</option>
+                                <option value="Tratamiento de ozono">🦠 Tratamiento de ozono</option>
+                                <option value="Tratamiento cerámico">🛡️ Tratamiento cerámico</option>
+                                <option value="Desinfección">🧴 Desinfección</option>
+                                <option value="Aromatizado">🌸 Aromatizado</option>
+                                <option value="Limpieza de motor">⚙️ Limpieza de motor</option>
+                                <option value="Limpieza de llantas">🛞 Limpieza de llantas</option>
+                                <option value="Revisión de fluidos">🔍 Revisión de fluidos</option>
+                            </select>
+                            <input type="text" id="servicio-incluye-custom" class="form-input-custom"
+                                placeholder="O escribe uno...">
+                            <button type="button" class="btn-agregar-incluye"
+                                onclick="window.agregarIncluyeAlServicio()">+</button>
+                        </div>
+                        <input type="hidden" id="servicio-incluye-valor" value="">
+                    </div>
+
+                    <div class="servicio-grid-2">
+                        <div class="form-card-servicio">
+                            <label class="form-card-label">💰 Precio (RD$)</label>
+                            <input type="number" id="servicio-precio" class="form-card-input" placeholder="0" min="0"
+                                step="0.01" required>
+                        </div>
+                        <div class="form-card-servicio">
+                            <label class="form-card-label">⏱️ Duración (min)</label>
+                            <input type="number" id="servicio-duracion" class="form-card-input" placeholder="45"
+                                min="5">
+                        </div>
+                    </div>
+
+                    <div class="form-group-servicio">
+                        <label class="form-label-servicio">📂 Tipo de Servicio</label>
+                        <div id="selector-tipo-servicio" class="tipo-servicio-grid">
+                            <div onclick="window.seleccionarTipoServicio?.('LAVADO', this)" data-tipo="LAVADO"
+                                class="tipo-card activo">🧽<br>Lavado</div>
+                            <div onclick="window.seleccionarTipoServicio?.('DETALLADO', this)" data-tipo="DETALLADO"
+                                class="tipo-card">✨<br>Detallado</div>
+                            <div onclick="window.seleccionarTipoServicio?.('PULIDO', this)" data-tipo="PULIDO"
+                                class="tipo-card">💎<br>Pulido</div>
+                            <div onclick="window.seleccionarTipoServicio?.('TRATAMIENTO', this)" data-tipo="TRATAMIENTO"
+                                class="tipo-card">🧴<br>Tratamiento</div>
+                            <div onclick="window.seleccionarTipoServicio?.('EXTRA', this)" data-tipo="EXTRA"
+                                class="tipo-card tipo-card-wide">➕<br>Extra</div>
+                        </div>
+                        <input type="hidden" id="servicio-tipo" value="LAVADO">
+                    </div>
+
+                    <div class="servicio-buttons">
+                        <button type="button" class="btn-cancelar-servicio"
+                            onclick="document.getElementById('modal-servicio').style.display='none'">Cancelar</button>
+                        <button type="button" class="btn-guardar-servicio" onclick="window.guardarServicio(event)">💾
+                            GUARDAR</button>
+                        <button type="button" id="btn-eliminar-servicio" class="btn-eliminar-servicio"
+                            onclick="window.eliminarServicioConfirmado()">🗑️</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ============ COLUMNA DERECHA: VISTA PREVIA ============ -->
+            <div class="modal-servicio-preview">
+                <div class="preview-servicio-header">
+                    <span class="preview-servicio-badge">👁️ <span>VISTA DEL CLIENTE</span></span>
+                </div>
+
+                <div class="preview-servicio-card">
+                    <span id="preview-servicio-tipo" class="preview-servicio-tipo">🧽 LAVADO</span>
+                    <h4 id="preview-servicio-nombre" class="preview-servicio-nombre">Nombre del Servicio</h4>
+
+                    <div class="preview-servicio-precio-box">
+                        <span id="preview-servicio-precio" class="preview-servicio-precio">RD$ 0</span>
+                        <p class="preview-servicio-duracion">⏱️ 45 min</p>
+                    </div>
+
+                    <div class="preview-servicio-incluye">
+                        <p class="preview-servicio-incluye-title">✅ Qué Incluye</p>
+                        <div id="preview-servicio-tags">
+                            <div class="preview-servicio-empty">
+                                <span>📋</span>
+                                No hay ítems agregados
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="preview-servicio-btn">🔧 Agendar Servicio</button>
+                    <p class="preview-servicio-footer-text">Así se verá tu servicio</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== SECCIÓN: PLANES ==================== -->
+    <section id="planes" class="dashboard-section">
+        <div class="section-header">
+            <h2>📦 Mis Planes</h2>
+
+            <button class="btn-add" onclick="window.abrirModalPlan()">+ Nuevo Plan</button>
+        </div>
+        <div id="planes-lista"
+            style="display:grid; grid-template-columns:repeat(auto-fill, minmax(300px, 1fr)); gap:15px;">
+            <p class="empty-state">Cargando planes...</p>
+        </div>
+    </section>
+    <!-- ================================================================
+   📦 MODAL DE PLANES - AUTOBRILLO DETALLING
+   Diseño premium con vista previa lateral
+   ================================================================ -->
+
+    <div id="modal-plan" class="modal d-none">
+
+        <!-- Contenedor principal: 2 columnas (formulario | vista previa) -->
+        <div class="modal-plan-container">
+
+            <!-- ============================================================
+           COLUMNA IZQUIERDA: FORMULARIO
+           ============================================================ -->
+            <div class="modal-plan-form">
+
+                <!-- Línea decorativa superior dorada -->
+                <div class="modal-plan-decorator"></div>
+
+                <!-- Header del formulario (sticky) -->
+                <div class="modal-plan-header">
+                    <span class="modal-plan-close"
+                        onclick="document.getElementById('modal-plan').style.display='none'">✕</span>
+
+                    <div class="modal-plan-header-content">
+                        <div id="modal-plan-icono" class="modal-plan-icon">📦</div>
+                        <div>
+                            <h3 id="modal-plan-titulo" class="modal-plan-title">Nuevo Plan</h3>
+                            <p class="modal-plan-subtitle">Completa la información del plan</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cuerpo del formulario -->
+                <div id="form-plan" class="modal-plan-body">
+                    <input type="hidden" id="plan-id" value="">
+                    <input type="hidden" id="plan-servicios-valor" value="">
+
+                    <!-- Campo: Nombre del Plan -->
+                    <div class="form-group">
+                        <label class="form-label"><span class="label-icon">🏷️</span> Nombre del Plan</label>
+                        <input type="text" id="plan-nombre" class="form-input" placeholder="Ej: Plan Oro" required
+                            oninput="window.actualizarVistaPreviaPlan?.()">
+                    </div>
+
+                    <!-- Grid de 4 cards: Precio, Días, Servicios, Lavados -->
+                    <div class="form-grid-4">
+                        <!-- Precio -->
+                        <div class="form-card">
+                            <label class="form-card-label">💰 Precio</label>
+                            <input type="number" id="plan-precio" class="form-card-input form-card-input-gold"
+                                placeholder="0" min="0" step="0.01" required
+                                oninput="window.actualizarVistaPreviaPlan?.()">
+                        </div>
+                        <!-- Días -->
+                        <div class="form-card">
+                            <label class="form-card-label">📅 Días</label>
+                            <input type="number" id="plan-duracion" class="form-card-input" placeholder="30" min="1"
+                                value="30" oninput="window.actualizarVistaPreviaPlan?.()">
+                        </div>
+                        <!-- Servicios -->
+                        <div class="form-card">
+                            <label class="form-card-label">🔢 Servicios</label>
+                            <input type="number" id="plan-servicios" class="form-card-input form-card-input-blue"
+                                placeholder="0" min="0" required oninput="window.actualizarVistaPreviaPlan?.()">
+                        </div>
+                        <!-- Lavados -->
+                        <div class="form-card">
+                            <label class="form-card-label">🧽 Lavados</label>
+                            <input type="number" id="plan-lavados" class="form-card-input form-card-input-purple"
+                                placeholder="0" min="0" oninput="window.calcularPrecioPlan?.()">
+                        </div>
+                    </div>
+
+                    <!-- Sección: Agregar Servicios -->
+                    <div class="form-group">
+                        <label class="form-label"><span class="label-icon">🔧</span> Agregar Servicios</label>
+                        <div class="form-servicios-row">
+                            <select id="plan-servicios-select" class="form-select">
+                                <option value="">Seleccionar servicio...</option>
+                                <option value="Lavado exterior">🧽 Lavado exterior</option>
+                                <option value="Lavado interior">🫧 Lavado interior</option>
+                                <option value="Aspirado">🔫 Aspirado</option>
+                                <option value="Encerado">✨ Encerado</option>
+                                <option value="Pulido de carrocería">💎 Pulido de carrocería</option>
+                                <option value="Pulido de faros">🔦 Pulido de faros</option>
+                                <option value="Limpieza de tapicería">🪑 Limpieza de tapicería</option>
+                                <option value="Limpieza de vidrios">🪟 Limpieza de vidrios</option>
+                                <option value="Tratamiento de ozono">🦠 Tratamiento de ozono</option>
+                                <option value="Tratamiento cerámico">🛡️ Tratamiento cerámico</option>
+                                <option value="Desinfección">🧴 Desinfección</option>
+                                <option value="Aromatizado">🌸 Aromatizado</option>
+                                <option value="Limpieza de motor">⚙️ Limpieza de motor</option>
+                                <option value="Limpieza de llantas">🛞 Limpieza de llantas</option>
+                                <option value="Revisión de fluidos">🔍 Revisión de fluidos</option>
+                            </select>
+                            <input type="number" id="plan-servicio-precio" class="form-precio-input"
+                                placeholder="Precio" min="0" step="0.01">
+                            <button type="button" class="btn-agregar-servicio"
+                                onclick="window.agregarServicioAlPlan()">+
+                                Agregar</button>
+                        </div>
+                        <div id="plan-servicios-container" class="servicios-container"></div>
+                    </div>
+
+                    <!-- Botones de acción -->
+                    <div class="form-buttons">
+                        <button type="button" class="btn-cancelar"
+                            onclick="document.getElementById('modal-plan').style.display='none'">Cancelar</button>
+                        <button type="button" class="btn-guardar-plan" onclick="window.guardarPlan(event)">💾 GUARDAR
+                            PLAN</button>
+                        <button type="button" id="btn-eliminar-plan" class="btn-eliminar-plan"
+                            onclick="window.eliminarPlanConfirmado()">🗑️</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ============================================================
+           COLUMNA DERECHA: VISTA PREVIA DEL CLIENTE
+           ============================================================ -->
+            <div class="modal-plan-preview">
+
+                <!-- Brillo decorativo -->
+                <div class="preview-glow"></div>
+
+                <!-- Header de la vista previa (sticky) -->
+                <div class="preview-header">
+                    <span class="preview-badge">👁️ <span>VISTA DEL CLIENTE</span></span>
+                </div>
+
+                <!-- Card del plan (simulación de cómo lo ve el cliente) -->
+                <div class="preview-card">
+
+                    <!-- Badge de nivel -->
+                    <span class="preview-nivel">🥇 Premium</span>
+
+                    <!-- Nombre del plan -->
+                    <h4 id="preview-plan-nombre" class="preview-nombre">Nombre del Plan</h4>
+
+                    <!-- Precio destacado -->
+                    <div class="preview-precio-box">
+                        <span id="preview-plan-precio" class="preview-precio">RD$ 0</span>
+                        <p id="preview-plan-duracion" class="preview-duracion">por 30 días</p>
+                    </div>
+
+                    <!-- Servicios incluidos -->
+                    <div class="preview-servicios-box">
+                        <p class="preview-servicios-title">✅ Servicios Incluidos</p>
+                        <div id="preview-plan-servicios" class="preview-servicios-lista">
+                            <div class="preview-servicios-empty">
+                                <span>📋</span>
+                                No hay servicios agregados
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Estadísticas -->
+                    <div class="preview-stats">
+                        <div class="preview-stat">
+                            <div id="preview-plan-num-servicios" class="preview-stat-valor preview-stat-green">0</div>
+                            <small>Servicios</small>
+                        </div>
+                        <div class="preview-stat">
+                            <div id="preview-plan-por-servicio" class="preview-stat-valor preview-stat-blue">RD$ 0</div>
+                            <small>Por Serv.</small>
+                        </div>
+                        <div class="preview-stat">
+                            <div id="preview-plan-lavados" class="preview-stat-valor preview-stat-purple">0</div>
+                            <small>🧽 Lavados</small>
+                        </div>
+                    </div>
+
+                    <!-- Botón simulado -->
+                    <button class="preview-btn-contratar">💳 Contratar Plan</button>
+
+                    <p class="preview-footer-text">Así se verá tu plan cuando los clientes lo exploren</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Sección: Bahías -->
+    <!-- Sección: Bahías -->
+    <section id="bahias" class="dashboard-section">
+        <div class="section-header">
+            <h2>🏗️ Administración de Bahías</h2>
+            <button class="btn-add" onclick="window.abrirModalNuevaBahia()">+ Nueva Bahía</button>
+        </div>
+        <div class="bahias-admin-grid" id="bahias-admin">
+            <p class="empty-state">Cargando bahías...</p>
+        </div>
+    </section>
+
+    <!-- Modal: Nueva/Editar Bahía -->
+    <div id="modal-bahia" class="modal d-none ">
+        <div class="modal-content"
+            style="max-width:550px; background:var(--bg-card, #131c2b); border:2px solid var(--border-color, #1e2a3a); border-radius:24px; padding:0; overflow:hidden; animation:slideUp 0.3s ease; box-shadow:0 30px 100px rgba(0,0,0,0.8);">
+
+            <!-- Header -->
+            <div style="padding:25px 30px 20px; text-align:center; position:relative;">
+                <span onclick="document.getElementById('modal-bahia').style.display='none'"
+                    style="position:absolute; top:18px; right:20px; font-size:1.1rem; cursor:pointer; color:var(--text-muted, #888); width:32px; height:32px; display:flex; align-items:center; justify-content:center; border-radius:50%; transition:all 0.3s; background:rgba(255,255,255,0.03);"
+                    onmouseover="this.style.background='#ff444422'; this.style.color='#ff4444';"
+                    onmouseout="this.style.background='rgba(255,255,255,0.03)'; this.style.color='var(--text-muted, #888)';">✕</span>
+
+                <!-- Icono animado -->
+                <div id="modal-bahia-icono"
+                    style="width:65px; height:65px; background:linear-gradient(135deg, var(--accent-color, #00ff88)30, var(--accent-color, #00ff88)08); border:3px solid var(--accent-color, #00ff88); border-radius:20px; display:flex; align-items:center; justify-content:center; font-size:2rem; margin:0 auto 12px; animation:pulse 2s infinite;">
+                    🏗️</div>
+
+                <h3 id="modal-bahia-titulo"
+                    style="color:var(--text-primary, #fff); margin:0 0 4px; font-size:1.2rem; font-weight:700;">Nueva
+                    Bahía
+                </h3>
+                <p style="color:var(--text-muted, #888); font-size:0.78rem; margin:0;">Configura los detalles de la
+                    bahía
+                </p>
+            </div>
+
+            <!-- Formulario -->
+            <div id="form-bahia" style="padding:0 30px 25px;">
+                <input type="hidden" id="bahia-id" value="">
+
+                <!-- Número y Nombre -->
+                <div style="display:grid; grid-template-columns:100px 1fr; gap:12px; margin-bottom:14px;">
+                    <div class="form-group">
+                        <label
+                            style="color:var(--text-secondary, #888); font-size:0.72rem; display:block; margin-bottom:4px; font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">🔢
+                            Número</label>
+                        <input type="number" id="bahia-numero" placeholder="1" required min="1"
+                            style="width:100%; padding:14px 12px; background:var(--bg-input, #080c14); border:2px solid var(--border-color, #1e2a3a); border-radius:12px; color:var(--text-primary, #fff); font-size:1.1rem; font-weight:700; text-align:center; transition:all 0.3s; font-family:Inter,sans-serif;"
+                            onfocus="this.style.borderColor='var(--accent-color, #00ff88)'; this.style.boxShadow='0 0 0 4px var(--accent-glow, rgba(0,255,136,0.1))';"
+                            onblur="this.style.borderColor='var(--border-color, #1e2a3a)'; this.style.boxShadow='none';">
+                    </div>
+                    <div class="form-group">
+                        <label
+                            style="color:var(--text-secondary, #888); font-size:0.72rem; display:block; margin-bottom:4px; font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">🏷️
+                            Nombre</label>
+                        <input type="text" id="bahia-nombre" placeholder="Ej: Bahía Express" required
+                            style="width:100%; padding:14px; background:var(--bg-input, #080c14); border:2px solid var(--border-color, #1e2a3a); border-radius:12px; color:var(--text-primary, #fff); font-size:0.9rem; transition:all 0.3s; font-family:Inter,sans-serif;"
+                            onfocus="this.style.borderColor='var(--accent-color, #00ff88)'; this.style.boxShadow='0 0 0 4px var(--accent-glow, rgba(0,255,136,0.1))';"
+                            onblur="this.style.borderColor='var(--border-color, #1e2a3a)'; this.style.boxShadow='none';">
+                    </div>
+                </div>
+
+                <!-- Tipo de Servicio - Cards seleccionables -->
+                <div class="form-group" style="margin-bottom:14px;">
+                    <label
+                        style="color:var(--text-secondary, #888); font-size:0.72rem; display:block; margin-bottom:8px; font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">🔧
+                        Tipo de Servicio</label>
+                    <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:8px;" id="selector-tipo-bahia">
+                        <div onclick="seleccionarTipoBahia('LAVADO_RAPIDO', this)" data-tipo="LAVADO_RAPIDO"
+                            style="padding:10px 8px; border:2px solid var(--border-color, #1e2a3a); border-radius:10px; text-align:center; cursor:pointer; transition:all 0.2s; color:var(--text-secondary, #aaa); font-size:0.75rem;"
+                            onmouseover="this.style.borderColor='var(--accent-color, #00ff88)';"
+                            onmouseout="if(!this.classList.contains('activo')){this.style.borderColor='var(--border-color, #1e2a3a)';}">
+                            🚿<br>Lavado Rápido
+                        </div>
+                        <div onclick="seleccionarTipoBahia('LAVADO_COMPLETO', this)" data-tipo="LAVADO_COMPLETO"
+                            style="padding:10px 8px; border:2px solid var(--border-color, #1e2a3a); border-radius:10px; text-align:center; cursor:pointer; transition:all 0.2s; color:var(--text-secondary, #aaa); font-size:0.75rem;"
+                            onmouseover="this.style.borderColor='var(--accent-color, #00ff88)';"
+                            onmouseout="if(!this.classList.contains('activo')){this.style.borderColor='var(--border-color, #1e2a3a)';}">
+                            🧼<br>Lavado Completo
+                        </div>
+                        <div onclick="seleccionarTipoBahia('DETALLADO', this)" data-tipo="DETALLADO"
+                            style="padding:10px 8px; border:2px solid var(--border-color, #1e2a3a); border-radius:10px; text-align:center; cursor:pointer; transition:all 0.2s; color:var(--text-secondary, #aaa); font-size:0.75rem;"
+                            onmouseover="this.style.borderColor='var(--accent-color, #00ff88)';"
+                            onmouseout="if(!this.classList.contains('activo')){this.style.borderColor='var(--border-color, #1e2a3a)';}">
+                            ✨<br>Detallado
+                        </div>
+                        <div onclick="seleccionarTipoBahia('PULIDO', this)" data-tipo="PULIDO"
+                            style="padding:10px 8px; border:2px solid var(--border-color, #1e2a3a); border-radius:10px; text-align:center; cursor:pointer; transition:all 0.2s; color:var(--text-secondary, #aaa); font-size:0.75rem;"
+                            onmouseover="this.style.borderColor='var(--accent-color, #00ff88)';"
+                            onmouseout="if(!this.classList.contains('activo')){this.style.borderColor='var(--border-color, #1e2a3a)';}">
+                            💎<br>Pulido
+                        </div>
+                        <div onclick="seleccionarTipoBahia('GENERAL', this)" data-tipo="GENERAL"
+                            style="padding:10px 8px; border:2px solid var(--border-color, #1e2a3a); border-radius:10px; text-align:center; cursor:pointer; transition:all 0.2s; color:var(--text-secondary, #aaa); font-size:0.75rem; grid-column:span 2;"
+                            onmouseover="this.style.borderColor='var(--accent-color, #00ff88)';"
+                            onmouseout="if(!this.classList.contains('activo')){this.style.borderColor='var(--border-color, #1e2a3a)';}">
+                            🔧<br>General
+                        </div>
+                    </div>
+                    <input type="hidden" id="bahia-tipo" value="GENERAL">
+                </div>
+
+                <!-- Estado y Empleado -->
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:20px;">
+                    <div class="form-group">
+                        <label
+                            style="color:var(--text-secondary, #888); font-size:0.72rem; display:block; margin-bottom:4px; font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">📌
+                            Estado</label>
+                        <select id="bahia-estado" required
+                            style="width:100%; padding:14px; background:var(--bg-input, #080c14); border:2px solid var(--border-color, #1e2a3a); border-radius:12px; color:var(--text-primary, #fff); font-size:0.9rem; cursor:pointer; font-family:Inter,sans-serif;">
+                            <option value="DISPONIBLE">🟢 Disponible</option>
+                            <option value="OCUPADA">🔴 Ocupada</option>
+                            <option value="MANTENIMIENTO">🟡 Mantenimiento</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label
+                            style="color:var(--text-secondary, #888); font-size:0.72rem; display:block; margin-bottom:4px; font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">👨‍🔧
+                            Empleado</label>
+                        <select id="bahia-empleado"
+                            style="width:100%; padding:14px; background:var(--bg-input, #080c14); border:2px solid var(--border-color, #1e2a3a); border-radius:12px; color:var(--text-primary, #fff); font-size:0.9rem; cursor:pointer; font-family:Inter,sans-serif;">
+                            <option value="">Sin asignar</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Botones -->
+                <div style="display:flex; gap:10px;">
+                    <button type="button" onclick="document.getElementById('modal-bahia').style.display='none'"
+                        style="flex:1; padding:14px; border:2px solid var(--border-color, #333); border-radius:12px; background:transparent; color:var(--text-primary, #fff); cursor:pointer; font-size:0.85rem; font-weight:600; transition:all 0.3s;"
+                        onmouseover="this.style.background='var(--bg-hover, rgba(255,255,255,0.05))';"
+                        onmouseout="this.style.background='transparent';">Cancelar</button>
+                    <button type="button" onclick="window.guardarBahia(event)"
+                        style="flex:2; padding:14px; border:none; border-radius:12px; background:var(--accent-color, #00ff88); color:#000; cursor:pointer; font-weight:700; font-size:0.9rem; transition:all 0.3s; letter-spacing:0.5px;"
+                        onmouseover="this.style.boxShadow='0 0 30px var(--accent-glow, rgba(0,255,136,0.5))'; this.style.transform='translateY(-2px)';"
+                        onmouseout="this.style.boxShadow='none'; this.style.transform='translateY(0)';">💾 GUARDAR
+                        BAHÍA</button>
+                    <button type="button" id="btn-eliminar-bahia" onclick="window.eliminarBahia()"
+                        style="display:none; flex:1; padding:14px; border:2px solid #ff4444; border-radius:12px; background:transparent; color:#ff4444; cursor:pointer; font-size:0.85rem; font-weight:600; transition:all 0.3s;"
+                        onmouseover="this.style.background='#ff444415';"
+                        onmouseout="this.style.background='transparent';">🗑️</button>
+                </div>
+            </div>
+        </div>
+
+        <style>
+            @keyframes slideUp {
+                from {
+                    transform: translateY(20px);
+                    opacity: 0;
+                }
+
+                to {
+                    transform: translateY(0);
+                    opacity: 1;
+                }
+            }
+
+            @keyframes pulse {
+
+                0%,
+                100% {
+                    box-shadow: 0 0 0 0 var(--accent-glow, rgba(0, 255, 136, 0.3));
+                }
+
+                50% {
+                    box-shadow: 0 0 0 15px transparent;
+                }
+            }
+        </style>
+    </div>
+
+    <!-- Sección: Empleados -->
+    <section id="empleados" class="dashboard-section">
+        <div class="section-header">
+            <h2>Mis Empleados</h2>
+            <button class="btn-add" onclick="window.abrirModalNuevoEmpleado()">+ Nuevo Empleado</button>
+        </div>
+        <div class="empleados-grid" id="empleados-lista">
+            <p class="empty-state">Cargando empleados...</p>
+        </div>
+    </section>
+
+    <!-- Modal: Nuevo/Editar Empleado -->
+    <div id="modal-empleado" class="modal d-none">
+        <div class="modal-content"
+            style="max-width:500px; background:var(--bg-card, #131c2b); border:2px solid var(--border-color, #1e2a3a); border-radius:20px; padding:0; overflow:hidden; animation:slideUp 0.3s ease; box-shadow:0 25px 80px rgba(0,0,0,0.6);">
+
+            <!-- Header con gradiente -->
+            <div
+                style="background:linear-gradient(135deg, var(--accent-color, #00ff88)18, var(--accent-color, #00ff88)05); padding:22px 25px; border-bottom:1px solid var(--border-color, #1e2a3a); display:flex; justify-content:space-between; align-items:center;">
+                <!-- Foto de perfil -->
+                <div style="margin-bottom:20px;" class="text-muted">
+                    <div style="position:relative; display:inline-block; cursor:pointer;"
+                        onclick="document.getElementById('empleado-foto').click()">
+                        <img id="preview-foto-empleado" src=""
+                            style="width:90px; height:90px; border-radius:50%; object-fit:cover; border:3px solid var(--accent-color, #00ff88); background:var(--bg-input, #080c14); display:none;"
+                            onerror="this.style.display='none'; document.getElementById('foto-placeholder').style.display='flex';">
+                        <div id="foto-placeholder"
+                            style="width:90px; height:90px; border-radius:50%; background:var(--bg-input, #080c14); border:3px dashed var(--border-color, #1e2a3a); display:flex; align-items:center; justify-content:center; font-size:2.5rem; transition:all 0.3s;"
+                            onmouseover="this.style.borderColor='var(--accent-color, #00ff88)';"
+                            onmouseout="this.style.borderColor='var(--border-color, #1e2a3a)';">
+                            👤
+                        </div>
+                        <div
+                            style="position:absolute; bottom:0; right:0; background:var(--accent-color, #00ff88); color:#000; width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.8rem; border:2px solid var(--bg-card, #131c2b);">
+                            📷</div>
+                    </div>
+                    <input type="file" id="empleado-foto" accept="image/*" class="d-none"
+                        onchange="window.previsualizarFotoEmpleado(event)">
+                    <p style="color:var(--text-muted, #888); font-size:0.7rem; margin-top:6px;">Click para agregar foto
+                    </p>
+                </div>
+                <div style="display:flex; align-items:center; gap:10px;">
+
+                    <h3 id="modal-empleado-titulo" style="color:var(--text-primary, #fff); margin:0; font-size:1.1rem;">
+                        Nuevo Empleado</h3>
+                </div>
+                <span onclick="document.getElementById('modal-empleado').style.display='none'"
+                    style="font-size:1.2rem; cursor:pointer; color:var(--text-muted, #888); width:35px; height:35px; display:flex; align-items:center; justify-content:center; border-radius:50%; transition:all 0.3s;"
+                    onmouseover="this.style.background='#ff444422'; this.style.color='#ff4444';"
+                    onmouseout="this.style.background='transparent'; this.style.color='var(--text-muted, #888)';">✕</span>
+            </div>
+
+            <!-- Formulario (convertido a div para evitar recarga) -->
+            <div id="form-empleado" style="padding:25px;">
+                <input type="hidden" id="empleado-id" value="">
+
+                <div class="form-group" style="margin-bottom:16px;">
+                    <label>👤
+                        Nombre Completo</label>
+                    <input type="text" id="empleado-nombre" placeholder="Ej: Juan Pérez" required
+                        onfocus="this.style.borderColor='var(--accent-color, #00ff88)'; this.style.boxShadow='0 0 0 3px var(--accent-glow, rgba(0,255,136,0.1))';"
+                        onblur="this.style.borderColor='var(--border-color, #1e2a3a)'; this.style.boxShadow='none';">
+                </div>
+
+                <div class="form-group" style="margin-bottom:16px;">
+                    <label>📧
+                        Email</label>
+                    <input type="email" id="empleado-email" placeholder="Ej: juan@taller.com" required
+                        onfocus="this.style.borderColor='var(--accent-color, #00ff88)'; this.style.boxShadow='0 0 0 3px var(--accent-glow, rgba(0,255,136,0.1))';"
+                        onblur="this.style.borderColor='var(--border-color, #1e2a3a)'; this.style.boxShadow='none';">
+                </div>
+
+                <div class="form-group" style="margin-bottom:16px;">
+                    <label>🔒
+                        Contraseña</label>
+                    <input type="password" id="empleado-password" placeholder="Mínimo 6 caracteres" minlength="6"
+                        onfocus="this.style.borderColor='var(--accent-color, #00ff88)'; this.style.boxShadow='0 0 0 3px var(--accent-glow, rgba(0,255,136,0.1))';"
+                        onblur="this.style.borderColor='var(--border-color, #1e2a3a)'; this.style.boxShadow='none';">
+                    <small style="color:var(--text-muted, #666); font-size:0.7rem; display:block; margin-top:4px;">Solo
+                        para nuevos
+                        empleados</small>
+                </div>
+
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px;">
+                    <div class="form-group">
+                        <label>🎯
+                            Rol</label>
+                        <select id="empleado-rol" required
+                            style="width:100%; padding:12px 14px; background:var(--bg-input, #080c14); border:1px solid var(--border-color, #1e2a3a); border-radius:10px; color:var(--text-primary, #fff); font-size:0.9rem; cursor:pointer; font-family:Inter,sans-serif;">
+                            <option value="LAVADOR">🧽 Lavador</option>
+                            <option value="DETALLADOR">✨ Detallador</option>
+                            <option value="SUPERVISOR">👁️ Supervisor</option>
+                            <option value="ADMIN">👔 Administrador</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>📌
+                            Estado</label>
+                        <select id="empleado-estado" required
+                            style="width:100%; padding:12px 14px; background:var(--bg-input, #080c14); border:1px solid var(--border-color, #1e2a3a); border-radius:10px; color:var(--text-primary, #fff); font-size:0.9rem; cursor:pointer; font-family:Inter,sans-serif;">
+                            <option value="DISPONIBLE">🟢 Disponible</option>
+                            <option value="OCUPADO">🔴 Ocupado</option>
+                            <option value="DESCANSANDO">🟡 Descansando</option>
+                            <option value="INACTIVO">⚪ Inactivo</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-bottom:20px;">
+                    <label>🔧
+                        Especialidad</label>
+                    <input type="text" id="empleado-especialidad" placeholder="Ej: Lavado Premium, Pulido"
+                        onfocus="this.style.borderColor='var(--accent-color, #00ff88)'; this.style.boxShadow='0 0 0 3px var(--accent-glow, rgba(0,255,136,0.1))';"
+                        onblur="this.style.borderColor='var(--border-color, #1e2a3a)'; this.style.boxShadow='none';">
+                </div>
+
+                <!-- Botones -->
+                <div
+                    style="display:flex; gap:10px; padding-top:10px; border-top:1px solid var(--border-color, #1e2a3a);">
+                    <button type="button" onclick="document.getElementById('modal-empleado').style.display='none'"
+                        style="flex:1; padding:12px; border:1px solid var(--border-color, #333); border-radius:10px; background:transparent; color:var(--text-primary, #fff); cursor:pointer; font-size:0.85rem; font-weight:500; transition:all 0.3s;"
+                        onmouseover="this.style.background='var(--bg-hover, rgba(255,255,255,0.05))';"
+                        onmouseout="this.style.background='transparent';">CANCELAR</button>
+                    <button type="button" onclick="window.guardarEmpleado(event)"
+                        style="flex:1.5; padding:12px; border:none; border-radius:10px; background:var(--accent-color, #00ff88); color:#000; cursor:pointer; font-weight:600; font-size:0.85rem; text-align:center; transition:all 0.3s;"
+                        onmouseover="this.style.boxShadow='0 0 20px var(--accent-glow, rgba(0,255,136,0.4))'; this.style.transform='translateY(-2px)';"
+                        onmouseout="this.style.boxShadow='none'; this.style.transform='translateY(0)';">💾
+                        GUARDAR</button>
+                    <button type="button" id="btn-eliminar-empleado" onclick="window.eliminarEmpleado()"
+                        style="display:none; flex:1; padding:12px; border:1px solid #ff4444; border-radius:10px; background:transparent; color:#ff4444; cursor:pointer; font-size:0.85rem; font-weight:500; transition:all 0.3s;"
+                        onmouseover="this.style.background='#ff444415';"
+                        onmouseout="this.style.background='transparent';">🗑️
+                        ELIMINAR</button>
+                </div>
+            </div>
+        </div>
+
+        <style>
+            @keyframes slideUp {
+                from {
+                    transform: translateY(20px);
+                    opacity: 0;
+                }
+
+                to {
+                    transform: translateY(0);
+                    opacity: 1;
+                }
+            }
+        </style>
+    </div>
+
+    <!-- Sección: Comisiones -->
+    <section id="comisiones" class="dashboard-section">
+        <div class="section-header">
+            <h2>👥 Empleados y Comisiones</h2>
+            <button class="btn-add" onclick="cargarRendimientoEmpleados()">🔄 Actualizar</button>
+        </div>
+
+        <!-- ✅ Filtros dinámicos -->
+        <div id="filtros-comisiones" style="display:flex; gap:10px; margin-bottom:15px; align-items:center;">
+            <!-- Se llena dinámicamente -->
+        </div>
+        <div style="overflow-x:auto;">
+            <table style="width:100%; border-collapse:collapse;" id="tabla-empleados-rendimiento">
+                <thead>
+                    <tr style="border-bottom:2px solid #1e2a3a;">
+                        <th style="padding:12px; text-align:left;">Empleado</th>
+                        <th>Trabajos</th>
+                        <th>Generó</th>
+                        <th>% Comisión</th>
+                        <th>A Pagar</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="tbody-comisiones">
+                    <tr>
+                        <td colspan="6" style="padding:30px; text-align:center; color:#888;">Cargando datos...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- Sección: Rendimiento -->
+    <section id="rendimiento" class="dashboard-section">
+
+
+        <div id="rendimiento-mensual"
+            style="display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:15px; margin-bottom:30px;">
+            <p style="color:#888; grid-column:1/-1;">Cargando rendimiento...</p>
+        </div>
+    </section>
+    <!-- Modal para Pagar Empleado -->
+    <div id="modal-pagar-empleado" class="modal d-none">
+        <div class="modal-content" style="max-width:450px;">
+            <span onclick="document.getElementById('modal-pagar-empleado').style.display='none'"
+                style="float:right; cursor:pointer; font-size:1.5rem; color:#888;">&times;</span>
+            <h3>💳 Pagar a Empleado</h3>
+
+            <div style="background:#131c2b; border-radius:10px; padding:15px; margin:15px 0; text-align:center;">
+                <p id="pagar-empleado-nombre" style="color:#fff; font-size:1.1rem; margin-bottom:5px;"></p>
+                <p style="color:#888; font-size:0.85rem;">Monto sugerido:</p>
+                <p id="pagar-empleado-monto" style="color:#00ff88; font-size:1.5rem; font-weight:700; margin:5px 0;">
+                </p>
+            </div>
+
+            <div class="form-group">
+                <label>Monto a Pagar (RD$)</label>
+                <input type="number" id="pagar-monto" min="0" step="0.01">
+            </div>
+
+            <div class="form-group">
+                <label>Método de Pago</label>
+                <select id="pagar-metodo">
+                    <option value="EFECTIVO">💵 Efectivo</option>
+                    <option value="TRANSFERENCIA">🏦 Transferencia Bancaria</option>
+                    <option value="TARJETA">💳 Tarjeta</option>
+                    <option value="CHEQUE">📝 Cheque</option>
+                    <option value="OTRO">📌 Otro</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Notas (opcional)</label>
+                <textarea id="pagar-notas" rows="2" placeholder="Ej: Pago correspondiente al mes de mayo"
+                    style="width:100%; padding:12px; background:#080c14; border:1px solid #1e2a3a; border-radius:8px; color:#fff; resize:vertical;"></textarea>
+            </div>
+
+            <div class="modal-actions" style="margin-top:20px; display:flex; gap:10px;">
+                <button onclick="document.getElementById('modal-pagar-empleado').style.display='none'"
+                    style="flex:1; padding:12px; background:transparent; border:1px solid #333; color:#fff; border-radius:8px; cursor:pointer;">Cancelar</button>
+                <button onclick="confirmarPagoEmpleado()" class="btn-confirm"
+                    style="flex:1; padding:12px; background:#00ff88; color:#000; border:none; border-radius:8px; cursor:pointer; font-weight:600;">💳
+                    Confirmar Pago</button>
+            </div>
+        </div>
+    </div>
+    <!-- Sección: Historial de Pagos -->
+    <!-- Sección: Historial de Pagos -->
+    <section id="historial-pagos" class="dashboard-section">
+        <div class="section-header">
+            <h2>💳 Historial de Pagos a Empleados</h2>
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                <button class="btn-add" onclick="exportarPagosCSV()" style="background:#00d4ff; color:#000;">📥
+                    Exportar CSV</button>
+                <button class="btn-add" onclick="cargarHistorialPagos()">🔄 Actualizar</button>
+            </div>
+        </div>
+
+        <!-- Filtros -->
+        <div
+            style="display:flex; gap:10px; margin-bottom:15px; flex-wrap:wrap; background:#131c2b; padding:15px; border-radius:10px; border:1px solid #1e2a3a;">
+            <select id="filtro-pago-empleado" onchange="cargarHistorialPagos()">
+                <option value="TODOS">👥 Todos los empleados</option>
+            </select>
+            <select id="filtro-pago-mes" onchange="cargarHistorialPagos()">
+                <option value="TODOS">📅 Todos los meses</option>
+                <option value="0">Enero</option>
+                <option value="1">Febrero</option>
+                <option value="2">Marzo</option>
+                <option value="3">Abril</option>
+                <option value="4">Mayo</option>
+                <option value="5">Junio</option>
+                <option value="6">Julio</option>
+                <option value="7">Agosto</option>
+                <option value="8">Septiembre</option>
+                <option value="9">Octubre</option>
+                <option value="10">Noviembre</option>
+                <option value="11">Diciembre</option>
+            </select>
+            <select id="filtro-pago-estado" onchange="cargarHistorialPagos()">
+                <option value="TODOS">📌 Todos los estados</option>
+                <option value="PAGADO">✅ Pagado</option>
+                <option value="PENDIENTE">⏳ Pendiente</option>
+            </select>
+            <input type="text" id="busqueda-pago" placeholder="🔍 Buscar empleado..." oninput="cargarHistorialPagos()"
+                style="padding:10px; background:#080c14; border:1px solid #1e2a3a; border-radius:8px; color:#fff; font-size:0.85rem; flex:1; min-width:150px;">
+        </div>
+
+        <!-- Resumen rápido -->
+        <div id="resumen-pagos"
+            style="display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:10px; margin-bottom:15px;">
+        </div>
+
+        <!-- Tabla de pagos -->
+        <div style="overflow-x:auto; background:#131c2b; border:1px solid #1e2a3a; border-radius:15px;">
+            <table style="width:100%; border-collapse:collapse;" id="tabla-pagos">
+                <thead>
+                    <tr style="border-bottom:2px solid #1e2a3a; background:#0a0e14;">
+                        <th
+                            style="padding:14px; text-align:left; font-size:0.75rem; color:#888; text-transform:uppercase;">
+                            Empleado</th>
+                        <th class="kpi-label">
+                            Periodo</th>
+                        <th class="kpi-label">
+                            Trabajos</th>
+                        <th class="kpi-label">
+                            Generado</th>
+                        <th class="kpi-label">
+                            % Com.</th>
+                        <th class="kpi-label">
+                            Pagado</th>
+                        <th class="kpi-label">
+                            Método</th>
+                        <th class="kpi-label">
+                            Estado</th>
+                        <th class="kpi-label">
+                            Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="tbody-pagos">
+                    <tr>
+                        <td colspan="9">Cargando historial...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- Modal de Comisión -->
+    <div id="modal-comision" class="modal d-none">
+        <div class="modal-content" style="max-width:450px;">
+            <span onclick="document.getElementById('modal-comision').style.display='none'"
+                style="float:right; cursor:pointer; font-size:1.5rem; color:#888;">&times;</span>
+            <h3>💰 Configurar Comisión</h3>
+            <input type="hidden" id="comision-empleado-id">
+            <p id="comision-empleado-nombre"></p>
+
+            <div class="form-group">
+                <label>Porcentaje por lavado (%)</label>
+                <input type="number" id="comision-porcentaje" value="30" min="0" max="100">
+            </div>
+
+            <div class="form-group">
+                <label>Tipo de pago</label>
+                <select id="comision-tipo">
+                    <option value="POR_LAVADO">Por lavado</option>
+                    <option value="POR_SERVICIO">Por servicio</option>
+                    <option value="FIJO_MENSUAL">Fijo mensual</option>
+                </select>
+            </div>
+
+            <div class="modal-actions" style="margin-top:20px; display:flex; gap:10px;">
+                <button onclick="document.getElementById('modal-comision').style.display='none'"
+                    style="flex:1; padding:12px; background:transparent; border:1px solid #333; color:#fff; border-radius:8px; cursor:pointer;">Cancelar</button>
+                <button onclick="guardarComision()"
+                    style="flex:1; padding:12px; background:#00ff88; color:#000; border:none; border-radius:8px; cursor:pointer; font-weight:600;">💾
+                    Guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== SECCIÓN: RESEÑAS ==================== -->
+    <section id="resenas" class="dashboard-section">
+        <div class="section-header">
+            <h2>⭐ Gestión de Reseñas</h2>
+            <button class="btn-add" onclick="cargarResenas()">🔄 Actualizar</button>
+        </div>
+
+        <!-- Estadísticas -->
+        <div id="stats-resenas"
+            style="display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:10px; margin-bottom:20px;">
+        </div>
+
+        <!-- Filtros -->
+        <div
+            style="display:flex; gap:10px; margin-bottom:15px; flex-wrap:wrap; background:#131c2b; padding:15px; border-radius:10px; border:1px solid #1e2a3a;">
+            <select id="filtro-resenas-estrellas" onchange="window.gestionResenas.cargar()"
+                style="padding:10px; background:#080c14; border:1px solid #1e2a3a; border-radius:8px; color:#fff;">
+                <option value="TODAS">⭐ Todas</option>
+                <option value="5">⭐⭐⭐⭐⭐ (5)</option>
+                <option value="4">⭐⭐⭐⭐ (4)</option>
+                <option value="3">⭐⭐⭐ (3)</option>
+                <option value="2">⭐⭐ (2)</option>
+                <option value="1">⭐ (1)</option>
+                <option value="SIN_RESPUESTA">💬 Sin responder</option>
+            </select>
+            <input type="text" id="busqueda-resena" placeholder="🔍 Buscar por cliente o comentario..."
+                oninput="window.gestionResenas.cargar()"
+                style="flex:1; padding:10px; background:#080c14; border:1px solid #1e2a3a; border-radius:8px; color:#fff; min-width:200px;">
+        </div>
+
+        <!-- Lista de reseñas -->
+        <div id="lista-resenas-taller" style="display:flex; flex-direction:column; gap:12px;">
+            <p style="color:#888; text-align:center; padding:30px;">Cargando reseñas...</p>
+        </div>
+    </section>
+
+    <!-- Modal: Responder Reseña -->
+    <div id="modal-responder-resena" class="modal d-none">
+        <div class="modal-content" style="max-width:550px;">
+            <span onclick="document.getElementById('modal-responder-resena').style.display='none'"
+                style="float:right; cursor:pointer; font-size:1.5rem; color:#888;">&times;</span>
+            <h3>💬 Responder Reseña</h3>
+
+            <div id="resena-original" style="background:#080c14; border-radius:10px; padding:15px; margin:15px 0;">
+            </div>
+
+            <div class="form-group">
+                <label>Tu Respuesta</label>
+                <textarea id="respuesta-texto" rows="4" placeholder="Escribe tu respuesta al cliente..."
+                    style="width:100%; padding:12px; background:#080c14; border:1px solid #1e2a3a; border-radius:8px; color:#fff; resize:vertical;"></textarea>
+            </div>
+
+            <input type="hidden" id="respuesta-resena-id" value="">
+
+            <div class="modal-actions" style="display:flex; gap:10px;">
+                <button onclick="document.getElementById('modal-responder-resena').style.display='none'"
+                    style="flex:1; padding:12px; background:transparent; border:1px solid #333; color:#fff; border-radius:8px; cursor:pointer;">Cancelar</button>
+                <button onclick="window.gestionResenas.enviarRespuesta()"
+                    style="flex:1; padding:12px; background:#00ff88; color:#000; border:none; border-radius:8px; cursor:pointer; font-weight:600;">📤
+                    Enviar Respuesta</button>
+            </div>
+        </div>
+    </div>
+    <!-- Sección: Historial de Trabajos -->
+    <section id="historial" class="dashboard-section">
+        <div class="section-header">
+            <h2>📋 Historial de Trabajos</h2>
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                <button class="btn-add" onclick="exportarHistorialCSV()" style="background:#00d4ff; color:#000;">📥
+                    Exportar CSV</button>
+                <button class="btn-add" onclick="cargarHistorial()">🔄 Actualizar</button>
+            </div>
+        </div>
+
+        <!-- Estadísticas rápidas -->
+        <div id="stats-historial"
+            style="display:grid; grid-template-columns:repeat(auto-fit, minmax(140px, 1fr)); gap:10px; margin-bottom:15px;">
+        </div>
+
+        <!-- Filtros avanzados -->
+        <div
+            style="display:flex; gap:10px; margin-bottom:15px; flex-wrap:wrap; background:#131c2b; padding:15px; border-radius:10px; border:1px solid #1e2a3a;">
+            <select id="filtro-historial-empleado" onchange="cargarHistorial()">
+                <option value="TODOS">👥 Todos los empleados</option>
+            </select>
+            <select id="filtro-historial-servicio" onchange="cargarHistorial()">
+                <option value="TODOS">🔧 Todos los servicios</option>
+            </select>
+            <input type="date" id="filtro-historial-desde" onchange="cargarHistorial()" title="Fecha desde">
+            <input type="date" id="filtro-historial-hasta" onchange="cargarHistorial()" title="Fecha hasta">
+            <input type="text" id="busqueda-historial" placeholder="🔍 Buscar por placa, cliente o servicio..."
+                oninput="cargarHistorial()"
+                style="padding:10px; background:#080c14; border:1px solid #1e2a3a; border-radius:8px; color:#fff; font-size:0.85rem; flex:1; min-width:200px;">
+        </div>
+
+        <!-- Tabla -->
+        <div style="overflow-x:auto; background:#131c2b; border:1px solid #1e2a3a; border-radius:15px;">
+            <table style="width:100%; border-collapse:collapse;" id="tabla-historial">
+                <thead>
+                    <tr style="border-bottom:2px solid #1e2a3a; background:#0a0e14;">
+                        <th>Fecha</th>
+                        <th>Cliente</th>
+                        <th>Vehículo</th>
+                        <th>Servicio</th>
+                        <th>Empleado</th>
+                        <th style="padding:14px; text-align:center; font-size:0.75rem; color:#888;">Duración</th>
+                        <th style="padding:14px; text-align:right; font-size:0.75rem; color:#888;">Monto</th>
+                        <th style="padding:14px; text-align:center; font-size:0.75rem; color:#888;">⭐</th>
+                        <th style="padding:14px; text-align:center; font-size:0.75rem; color:#888;">Detalle</th>
+                    </tr>
+                </thead>
+                <tbody id="historial-tbody">
+                    <tr>
+                        <td colspan="9">Cargando historial...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Paginación -->
+        <div id="paginacion-historial" style="display:flex; justify-content:center; gap:8px; margin-top:15px;">
+        </div>
+    </section>
+
+    <!-- Sección: Configuración del Taller -->
+    <section id="configuracion" class="dashboard-section">
+        <div class="section-header">
+            <h2>⚙️ Configuración del Taller</h2>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+            <!-- Columna Izquierda: Datos del taller -->
+            <div>
+                <div>
+                    <h3 style="color:#fff; margin-bottom:20px;">🏪 Información del Taller</h3>
+
+                    <!-- Logo del taller -->
+                    <div style=" margin-bottom:25px;" class="text-muted">
+                        <div style="position:relative; display:inline-block; cursor:pointer;"
+                            onclick="document.getElementById('input-logo-taller').click()">
+                            <img id="preview-logo-taller" src=""
+                                style="width:120px; height:120px; border-radius:50%; object-fit:cover; border:3px solid #00ff88; background:#080c14; transition:all 0.3s;"
+                                onmouseover="this.style.borderColor='#ffbb33'; this.style.transform='scale(1.05)';"
+                                onmouseout="this.style.borderColor='#00ff88'; this.style.transform='scale(1)';"
+                                onerror="this.style.display='none'; document.getElementById('logo-placeholder').style.display='flex';">
+                            <div id="logo-placeholder"
+                                style="width:120px; height:120px; border-radius:50%; background:#080c14; border:3px solid #00ff88; display:flex; align-items:center; justify-content:center; font-size:3rem;">
+                                🏪
+                            </div>
+                            <div
+                                style="position:absolute; bottom:5px; right:5px; background:#00ff88; color:#000; width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.9rem; border:2px solid #000;">
+                                📷</div>
+                        </div>
+                        <!-- ✅ QUITADO el onchange del HTML - se maneja en JavaScript -->
+                        <input type="file" id="input-logo-taller" accept="image/*" class="d-none">
+                        <p style="color:#888; font-size:0.8rem; margin-top:8px;">Click para cambiar el logo (máx
+                            2MB)</p>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Nombre del Taller *</label>
+                        <input type="text" id="config-nombre" placeholder="Nombre de tu taller">
+                    </div>
+
+                    <div class="form-group">
+                        <label>📝 Descripción</label>
+                        <textarea id="config-descripcion" rows="3"
+                            placeholder="Describe tu taller... Ej: 10 años de experiencia en estética vehicular."
+                            style="width:100%; padding:12px; background:#080c14; border:1px solid #1e2a3a; border-radius:8px; color:#fff; resize:vertical; font-family:Inter,sans-serif;"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="config-email" placeholder="taller@email.com">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Teléfono</label>
+                        <input type="text" id="config-telefono" placeholder="809-555-1234">
+                    </div>
+                    <!-- ✅ Cambiar Contraseña (NUEVO) -->
+                    <div
+                        style="background:#131c2b; border:1px solid #ffbb33; border-radius:15px; padding:25px; margin-bottom:20px;">
+                        <h3 style="color:#ffbb33; margin-bottom:15px;">🔒 Cambiar Contraseña</h3>
+
+                        <div class="form-group">
+                            <label>Contraseña Actual</label>
+                            <input type="password" id="config-password-actual" placeholder="••••••••">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Nueva Contraseña</label>
+                            <input type="password" id="config-password-nueva" placeholder="Mínimo 6 caracteres"
+                                minlength="6">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Confirmar Nueva Contraseña</label>
+                            <input type="password" id="config-password-confirmar"
+                                placeholder="Repite la nueva contraseña">
+                        </div>
+
+                        <div id="btn-cambiar-password" onclick="window.cambiarContrasenaTaller()"
+                            style="width:100%; padding:12px; background:#ffbb33; color:#000; border:none; border-radius:8px; cursor:pointer; font-weight:600; font-size:0.9rem; margin-top:10px; text-align:center;"
+                            onmouseover="this.style.boxShadow='0 0 20px rgba(255,187,51,0.4)'"
+                            onmouseout="this.style.boxShadow='none'">
+                            🔄 Cambiar Contraseña
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Especialidad</label>
+                        <select id="config-especialidad">
+                            <option value="GENERAL">🔧 General</option>
+                            <option value="LAVADO">🧽 Lavado</option>
+                            <option value="DETALLADO">✨ Detallado</option>
+                            <option value="PULIDO">💎 Pulido</option>
+                            <option value="TRATAMIENTO">🧴 Tratamiento</option>
+                        </select>
+                    </div>
+
+                    <!-- Métodos de pago -->
+                    <div class="form-group">
+                        <label>💳 Métodos de pago aceptados</label>
+                        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                            <label>
+                                <input type="checkbox" id="config-pago-efectivo" value="EFECTIVO"> 💵 Efectivo
+                            </label>
+                            <label>
+                                <input type="checkbox" id="config-pago-transferencia" value="TRANSFERENCIA"> 🏦
+                                Transferencia
+                            </label>
+                            <label>
+                                <input type="checkbox" id="config-pago-tarjeta" value="TARJETA"> 💳 Tarjeta
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- ✅ Tipos de Vehículos (NUEVO) -->
+                    <div>
+                        <h3>🚗 Tipos de Vehículos que atiendes</h3>
+                        <p style="color:#888; font-size:0.8rem; margin-bottom:15px;">Selecciona los tipos de vehículos
+                            que aceptas en tu
+                            taller</p>
+
+                        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                            <label>
+                                <input type="checkbox" id="config-vehiculo-auto" value="AUTO"> 🚗 Auto
+                            </label>
+                            <label>
+                                <input type="checkbox" id="config-vehiculo-camioneta" value="CAMIONETA"> 🚙 Camioneta
+                            </label>
+                            <label>
+                                <input type="checkbox" id="config-vehiculo-moto" value="MOTO"> 🏍️ Moto
+                            </label>
+                            <label>
+                                <input type="checkbox" id="config-vehiculo-camion" value="CAMION"> 🚛 Camión
+                            </label>
+                            <label>
+                                <input type="checkbox" id="config-vehiculo-bus" value="BUS"> 🚌 Bus
+                            </label>
+                            <label>
+                                <input type="checkbox" id="config-vehiculo-otro" value="OTRO"> ⚙️ Otro
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <!-- ✅ PANEL DE PERSONALIZACIÓN VISUAL (NUEVO) -->
+                <div>
+                    <h3 style="color:#fff; margin-bottom:20px;">🎨 Personalización Visual</h3>
+                    <p style="color:#888; font-size:0.85rem; margin-bottom:20px;">Estos cambios se aplican solo a tu
+                        vista. Cada usuario
+                        puede personalizar su experiencia.</p>
+
+                    <!-- ✅ Selector de Tema -->
+                    <div class="form-group">
+                        <label>🎭 Tema de color</label>
+                        <div id="selector-temas" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:10px;">
+                            <!-- Se llena dinámicamente con temaManager.renderizarSelectorTemas() -->
+                            <p style="color:#888; grid-column:1/-1; text-align:center;">Cargando temas...</p>
+                        </div>
+                    </div>
+
+                    <!-- ✅ PALETAS PREMIUM: Selector de paletas predefinidas (NUEVO) -->
+                    <div class="form-group mt-lg">
+                        <label>🎨 Paletas de color</label>
+                        <p style="color:#888; font-size:0.8rem; margin-bottom:12px;">Elige una combinación de
+                            colores predefinida para tu
+                            taller</p>
+                        <div id="selector-paletas"
+                            style="display:grid; grid-template-columns: repeat(4, 1fr); gap:10px;">
+                            <!-- Se llena dinámicamente con temaManager.renderizarSelectorPaletas() -->
+                            <p style="color:#888; grid-column:1/-1; text-align:center;">Cargando paletas...</p>
+                        </div>
+                    </div>
+                    <!-- ✅ Color Primario -->
+                    <div class="form-group mt-lg">
+                        <label>🎨 Color de acento</label>
+                        <div style="display:flex; align-items:center; gap:15px; flex-wrap:wrap;">
+                            <input type="color" id="input-color-primario" value="#00ff88"
+                                onchange="window.temaManager?.cambiarColorPrimario(this.value)"
+                                style="width:50px; height:40px; border-radius:8px; cursor:pointer; border:2px solid #1e2a3a; background:transparent; padding:3px;">
+                            <span style="color:#888; font-size:0.85rem;">Color principal de botones y acentos</span>
+                        </div>
+                        <small style="color:#666; display:block; margin-top:6px;">Este color se usa en botones,
+                            bordes activos y
+                            elementos destacados</small>
+                    </div>
+
+                    <!-- ✅ Densidad de UI -->
+                    <div class="form-group mt-lg">
+                        <label>📐 Densidad de la
+                            interfaz</label>
+                        <div style="display:flex; gap:10px;">
+                            <button onclick="window.temaManager?.cambiarDensidad('compacto')" class="btn-densidad"
+                                data-densidad="compacto"
+                                style="flex:1; padding:12px; border-radius:8px; cursor:pointer; background:#080c14; color:#fff; border:1px solid #1e2a3a; font-family:Inter,sans-serif; font-size:0.85rem; transition:all 0.3s;"
+                                onmouseover="if(!this.classList.contains('active')){this.style.borderColor='var(--accent-color)';}"
+                                onmouseout="if(!this.classList.contains('active')){this.style.borderColor='#1e2a3a';}">
+                                📦 Compacto
+                            </button>
+                            <button onclick="window.temaManager?.cambiarDensidad('comodo')" class="btn-densidad active"
+                                data-densidad="comodo"
+                                style="flex:1; padding:12px; border-radius:8px; cursor:pointer; background:rgba(0,255,136,0.08); color:#00ff88; border:1px solid #00ff88; font-family:Inter,sans-serif; font-size:0.85rem; transition:all 0.3s;">
+                                😊 Cómodo
+                            </button>
+                        </div>
+                        <small style="color:#666; display:block; margin-top:6px;">Compacto muestra más información,
+                            Cómodo tiene más
+                            espacio</small>
+                    </div>
+
+                    <!-- ✅ Tamaño de fuente -->
+                    <div class="form-group mt-lg">
+                        <label>🔤 Tamaño de texto</label>
+                        <div style="display:flex; gap:10px;">
+                            <button onclick="window.temaManager?.cambiarTamanoFuente('pequeno')" class="btn-font"
+                                data-font="pequeno"
+                                style="flex:1; padding:10px; border-radius:8px; cursor:pointer; font-size:0.8rem; background:#080c14; color:#fff; border:1px solid #1e2a3a; font-family:Inter,sans-serif; transition:all 0.3s;"
+                                onmouseover="if(!this.classList.contains('active')){this.style.borderColor='var(--accent-color)';}"
+                                onmouseout="if(!this.classList.contains('active')){this.style.borderColor='#1e2a3a';}">
+                                Aa Pequeño
+                            </button>
+                            <button onclick="window.temaManager?.cambiarTamanoFuente('normal')" class="btn-font active"
+                                data-font="normal"
+                                style="flex:1; padding:10px; border-radius:8px; cursor:pointer; font-size:1rem; background:rgba(0,255,136,0.08); color:#00ff88; border:1px solid #00ff88; font-family:Inter,sans-serif; transition:all 0.3s;">
+                                Aa Normal
+                            </button>
+                            <button onclick="window.temaManager?.cambiarTamanoFuente('grande')" class="btn-font"
+                                data-font="grande"
+                                style="flex:1; padding:10px; border-radius:8px; cursor:pointer; font-size:1.2rem; background:#080c14; color:#fff; border:1px solid #1e2a3a; font-family:Inter,sans-serif; transition:all 0.3s;"
+                                onmouseover="if(!this.classList.contains('active')){this.style.borderColor='var(--accent-color)';}"
+                                onmouseout="if(!this.classList.contains('active')){this.style.borderColor='#1e2a3a';}">
+                                Aa Grande
+                            </button>
+                        </div>
+                        <small style="color:#666; display:block; margin-top:6px;">Ajusta el tamaño del texto en toda
+                            la
+                            aplicación</small>
+                    </div>
+
+                    <!-- ✅ Botón restablecer -->
+                    <div class="text-muted" style=" margin-top:25px; padding-top:20px; border-top:1px solid #1e2a3a;">
+                        <button onclick="window.temaManager?.resetear()"
+                            style="padding:10px 25px; background:transparent; color:#ff4444; border:1px solid #ff4444; border-radius:8px; cursor:pointer; font-size:0.85rem; font-family:Inter,sans-serif; transition:all 0.3s;"
+                            onmouseover="this.style.background='rgba(255,68,68,0.1)';"
+                            onmouseout="this.style.background='transparent';">
+                            🔄 Restablecer valores por defecto
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ✅ Vista previa del color (NUEVO) -->
+                <div
+                    style="background:#080c14; border:1px solid #1e2a3a; border-radius:12px; padding:15px; margin-top:10px;">
+                    <p style="color:#888; font-size:0.8rem; margin-bottom:10px;">👁️ Vista previa de tu perfil:</p>
+                    <div style="display:flex; align-items:center; gap:12px; padding:12px; background:#131c2b; border-radius:10px; border:2px solid var(--preview-color, #00ff88);"
+                        id="preview-color-card">
+                        <div style="width:45px; height:45px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:1.3rem; border:2px solid var(--preview-color, #00ff88);"
+                            id="preview-color-avatar">🏪</div>
+                        <div>
+                            <div style="display:flex; align-items:center; gap:6px;">
+                                <span style="color:#fff; font-weight:600;" id="preview-color-nombre">Mi
+                                    Taller</span>
+                                <span
+                                    style="padding:2px 8px; border-radius:10px; font-size:0.6rem; font-weight:600; background:var(--preview-color-10, rgba(0,255,136,0.1)); color:var(--preview-color, #00ff88);"
+                                    id="preview-color-badge">⭐ MI TALLER</span>
+                            </div>
+                            <span style="color:#888; font-size:0.75rem;">Así te verán tus clientes</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- Dirección -->
+                <div>
+                    <h3 style="color:#fff; margin-bottom:20px;">📍 Dirección</h3>
+
+                    <div class="form-group">
+                        <label>Calle</label>
+                        <input type="text" id="config-calle" placeholder="Calle Principal #123">
+                    </div>
+
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                        <div class="form-group">
+                            <label>Ciudad</label>
+                            <input type="text" id="config-ciudad" placeholder="San Pedro de Macorís">
+                        </div>
+                        <div class="form-group">
+                            <label>Provincia</label>
+                            <input type="text" id="config-provincia" placeholder="San Pedro de Macorís">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Columna Derecha: Horarios y Mapa -->
+            <div>
+                <!-- Horarios -->
+                <div>
+                    <h3 style="color:#fff; margin-bottom:20px;">🕐 Horarios</h3>
+
+                    <div style="display:grid; grid-template-columns:1fr 1fr 1fr 60px; gap:8px; margin-bottom:10px;">
+                        <small class="text-muted">Día</small>
+                        <small class="text-muted">Apertura</small>
+                        <small class="text-muted">Cierre</small>
+                        <small class="text-muted">Abre</small>
+                    </div>
+
+                    <div id="horarios-container">
+                        <p style="color:#888; text-align:center;">Cargando horarios...</p>
+                    </div>
+                </div>
+
+                <!-- Mapa -->
+                <div>
+                    <h3>🗺️ Ubicación exacta</h3>
+                    <p style="color:#888; font-size:0.8rem; margin-bottom:10px;">Arrastra el marcador a la ubicación
+                        exacta
+                        de tu taller</p>
+
+                    <div id="mapa-config-taller"
+                        style="width:100%; height:300px; border-radius:12px; background:#080c14; border:1px solid #1e2a3a;">
+                    </div>
+
+                    <div style="display:flex; gap:10px; margin-top:10px;">
+                        <input type="text" id="config-lat" placeholder="Latitud" readonly
+                            style="flex:1; padding:10px; background:#080c14; border:1px solid #1e2a3a; border-radius:8px; color:#888; font-size:0.85rem;">
+                        <input type="text" id="config-lng" placeholder="Longitud" readonly
+                            style="flex:1; padding:10px; background:#080c14; border:1px solid #1e2a3a; border-radius:8px; color:#888; font-size:0.85rem;">
+                    </div>
+                    <small id="config-direccion-detectada" style="color:#888; display:block; margin-top:8px;"></small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Botón Guardar -->
+        <div class="text-muted mt-lg">
+            <!-- ✅ Cambiado a div con onclick para evitar submit -->
+            <div id="btn-guardar-config"
+                style="padding:15px 50px; background:#00ff88; color:#000; border:none; border-radius:12px; cursor:pointer; font-weight:700; font-size:1rem; text-align:center; transition:all 0.3s; display:inline-block;"
+                onmouseover="this.style.boxShadow='0 0 30px rgba(0,255,136,0.4)'"
+                onmouseout="this.style.boxShadow='none'">
+                💾 GUARDAR CONFIGURACIÓN
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== SECCIÓN: GALERÍA DEL TALLER (ESTILO INSTAGRAM) ==================== -->
+    <section id="galeria" class="dashboard-section">
+        <div class="section-header">
+            <div>
+                <h2>🖼️ Galería de Trabajos</h2>
+                <p style="color:#888; font-size:0.85rem; margin-top:5px;">
+                    <span id="galeria-total-fotos">0</span> fotos en <span id="galeria-total-citas">0</span>
+                    servicios
+                </p>
+            </div>
+            <button class="btn-add" onclick="window.galeriaTaller.cargar()">🔄 Actualizar</button>
+        </div>
+
+        <!-- Barra de búsqueda -->
+        <div style="margin-bottom:15px;">
+            <div style="position:relative;">
+                <span style="position:absolute; left:15px; top:50%; transform:translateY(-50%); color:#888;">🔍</span>
+                <input type="text" id="busqueda-galeria-taller"
+                    placeholder="Buscar por vehículo, placa, cliente o servicio..."
+                    oninput="window.galeriaTaller.buscar(this.value)"
+                    style="width:100%; padding:14px 20px 14px 45px; background:#131c2b; border:2px solid #1e2a3a; border-radius:30px; color:#fff; font-size:0.9rem; transition:all 0.3s;"
+                    onfocus="this.style.borderColor='#00ff88'; this.style.boxShadow='0 0 20px rgba(0,255,136,0.1)';"
+                    onblur="this.style.borderColor='#1e2a3a'; this.style.boxShadow='none';">
+            </div>
+        </div>
+
+        <!-- Filtros + Contador -->
+        <div
+            style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:10px;">
+            <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                <button class="btn-filtro-galeria active" id="filtro-galeria-todas"
+                    onclick="window.galeriaTaller.filtrar('todas')"
+                    style="padding:8px 18px; background:rgba(0,255,136,0.1); border:2px solid #00ff88; border-radius:25px; color:#00ff88; cursor:pointer; font-weight:600; font-size:0.8rem; transition:all 0.3s;">
+                    📸 Todas
+                </button>
+                <button class="btn-filtro-galeria" id="filtro-galeria-antes"
+                    onclick="window.galeriaTaller.filtrar('antes')"
+                    style="padding:8px 18px; background:transparent; border:2px solid #333; border-radius:25px; color:#aaa; cursor:pointer; font-weight:600; font-size:0.8rem; transition:all 0.3s;">
+                    🔴 Antes
+                </button>
+                <button class="btn-filtro-galeria" id="filtro-galeria-durante"
+                    onclick="window.galeriaTaller.filtrar('durante')"
+                    style="padding:8px 18px; background:transparent; border:2px solid #333; border-radius:25px; color:#aaa; cursor:pointer; font-weight:600; font-size:0.8rem; transition:all 0.3s;">
+                    🟡 Durante
+                </button>
+                <button class="btn-filtro-galeria" id="filtro-galeria-despues"
+                    onclick="window.galeriaTaller.filtrar('despues')"
+                    style="padding:8px 18px; background:transparent; border:2px solid #333; border-radius:25px; color:#aaa; cursor:pointer; font-weight:600; font-size:0.8rem; transition:all 0.3s;">
+                    🟢 Después
+                </button>
+            </div>
+            <button
+                onclick="window.galeriaTaller.filtrar('todas'); document.getElementById('busqueda-galeria-taller').value='';"
+                style="padding:8px 15px; background:transparent; border:1px solid #ff4444; color:#ff4444; border-radius:25px; cursor:pointer; font-size:0.75rem;">
+                🧹 Limpiar
+            </button>
+        </div>
+        <!-- Después de los filtros existentes, agrega: -->
+        <div style="display:flex; gap:8px; align-items:center;">
+            <input type="date" id="filtro-fecha-desde" onchange="window.galeriaTaller.filtrarPorFecha()"
+                style="padding:8px 12px; background:#080c14; border:1px solid #1e2a3a; border-radius:20px; color:#fff; font-size:0.75rem;">
+            <span class="text-muted">a</span>
+            <input type="date" id="filtro-fecha-hasta" onchange="window.galeriaTaller.filtrarPorFecha()"
+                style="padding:8px 12px; background:#080c14; border:1px solid #1e2a3a; border-radius:20px; color:#fff; font-size:0.75rem;">
+        </div>
+        <!-- Grid Masonry estilo Instagram -->
+        <div id="galeria-taller-grid" style="columns:4 250px; gap:12px;">
+            <p style="color:#888; text-align:center; padding:60px; column-span:all;">
+                <span style="font-size:4rem; display:block; margin-bottom:15px;">🖼️</span>
+                Cargando galería...
+            </p>
+        </div>
+    </section>
+</main>
+
+<!-- Modal: Recepción de Vehículo -->
+<div id="modal-recepcion" class="modal d-none">
+    <div class="modal-content">
+        <h3>🚗 Recepción de Vehículo</h3>
+        <div id="recepcion-content"></div>
+        <div class="modal-actions">
+            <button class="btn-cancel" onclick="cerrarModal('modal-recepcion')">Cancelar</button>
+            <button class="btn-confirm" onclick="confirmarRecepcion()">Recibir Vehículo</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Finalizar Trabajo -->
+<div id="modal-finalizar" class="modal  d-none" ">
+    <div class=" modal-content">
+    <h3>✅ Finalizar Trabajo</h3>
+    <div id="finalizar-content"></div>
+    <div class="modal-actions">
+        <button class="btn-cancel" onclick="cerrarModal('modal-finalizar')">Cancelar</button>
+        <button class="btn-confirm" onclick="confirmarFinalizacion()">Finalizar Trabajo</button>
+    </div>
+</div>
+</div>
+<!-- Modal de Notificaciones del Taller -->
+
+<div id="modal-notificaciones" class="modal-notificaciones-overlay d-none"
+    style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:10000; align-items:center; justify-content:center; backdrop-filter:blur(5px);">
+    <div
+        style="background:#0f1621; border:1px solid #1e2a3a; border-radius:20px; padding:25px; max-width:550px; width:95%; max-height:80vh; display:flex; flex-direction:column;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+            <h3 style="color:#fff; margin:0;">🔔 Notificaciones</h3>
+            <div style="display:flex; gap:8px; align-items:center;">
+                <!-- Contador de no leídas -->
+                <span id="contador-notificaciones" style="font-size:0.7rem; color:#00ff88; background:rgba(0,255,136,0.1); 
+                             padding:4px 10px; border-radius:12px; font-weight:600; letter-spacing:0.5px;">
+                    0 sin leer
+                </span>
+
+                <!-- Botón marcar todas leídas -->
+                <button onclick="marcarTodasLeidas()"
+                    style="padding:6px 12px; border:1px solid #00ff88; border-radius:15px; background:transparent; color:#00ff88; cursor:pointer; font-size:0.7rem; transition:all 0.3s;"
+                    onmouseover="this.style.background='rgba(0,255,136,0.1)';"
+                    onmouseout="this.style.background='transparent';">
+                    ✅ Todas leídas
+                </button>
+
+                <!-- Botón cerrar -->
+                <span onclick="document.getElementById('modal-notificaciones').style.display='none'"
+                    style="font-size:1.5rem; cursor:pointer; color:#888; transition:color 0.3s; width:30px; height:30px; display:flex; align-items:center; justify-content:center; border-radius:50%;"
+                    onmouseover="this.style.color='#ff4444'; this.style.background='rgba(255,68,68,0.1)';"
+                    onmouseout="this.style.color='#888'; this.style.background='transparent';">
+                    &times;
+                </span>
+            </div>
+        </div>
+
+        <!-- Filtros -->
+        <div style="display:flex; gap:8px; margin-bottom:15px; flex-wrap:wrap;">
+            <button class="filtro-notif active" onclick="filtrarNotificaciones('todas', this)"
+                style="padding:6px 14px; border:1px solid #00ff88; border-radius:20px; background:rgba(0,255,136,0.1); color:#00ff88; cursor:pointer; font-size:0.75rem;">Todas</button>
+            <button class="filtro-notif" onclick="filtrarNotificaciones('no_leidas', this)"
+                style="padding:6px 14px; border:1px solid #333; border-radius:20px; background:transparent; color:#aaa; cursor:pointer; font-size:0.75rem;">🔵
+                No leídas</button>
+            <button class="filtro-notif" onclick="filtrarNotificaciones('nueva_cita', this)"
+                style="padding:6px 14px; border:1px solid #333; border-radius:20px; background:transparent; color:#aaa; cursor:pointer; font-size:0.75rem;">📅
+                Citas</button>
+            <button class="filtro-notif" onclick="filtrarNotificaciones('trabajo', this)"
+                style="padding:6px 14px; border:1px solid #333; border-radius:20px; background:transparent; color:#aaa; cursor:pointer; font-size:0.75rem;">🔧
+                Trabajos</button>
+            <button class="filtro-notif" onclick="filtrarNotificaciones('pago', this)"
+                style="padding:6px 14px; border:1px solid #333; border-radius:20px; background:transparent; color:#aaa; cursor:pointer; font-size:0.75rem;">💰
+                Pagos</button>
+        </div>
+
+        <!-- Lista de notificaciones -->
+        <div id="lista-notificaciones" style="overflow-y:auto; flex:1;">
+            <p style="color:#888; text-align:center; padding:30px;">Cargando...</p>
+        </div>
+    </div>
+</div>
+<!-- Modal: Historial del Empleado -->
+<div id="modal-historial-empleado" class="modal d-none">
+    <div class="modal-content"
+        style="max-width:700px; max-height:80vh; overflow-y:auto; background:#0f1621; border:1px solid #1e2a3a; border-radius:15px; padding:25px;">
+        <span onclick="document.getElementById('modal-historial-empleado').style.display='none'"
+            style="float:right; cursor:pointer; font-size:1.5rem; color:#888;">&times;</span>
+
+        <!-- Encabezado del empleado -->
+        <div id="historial-empleado-header" class="text-muted"
+            style=" margin-bottom:20px; padding-bottom:20px; border-bottom:1px solid #1e2a3a;">
+            <!-- Se llena dinámicamente -->
+        </div>
+
+        <!-- Resumen de estadísticas -->
+        <div id="historial-empleado-stats"
+            style="display:flex; justify-content:space-around; margin-bottom:20px; padding:15px; background:#080c14; border-radius:12px;">
+            <!-- Se llena dinámicamente -->
+        </div>
+
+        <!-- Lista de trabajos -->
+        <h4 style="margin-bottom:15px; color:#00ff88;">📋 Historial de Trabajos</h4>
+        <div id="historial-empleado-lista">
+            <p style="color:#666; text-align:center;">Cargando historial...</p>
+        </div>
+
+        <button onclick="document.getElementById('modal-historial-empleado').style.display='none'"
+            style="margin-top:15px; width:100%; padding:12px; border:1px solid #333; border-radius:8px; background:transparent; color:#fff; cursor:pointer; font-family:Inter,sans-serif;">CERRAR</button>
+    </div>
+</div>
+
+
+<!-- ================================================================
+     📸 MODAL DE FOTOS - AUTOBRILLO DETALLING
+     ================================================================ -->
+<div id="modal-fotos-cita" class="modal-fotos-overlay d-none">
+    <div class="modal-fotos-container">
+
+        <!-- Header -->
+        <div class="modal-fotos-header">
+            <span class="modal-fotos-close"
+                onclick="document.getElementById('modal-fotos-cita').style.display='none'">✕</span>
+            <div class="modal-fotos-header-content">
+                <div class="modal-fotos-icon">📸</div>
+                <div>
+                    <h3 id="modal-fotos-titulo" class="modal-fotos-title">Fotos del Servicio</h3>
+                    <p class="modal-fotos-subtitle">Sube fotos de Antes, Durante y Después</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Info de la cita -->
+        <div id="fotos-cita-info" class="modal-fotos-info">
+            <div class="modal-fotos-info-row">
+                <div>
+                    <strong class="modal-fotos-vehiculo">🚗 <span id="fotos-cita-vehiculo">—</span></strong>
+                    <p class="modal-fotos-servicio">🔧 <span id="fotos-cita-servicio">—</span></p>
+                    <p class="modal-fotos-fecha">📅 <span id="fotos-cita-fecha">—</span></p>
+                </div>
+                <span id="fotos-cita-estado" class="modal-fotos-estado">—</span>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="modal-fotos-tabs">
+            <button class="tab-foto active" onclick="window.gestionFotos.cambiarTab('antes')" id="tab-foto-antes">
+                🔴 Antes
+            </button>
+            <button class="tab-foto" onclick="window.gestionFotos.cambiarTab('durante')" id="tab-foto-durante">
+                🟡 Durante
+            </button>
+            <button class="tab-foto" onclick="window.gestionFotos.cambiarTab('despues')" id="tab-foto-despues">
+                🟢 Después
+            </button>
+        </div>
+
+        <!-- Área de Drag & Drop -->
+        <div id="fotos-upload-area" class="modal-fotos-upload"
+            onclick="document.getElementById('input-fotos-multiples').click()">
+            <div class="modal-fotos-upload-icon">📷</div>
+            <p class="modal-fotos-upload-text">Arrastra y suelta tus fotos aquí</p>
+            <p class="modal-fotos-upload-hint">o haz clic para seleccionar (máx 10 fotos, 5MB c/u)</p>
+        </div>
+
+        <input type="file" id="input-fotos-multiples" accept="image/*" multiple class="d-none"
+            onchange="window.gestionFotos.previsualizar(event)">
+
+        <!-- Contador -->
+        <div id="fotos-contador" class="modal-fotos-contador">
+            📸 <span id="fotos-cantidad">0</span> foto(s) seleccionada(s)
+        </div>
+
+        <!-- Previsualización -->
+        <div id="fotos-preview" class="modal-fotos-preview"></div>
+
+        <!-- Descripción -->
+        <div class="modal-fotos-descripcion">
+            <label>📝 Descripción para todas las fotos (opcional)</label>
+            <input type="text" id="foto-descripcion" placeholder="Ej: Rayón en puerta delantera...">
+        </div>
+
+        <!-- Progreso -->
+        <div id="fotos-progreso" class="modal-fotos-progreso d-none" ">
+            <div class=" modal-fotos-progreso-header">
+            <span>⏳ Subiendo...</span>
+            <span id="fotos-progreso-texto">0%</span>
+        </div>
+        <div class="modal-fotos-progreso-track">
+            <div id="fotos-progreso-barra" class="modal-fotos-progreso-fill"></div>
+        </div>
+    </div>
+
+    <!-- Fotos ya subidas -->
+    <div class="modal-fotos-ya-subidas">
+        <h4>📸 Fotos ya subidas</h4>
+        <div id="galeria-fotos-subidas" class="modal-fotos-galeria">
+            <p class="modal-fotos-vacio">📭 No hay fotos en esta categoría</p>
+        </div>
+    </div>
+
+    <!-- Botones -->
+    <div class="modal-fotos-buttons">
+        <button type="button" class="modal-fotos-btn-cancelar" onclick="window.gestionFotos.cerrar()">Cancelar</button>
+        <button type="button" class="modal-fotos-btn-subir" onclick="window.gestionFotos.subir(event)"
+            id="btn-subir-fotos">
+            📤 Subir <span id="btn-fotos-cantidad"></span>
+        </button>
+    </div>
+
+    <input type="hidden" id="fotos-cita-id" value="">
+    <input type="hidden" id="fotos-tipo-actual" value="antes">
+</div>
+</div>
+
+<!-- Modal para Ver Galería Antes/Después -->
+<div id="modal-galeria" class="modal d-none" ">
+    <div class=" modal-content" style="max-width: 800px; max-height: 90vh; overflow-y: auto;">
+    <span class="close-btn" onclick="cerrarModal('modal-galeria')">&times;</span>
+    <h3>📸 Galería Antes y Después</h3>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px;">
+        <!-- Columna ANTES -->
+        <div>
+            <h4 style="color: #ff4444; text-align: center; margin-bottom: 10px;">🔴 ANTES</h4>
+            <div id="galeria-antes" style="display: flex; flex-direction: column; gap: 15px;">
+                <p style="color: #666; text-align: center;">Cargando...</p>
+            </div>
+        </div>
+
+        <!-- Columna DESPUÉS -->
+        <div>
+            <h4 style="color: #00ff88; text-align: center; margin-bottom: 10px;">🟢 DESPUÉS</h4>
+            <div id="galeria-despues" style="display: flex; flex-direction: column; gap: 15px;">
+                <p style="color: #666; text-align: center;">Cargando...</p>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+<script type="module" src="../../javascript/taller/taller-dashboard.js"></script>
+</body>
+
+</html>

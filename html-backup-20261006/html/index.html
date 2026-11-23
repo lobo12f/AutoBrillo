@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoBrillo Detailing | Suscripciones</title>
+    <link rel="stylesheet" href="../css/styla.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&display=swap" rel="stylesheet">
+</head>
+
+<nav class="navbar">
+    <div class="logo">AUTOBRILLO<span>Detailing</span></div>
+    <ul class="nav-links">
+        <li><a href="#">Inicio</a></li>
+        <li><a href="#">Servicios</a></li>
+        <li><a href="#planes" class="active">Planes</a></li>
+        <li><a href="#contacto">Contacto</a></li>
+
+    </ul>
+    <li class="_regitro"><a href="./clientes/registroNuevoUsuario.html">Crear Cuenta</a></li>
+    <button class="btn-login">Mi Cuenta </button>
+</nav>
+
+<header class="hero">
+    <div class="hero-content">
+        <h1>TU AUTO SIEMPRE COMO NUEVO</h1>
+        <p>Mantenimiento estético por suscripción mensual. Brillo impecable todo el año.</p>
+        <a href="#planes" class="btn-primary">VER PLANES Y SUSCRIBIRSE</a>
+    </div>
+</header>
+
+<section id="planes" class="pricing-section">
+    <h2>NUESTROS PLANES</h2>
+    <div class="pricing-container">
+        <div class="card">
+            <h3>PLAN BÁSICO</h3>
+            <div class="price">$45<span>/mes</span></div>
+            <ul>
+                <li>2 Lavados Exteriores</li>
+                <li>Aspirado Interior Básico</li>
+                <li>Brillo de Llantas</li>
+            </ul>
+            <button onclick="seleccionarPlan('Básico')" class="btn-outline">SELECCIONAR</button>
+        </div>
+
+        <div class="card featured">
+            <div class="badge">MÁS POPULAR</div>
+            <h3>PLAN PRO</h3>
+            <div class="price">$89<span>/mes</span></div>
+            <ul>
+                <li>4 Lavados Premium</li>
+                <li>Limpieza Profunda Interiores</li>
+                <li>Encerado Manual</li>
+                <li>Descontaminado de Vidrios</li>
+            </ul>
+            <button onclick="seleccionarPlan('Pro')" class="btn-primary">SUSCRIBIRSE AHORA</button>
+        </div>
+
+        <div class="card">
+            <h3>SHOWROOM</h3>
+            <div class="price">$150<span>/mes</span></div>
+            <ul>
+                <li>Lavados Ilimitados</li>
+                <li>Tratamiento de Cuero</li>
+                <li>Pulido Orbital</li>
+                <li>Recubrimiento Cerámico</li>
+            </ul>
+            <button onclick="seleccionarPlan('Showroom')" class="btn-outline">SELECCIONAR</button>
+        </div>
+    </div>
+</section>
+<section id="contacto" class="contact-section">
+    <div class="contact-container">
+        <div class="contact-header">
+            <h2>HABLEMOS DE TU AUTO</h2>
+            <p>¿Tienes dudas sobre nuestros procesos o necesitas un presupuesto personalizado? Escríbenos.</p>
+        </div>
+
+        <div class="contact-grid">
+            <form id="contactForm" class="contact-form">
+                <div class="input-group">
+                    <input type="text" id="nombre" placeholder="Tu Nombre Completo" required>
+                </div>
+                <div class="input-group">
+                    <input type="email" id="email" placeholder="Correo Electrónico" required>
+                </div>
+                <div class="input-group">
+                    <select id="servicio">
+                        <option value="consulta">Consulta General</option>
+                        <option value="cita">Agendar Cita (Suscriptor)</option>
+                        <option value="presupuesto">Presupuesto Especial</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <textarea id="mensaje" rows="5" placeholder="¿Cómo podemos ayudarte?" required></textarea>
+                </div>
+                <button type="submit" class="btn-primary">ENVIAR MENSAJE</button>
+            </form>
+
+            <div class="contact-info-box">
+                <div class="info-item">
+                    <h4>HORARIOS DE ATENCIÓN</h4>
+                    <p>Lunes a Viernes: 8:00 AM - 6:00 PM</p>
+                    <p>Sábados: 9:00 AM - 3:00 PM</p>
+                    <p>Domingos: Cerrado (Solo emergencias)</p>
+                </div>
+
+                <div class="info-item">
+                    <h4>UBICACIÓN</h4>
+                    <p>Av. Francisco Alberto Caamaño Deñó,</p>
+                    <p>San Pedro de Macorís, República Dominicana.</p>
+                </div>
+
+                <a href="https://wa.me/18090000000" class="btn-whatsapp">
+                    CHATEAR POR WHATSAPP
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+
+<section id="footerSecion" class="sectionFooter">
+    <footer class="main-footer">
+        <div class="footer-container">
+            <div class="footer-info">
+                <div class="logo">AUTOBRILLO<span>Detailing</span></div>
+                <p>Expertos en el cuidado y protección de tu vehículo. Calidad premium garantizada en cada detalle.</p>
+                <div class="social-icons">
+                    <a href="#">FB</a>
+                    <a href="#">IG</a>
+                    <a href="#">WA</a>
+                </div>
+            </div>
+
+
+            <div class="footer-contact">
+                <h4>Contacto</h4>
+                <p>📍 San Pedro de Macorís, RD</p>
+                <p>📞 +1 (809) 000-0000</p>
+                <p>✉️ info@autobrillo.com</p>
+            </div>
+
+            <div class="footer-payments">
+                <h4>Pagos Seguros</h4>
+                <div class="payment-badges">
+                    <span>VISA</span>
+                    <span>Mastercard</span>
+                    <span>PayPal</span>
+                    <span>Stripe</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <p>&copy; 2026 AutoBrillo Detailing. Todos los derechos reservados.</p>
+        </div>
+    </footer>
+</section>
+<script src="../javascript/script.js"></script>
+<script type="module" src="../../javascript/profile.js"></script>
+</body>
+
+</html>

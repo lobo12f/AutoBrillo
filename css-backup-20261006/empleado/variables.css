@@ -1,0 +1,171 @@
+:root {
+    /* Colores base */
+    --bg-primary: #0a0e17;
+    --bg-secondary: #111827;
+    --bg-card: #1a2332;
+    --bg-hover: #1e293b;
+
+    /* Acentos */
+    --accent: #00ff88;
+    --accent-secondary: #00d4ff;
+    --accent-warning: #ffbb33;
+    --accent-danger: #ff4444;
+    --accent-purple: #ff44ff;
+
+    /* Texto */
+    --text-primary: #ffffff;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+
+    /* Bordes */
+    --border: #1e293b;
+    --border-light: #334155;
+
+    /* Gradientes */
+    --gradient-accent: linear-gradient(135deg, #00ff88, #00d4ff);
+    --gradient-card: linear-gradient(145deg, #1a2332, #0f1621);
+    --gradient-ingreso: linear-gradient(135deg, #ffbb33, #ff8800);
+
+    /* Sombras */
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
+    --shadow-accent: 0 4px 16px rgba(0, 255, 136, 0.2);
+
+    /* Radios */
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 20px;
+    --radius-full: 50%;
+
+    /* Transiciones */
+    --transition-fast: 0.2s ease;
+    --transition-normal: 0.3s ease;
+    --transition-slow: 0.5s ease;
+}
+
+/* ================================================================
+   SCROLL PERSONALIZADO - AUTOBRILLO DETALLING
+   ================================================================ */
+
+/* Scroll global */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: var(--accent) var(--bg-primary);
+}
+
+*::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+*::-webkit-scrollbar-track {
+    background: var(--bg-primary);
+    border-radius: 10px;
+}
+
+*::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, var(--accent), var(--accent-secondary));
+    border-radius: 10px;
+    border: 2px solid var(--bg-primary);
+}
+
+*::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, var(--accent-secondary), var(--accent));
+}
+
+/* Scroll para contenedores de listas */
+#contenedor-pendientes,
+#contenedor-realizados,
+#historial-lista,
+#checklist-container {
+    scrollbar-width: thin;
+    scrollbar-color: var(--accent) var(--border);
+}
+
+#contenedor-pendientes::-webkit-scrollbar,
+#contenedor-realizados::-webkit-scrollbar,
+#historial-lista::-webkit-scrollbar,
+#checklist-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+#contenedor-pendientes::-webkit-scrollbar-track,
+#contenedor-realizados::-webkit-scrollbar-track,
+#historial-lista::-webkit-scrollbar-track,
+#checklist-container::-webkit-scrollbar-track {
+    background: var(--border);
+    border-radius: 10px;
+}
+
+#contenedor-pendientes::-webkit-scrollbar-thumb,
+#contenedor-realizados::-webkit-scrollbar-thumb,
+#historial-lista::-webkit-scrollbar-thumb,
+#checklist-container::-webkit-scrollbar-thumb {
+    background: var(--accent);
+    border-radius: 10px;
+}
+
+#contenedor-pendientes::-webkit-scrollbar-thumb:hover,
+#contenedor-realizados::-webkit-scrollbar-thumb:hover,
+#historial-lista::-webkit-scrollbar-thumb:hover,
+#checklist-container::-webkit-scrollbar-thumb:hover {
+    background: var(--accent-secondary);
+}
+
+/* Scroll para modal */
+#modal-detalle-cita,
+#modal-detalle-cita * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--accent) var(--bg-primary);
+}
+
+#modal-detalle-cita::-webkit-scrollbar {
+    width: 8px;
+}
+
+#modal-detalle-cita::-webkit-scrollbar-track {
+    background: var(--bg-primary);
+    border-radius: 10px;
+}
+
+#modal-detalle-cita::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, var(--accent), var(--accent-secondary));
+    border-radius: 10px;
+    border: 2px solid var(--bg-primary);
+}
+
+#modal-detalle-cita::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, var(--accent-secondary), var(--accent-purple));
+}
+
+/* Scroll para tabla historial */
+#tabla-historial::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+#tabla-historial::-webkit-scrollbar-track {
+    background: var(--bg-primary);
+}
+
+#tabla-historial::-webkit-scrollbar-thumb {
+    background: var(--accent);
+    border-radius: 10px;
+}
+
+/* Scroll para notas dentro del modal */
+#modal-detalle-cita [style*="max-height"] {
+    scrollbar-width: thin;
+    scrollbar-color: var(--accent) var(--border);
+}
+
+#modal-detalle-cita [style*="max-height"]::-webkit-scrollbar {
+    width: 4px;
+}
+
+#modal-detalle-cita [style*="max-height"]::-webkit-scrollbar-thumb {
+    background: var(--accent);
+    border-radius: 10px;
+}

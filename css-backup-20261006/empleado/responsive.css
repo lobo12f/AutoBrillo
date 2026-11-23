@@ -1,0 +1,329 @@
+/* ================================================================
+   RESPONSIVE - Media Queries
+   ================================================================ */
+
+/* Tablet (768px - 1024px) */
+@media (max-width: 1024px) {
+    .sections-container {
+        padding: 15px;
+    }
+
+    .ingresos-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+}
+
+/* ================================================================
+   MÓVIL (max-width: 768px)
+   ================================================================ */
+@media (max-width: 768px) {
+
+    /* Sidebar se oculta */
+    .sidebar {
+        transform: translateX(-100%);
+        width: 280px;
+        /* ✅ Más ancho para mejor toque */
+        box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+        /* ✅ Sombra cuando está abierto */
+    }
+
+    .sidebar.open {
+        transform: translateX(0);
+    }
+
+    .sidebar-overlay.show {
+        display: block;
+    }
+
+    /* Main content sin margen lateral */
+    .main-content {
+        margin-left: 0;
+        padding-bottom: 0;
+        /* ✅ Quitar padding aquí, el spacer lo maneja */
+    }
+
+    /* ✅ Mostrar barra espaciadora */
+    .spacer-bottom {
+        display: block;
+    }
+
+    /* ✅ Mostrar bottom nav */
+    .bottom-nav {
+        display: flex;
+    }
+
+    /* Topbar ajustes */
+    .topbar {
+        padding: 10px 15px;
+        gap: 10px;
+    }
+
+    .topbar-title h1 {
+        font-size: 1rem;
+    }
+
+    .topbar-title span {
+        font-size: 0.7rem;
+        display: none;
+        /* ✅ Ocultar fecha en móvil para espacio */
+    }
+
+    /* ✅ Mostrar botón menú */
+    .btn-menu-mobile {
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        border-radius: var(--radius-sm);
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        color: var(--text-primary);
+        font-size: 1.2rem;
+        cursor: pointer;
+        flex-shrink: 0;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    /* Ocultar info empleado en topbar */
+    .topbar-empleado {
+        display: none;
+    }
+
+    /* Cards más compactas */
+    .card {
+        padding: 15px;
+        margin-bottom: 15px;
+        border-radius: var(--radius-md);
+    }
+
+    .card-header {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    /* Ingresos 2 columnas */
+    .ingresos-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+    }
+
+    .ingreso-item {
+        padding: 12px 8px;
+    }
+
+    .ingreso-monto {
+        font-size: 1rem;
+    }
+
+    /* Estadísticas 2 columnas */
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+    }
+
+    .stat-card {
+        padding: 15px 10px;
+    }
+
+    .stat-valor {
+        font-size: 1.3rem;
+    }
+
+    /* Tabs */
+    .tabs {
+        width: 100%;
+    }
+
+    .tab {
+        flex: 1;
+        text-align: center;
+        padding: 8px 10px;
+    }
+
+    /* Modal */
+    .modal-content {
+        max-width: 95%;
+        padding: 20px 15px;
+        max-height: 85vh;
+        overflow-y: auto;
+    }
+
+    /* Toast en móvil */
+    .toast-container {
+        bottom: 80px;
+        /* ✅ Encima del bottom nav */
+        right: 10px;
+        left: 10px;
+    }
+
+    .toast {
+        max-width: 100%;
+    }
+}
+
+/* ================================================================
+   MÓVIL PEQUEÑO (max-width: 480px)
+   ================================================================ */
+@media (max-width: 480px) {
+    .sections-container {
+        padding: 10px;
+    }
+
+    .ingresos-grid {
+        gap: 5px;
+    }
+
+    .ingreso-item {
+        padding: 10px 5px;
+    }
+
+    .ingreso-icono {
+        font-size: 1.2rem;
+    }
+
+    .ingreso-monto {
+        font-size: 0.85rem;
+    }
+
+    .ingreso-periodo {
+        font-size: 0.5rem;
+        letter-spacing: 0.5px;
+    }
+
+    .stats-grid {
+        gap: 5px;
+    }
+
+    .stat-card {
+        padding: 12px 8px;
+    }
+
+    .stat-icono {
+        font-size: 1.2rem;
+    }
+
+    .stat-valor {
+        font-size: 1.1rem;
+    }
+
+    .stat-label {
+        font-size: 0.6rem;
+    }
+
+    .card {
+        padding: 12px 10px;
+    }
+
+    .card-header h2 {
+        font-size: 0.9rem;
+    }
+
+    /* Bottom nav más compacto */
+    .bottom-nav {
+        padding: 5px 2px;
+        padding-bottom: calc(5px + env(safe-area-inset-bottom, 0px));
+    }
+
+    .bottom-item {
+        min-height: 45px;
+        padding: 4px 2px;
+    }
+
+    .bottom-icon {
+        font-size: 1.1rem;
+    }
+
+    .bottom-text {
+        font-size: 0.55rem;
+    }
+
+    /* Spacer más pequeño */
+    .spacer-bottom {
+        height: 60px;
+    }
+}
+
+/* ================================================================
+   MÓVIL MUY PEQUEÑO (max-width: 360px)
+   ================================================================ */
+@media (max-width: 360px) {
+    .ingresos-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 4px;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 4px;
+    }
+
+    .ingreso-monto {
+        font-size: 0.75rem;
+    }
+
+    .stat-valor {
+        font-size: 1rem;
+    }
+}
+
+/* ================================================================
+   DESKTOP GRANDE (min-width: 1440px)
+   ================================================================ */
+@media (min-width: 1440px) {
+    .sections-container {
+        max-width: 1300px;
+    }
+
+    .ingresos-grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 20px;
+    }
+
+    .stats-grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 20px;
+    }
+}
+
+/* ================================================================
+   ORIENTACIÓN HORIZONTAL EN MÓVIL
+   ================================================================ */
+@media (max-width: 768px) and (orientation: landscape) {
+    .bottom-nav {
+        padding: 5px 10px;
+    }
+
+    .bottom-item {
+        flex-direction: row;
+        gap: 8px;
+        min-height: 40px;
+    }
+
+    .bottom-icon {
+        font-size: 1.1rem;
+    }
+
+    .spacer-bottom {
+        height: 50px;
+    }
+}
+
+/* ================================================================
+   SAFE AREA PARA IPHONE CON NOTCH
+   ================================================================ */
+@supports (padding: max(0px)) {
+    .bottom-nav {
+        padding-bottom: max(8px, env(safe-area-inset-bottom, 0px));
+    }
+
+    .topbar {
+        padding-top: max(10px, env(safe-area-inset-top, 0px));
+    }
+}

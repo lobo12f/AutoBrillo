@@ -1,0 +1,341 @@
+/* ============================================================================
+   AUTOBRILLO - REGISTRO DE TALLER
+   ============================================================================
+   Extraído del bloque <style> de registro.html
+   Usa variables del sistema central (variables.css)
+   ============================================================================ */
+
+/* ============================================================================
+   LAYOUT PRINCIPAL
+   ============================================================================ */
+.register-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-image:
+        radial-gradient(circle at 20% 50%, rgba(var(--accent-color-rgb), 0.03) 0%, transparent 50%),
+        radial-gradient(circle at 80% 50%, rgba(var(--color-info-rgb), 0.03) 0%, transparent 50%);
+}
+
+.register-container {
+    width: 100%;
+    max-width: 700px;
+    padding: var(--space-xl);
+}
+
+.register-card {
+    background: var(--bg-card);
+    border-radius: var(--radius-xl);
+    padding: var(--space-4xl);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-lg);
+}
+
+/* ============================================================================
+   LOGO Y HEADER
+   ============================================================================ */
+.logo-section {
+    text-align: center;
+    margin-bottom: var(--space-3xl);
+}
+
+.logo {
+    font-size: var(--font-size-4xl);
+    font-weight: var(--font-weight-bold);
+    letter-spacing: var(--letter-spacing-widest);
+}
+
+.logo span {
+    color: var(--accent-color);
+}
+
+.subtitle {
+    color: var(--text-secondary);
+    font-size: var(--font-size-md);
+    margin-top: var(--space-xxs);
+}
+
+.register-title {
+    font-size: var(--font-size-3xl);
+    margin-bottom: var(--space-md);
+    text-align: center;
+}
+
+/* ============================================================================
+   INDICADOR DE PASOS
+   ============================================================================ */
+.steps-indicator {
+    display: flex;
+    justify-content: center;
+    gap: var(--space-3xl);
+    margin-bottom: var(--space-3xl);
+}
+
+.step {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    color: var(--text-secondary);
+    font-size: var(--font-size-base);
+    transition: color var(--transition-base);
+}
+
+.step.active {
+    color: var(--accent-color);
+}
+
+.step.completed {
+    color: var(--accent-color);
+}
+
+.step-number {
+    width: 28px;
+    height: 28px;
+    border-radius: var(--radius-circle);
+    border: 2px solid currentColor;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: var(--font-weight-semibold);
+    font-size: var(--font-size-sm);
+    transition: all var(--transition-base);
+}
+
+.step.active .step-number,
+.step.completed .step-number {
+    background: var(--accent-color);
+    border-color: var(--accent-color);
+    color: var(--text-inverse);
+}
+
+/* ============================================================================
+   FORMULARIOS POR PASO
+   ============================================================================ */
+.form-step {
+    display: none;
+    animation: fadeSlide var(--transition-base) ease;
+}
+
+.form-step.active {
+    display: block;
+}
+
+@keyframes fadeSlide {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ============================================================================
+   CAMPOS DEL FORMULARIO
+   ============================================================================ */
+.register-card .form-group {
+    margin-bottom: var(--space-xl);
+}
+
+.register-card label {
+    display: block;
+    color: var(--text-secondary);
+    margin-bottom: var(--space-xs);
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-medium);
+}
+
+.register-card input,
+.register-card select {
+    width: 100%;
+    padding: var(--input-padding-y) var(--input-padding-x);
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--input-radius);
+    color: var(--text-primary);
+    font-size: var(--input-font-size);
+    transition: all var(--transition-base);
+    font-family: var(--font-family);
+}
+
+.register-card input:focus,
+.register-card select:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-lg);
+}
+
+/* ============================================================================
+   ACCIONES DEL FORMULARIO
+   ============================================================================ */
+.form-actions {
+    display: flex;
+    gap: var(--space-lg);
+    margin-top: var(--space-3xl);
+}
+
+.btn-register {
+    padding: 14px 30px;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    cursor: pointer;
+    transition: all var(--transition-base);
+    font-family: var(--font-family);
+    flex: 1;
+}
+
+.btn-register-primary {
+    background: var(--accent-color);
+    color: var(--text-inverse);
+}
+
+.btn-register-primary:hover {
+    box-shadow: 0 0 30px var(--accent-glow);
+    transform: translateY(-2px);
+}
+
+.btn-register-secondary {
+    background: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+}
+
+.btn-register-secondary:hover {
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+}
+
+.btn-register:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* ============================================================================
+   ALERTAS
+   ============================================================================ */
+.register-card .alert {
+    padding: var(--space-md) var(--space-lg);
+    border-radius: var(--radius-sm);
+    margin-bottom: var(--space-xl);
+    font-size: var(--font-size-base);
+}
+
+.register-card .alert-error {
+    background: rgba(255, 68, 68, 0.1);
+    border: 1px solid var(--color-danger);
+    color: var(--color-danger);
+}
+
+.register-card .alert-success {
+    background: rgba(var(--accent-color-rgb), 0.1);
+    border: 1px solid var(--accent-color);
+    color: var(--accent-color);
+}
+
+/* ============================================================================
+   LINK DE LOGIN
+   ============================================================================ */
+.login-link {
+    text-align: center;
+    margin-top: var(--space-xl);
+    color: var(--text-secondary);
+    font-size: var(--font-size-md);
+}
+
+.login-link a {
+    color: var(--accent-color);
+    text-decoration: none;
+    font-weight: var(--font-weight-semibold);
+}
+
+.login-link a:hover {
+    text-decoration: underline;
+}
+
+/* ============================================================================
+   TARJETAS DE PLANES
+   ============================================================================ */
+.plan-card {
+    background: var(--bg-primary);
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: var(--space-xl);
+    cursor: pointer;
+    transition: all var(--transition-base);
+}
+
+.plan-card:hover {
+    border-color: var(--accent-color);
+}
+
+.plan-card.selected {
+    border-color: var(--accent-color);
+    background: rgba(var(--accent-color-rgb), 0.05);
+}
+
+.plan-card+.plan-card {
+    margin-top: var(--space-lg);
+}
+
+.plan-name {
+    font-weight: var(--font-weight-semibold);
+    font-size: var(--font-size-xl);
+    margin-bottom: var(--space-xxs);
+}
+
+.plan-price {
+    color: var(--accent-color);
+    font-size: var(--font-size-3xl);
+    font-weight: var(--font-weight-bold);
+}
+
+.plan-features {
+    list-style: none;
+    margin-top: var(--space-md);
+    color: var(--text-secondary);
+    font-size: var(--font-size-base);
+}
+
+.plan-features li::before {
+    content: "✓ ";
+    color: var(--accent-color);
+}
+
+.plan-subtitle {
+    color: var(--text-secondary);
+    text-align: center;
+    margin-bottom: var(--space-xl);
+}
+
+/* ============================================================================
+   RESPONSIVE
+   ============================================================================ */
+@media (max-width: 600px) {
+    .register-card {
+        padding: var(--space-2xl);
+    }
+
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .form-actions {
+        flex-direction: column;
+    }
+
+    .steps-indicator {
+        gap: var(--space-lg);
+        flex-wrap: wrap;
+    }
+}

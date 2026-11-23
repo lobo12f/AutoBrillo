@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Taller | AutoBrillo</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Sistema de variables -->
+    <!-- Estilos base y específicos -->
+        <!-- ⭐ CSS UNIFICADO -->
+    <!-- ⭐ CSS MANAGER -->
+        <!-- ⭐ CSS UNIFICADO -->
+    <link rel="stylesheet" href="../../css/main.css">
+    <!-- ⭐ CSS MANAGER -->
+    <script type="module" src="../../javascript/css-manager.js"></script>
+</head>
+
+<body class="login-page">
+    <div class="login-container">
+        <div class="login-card">
+            <div class="logo-section">
+                <div class="logo">AUTOBRILLO<span>D.</span></div>
+                <p class="subtitle">Panel de Gestión de Talleres</p>
+            </div>
+
+            <div class="role-tabs">
+                <button class="role-tab active" onclick="cambiarRol('propietario')" id="tab-propietario">
+                    <span class="icon-tab">🏪</span>
+                    Propietario
+                </button>
+                <button class="role-tab" onclick="cambiarRol('empleado')" id="tab-empleado">
+                    <span class="icon-tab">👨‍🔧</span>
+                    Empleado
+                </button>
+            </div>
+
+            <h2 id="login-title">Iniciar Sesión - Propietario</h2>
+
+            <div id="alert-container" class="alert alert-error d-none"></div>
+
+            <form id="login-form">
+                <div id="campos-propietario">
+                    <div class="form-group">
+                        <label>📧 Email del Taller</label>
+                        <input type="email" id="login-email" placeholder="taller@ejemplo.com">
+                    </div>
+
+                    <div class="form-group">
+                        <label>🔒 Contraseña</label>
+                        <div class="password-container">
+                            <input type="password" id="login-password" placeholder="Tu contraseña">
+                            <span class="toggle-password" onclick="togglePassword('login-password')">👁️</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="campos-empleado" class="d-none">
+                    <div class="form-group">
+                        <label>🏪 Selecciona tu Taller</label>
+                        <select id="empleado-taller">
+                            <option value="">Cargando talleres...</option>
+                        </select>
+                    </div>
+
+                    <div id="info-taller-seleccionado" class="info-taller d-none"></div>
+
+                    <div class="form-group">
+                        <label>📧 Email de Empleado</label>
+                        <input type="email" id="empleado-email" placeholder="empleado@taller.com">
+                    </div>
+
+                    <div class="form-group">
+                        <label>🔒 Contraseña</label>
+                        <div class="password-container">
+                            <input type="password" id="empleado-password" placeholder="Tu contraseña">
+                            <span class="toggle-password" onclick="togglePassword('empleado-password')">👁️</span>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-login" id="btn-login">
+                    🚀 Ingresar al Panel
+                </button>
+            </form>
+
+            <div class="register-link" id="link-registro">
+                ¿No tienes taller? <a href="registro.html">Registra tu Taller</a>
+            </div>
+            <div class="register-link d-none" id="link-info-empleado">
+                <span class="text-secondary">¿Eres nuevo? Pide a tu supervisor que te registre.</span>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { API_URL } from '../../javascript/config.js';
+        import { apiFetch } from '../../javascript/api-client.js';
+
+        let rolActual = 'propietario';
+        let talleresDisponibles = [];
+
+        window.cambiarRol = function (rol) {
+            rolActual = rol;
+
+            document.getElementById('tab-propietario').classList.toggle('active', rol === 'propietario');
+            document.getElementById('tab-empleado').classList.toggle('active', rol === 'empleado');
+
+            document.getElementById('login-title').textContent =
+                rol === 'propietario' ? 'Iniciar Sesión - Propietario' : 'Iniciar Sesión - Empleado';
+
+            document.getElementById('campos-propietario').classList.toggle('d-none', rol !== 'propietario');
+            document.getElementById('campos-empleado').classList.toggle('d-none', rol !== 'empleado');
+
+            document.getElementById('link-registro').classList.toggle('d-none', rol !== 'propietario');
+            document.getElementById('link-info-empleado').classList.toggle('d-none', rol !== 'empleado');
+
+            if (rol === 'empleado' && talleresDisponibles.length === 0) {
+                cargarTalleres();
+            }
+
+            ocultarAlerta();
+
+            document.getElementById('login-email').required = (rol === 'propietario');
+            document.getElementById('login-password').required = (rol === 'propietario');
+            document.getElementById('empleado-email').required = (rol === 'empleado');
+            document.getElementById('empleado-password').required = (rol === 'empleado');
+            document.getElementById('empleado-taller').required = (rol === 'empleado');
+        };
+
+        async function cargarTalleres() {
+            const select = document.getElementById('empleado-taller');
+            select.innerHTML = '<option value="">🔍 Buscando talleres...</option>';
+
+            try {
+                const response = await apiFetch('/talleres/activos');
+                const data = await response.json();
+
+                if (data.exito && data.talleres) {
+                    talleresDisponibles = data.talleres;
+                    select.innerHTML = '<option value="">Selecciona tu taller...</option>' +
+                        talleresDisponibles.map(t => `
+                            <option value="${t._id}"
+                                    data-nombre="${t.nombre}"
+                                    data-direccion="${t.direccion?.calle || ''}, ${t.direccion?.ciudad || ''}">
+                                ${t.nombre} - ${t.direccion?.ciudad || 'Sin ciudad'}
+                            </option>
+                        `).join('');
+                } else {
+                    select.innerHTML = '<option value="">No hay talleres disponibles</option>';
+                }
+            } catch (error) {
+                console.error('Error al cargar talleres:', error);
+                select.innerHTML = '<option value="">Error al cargar talleres</option>';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const selectTaller = document.getElementById('empleado-taller');
+            selectTaller.addEventListener('change', function () {
+                const option = this.selectedOptions[0];
+                const infoDiv = document.getElementById('info-taller-seleccionado');
+
+                if (option && option.value) {
+                    infoDiv.classList.remove('d-none');
+                    infoDiv.innerHTML = `
+                        🏪 <strong>${option.dataset.nombre}</strong><br>
+                        📍 ${option.dataset.direccion}
+                    `;
+                } else {
+                    infoDiv.classList.add('d-none');
+                }
+            });
+        });
+
+        window.togglePassword = function (inputId) {
+            const input = document.getElementById(inputId);
+            input.type = input.type === 'password' ? 'text' : 'password';
+        };
+
+        function mostrarAlerta(mensaje, tipo = 'error') {
+            const alert = document.getElementById('alert-container');
+            alert.textContent = mensaje;
+            alert.className = `alert alert-${tipo}`;
+            alert.classList.remove('d-none');
+        }
+
+        function ocultarAlerta() {
+            document.getElementById('alert-container').classList.add('d-none');
+        }
+
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            ocultarAlerta();
+
+            const btn = document.getElementById('btn-login');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="loading-spinner"></span> Ingresando...';
+
+            try {
+                if (rolActual === 'propietario') {
+                    await loginPropietario();
+                } else {
+                    await loginEmpleado();
+                }
+            } catch (error) {
+                mostrarAlerta(error.message || 'Error al iniciar sesión.');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '🚀 Ingresar al Panel';
+            }
+        });
+
+        async function loginPropietario() {
+            const email = document.getElementById('login-email').value.trim();
+            const password = document.getElementById('login-password').value;
+
+            if (!email || !password) throw new Error('Completa todos los campos.');
+
+            const response = await apiFetch('/talleres/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+
+            const data = await response.json();
+
+            if (data.exito) {
+                localStorage.setItem('taller_sesion', JSON.stringify(data));
+                localStorage.removeItem('taller_seccion_activa');
+                window.location.href = 'dashboard.html';
+            } else {
+                throw new Error(data.mensaje || 'Credenciales inválidas.');
+            }
+        }
+
+        async function loginEmpleado() {
+            const tallerId = document.getElementById('empleado-taller').value;
+            const email = document.getElementById('empleado-email').value.trim();
+            const password = document.getElementById('empleado-password').value;
+
+            if (!tallerId || !email || !password) throw new Error('Completa todos los campos.');
+
+            const response = await apiFetch('/talleres/empleados/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password, tallerId })
+            });
+
+            const data = await response.json();
+
+            if (data.exito) {
+                const sesion = {
+                    empleado: data.empleado,
+                    permisos: data.permisos,
+                    tallerId: tallerId,
+                    token: data.token,
+                    tipo: 'empleado'
+                };
+
+                localStorage.setItem('taller_empleado_sesion', JSON.stringify(sesion));
+                localStorage.removeItem('taller_seccion_activa');
+                window.location.href = 'empleado-dashboard.html';
+            } else {
+                throw new Error(data.mensaje || 'Credenciales inválidas.');
+            }
+        }
+
+        cambiarRol('propietario');
+    </script>
+</body>
+
+</html>

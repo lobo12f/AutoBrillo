@@ -1,0 +1,118 @@
+/* ============================================================================
+   TALLER - GALERÍA (Estilo Instagram/Masonry)
+   ============================================================================ */
+
+#galeria-taller-grid {
+    columns: 4 250px;
+    column-gap: var(--space-md);
+}
+
+.galeria-item-taller {
+    break-inside: avoid;
+    margin-bottom: var(--space-md);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    transition: var(--transition);
+    cursor: pointer;
+    position: relative;
+}
+
+.galeria-item-taller:hover {
+    border-color: var(--accent-color);
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-lg);
+}
+
+.galeria-item-taller img {
+    width: 100%;
+    display: block;
+    transition: transform var(--transition-base);
+}
+
+.galeria-item-taller:hover img {
+    transform: scale(1.05);
+}
+
+.galeria-item-info {
+    padding: var(--space-md);
+}
+
+.galeria-item-info h4 {
+    color: var(--text-primary);
+    font-size: var(--font-size-base);
+    margin: 0 0 var(--space-xs);
+    font-weight: var(--font-weight-semibold);
+}
+
+.galeria-item-info p {
+    color: var(--text-muted);
+    font-size: var(--font-size-xs);
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* Botón expandir sobre la imagen */
+.btn-expandir-galeria {
+    position: absolute;
+    top: var(--space-md);
+    right: var(--space-md);
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 6px 10px;
+    cursor: pointer;
+    font-size: var(--font-size-sm);
+    opacity: 0;
+    transition: var(--transition);
+}
+
+.galeria-item-taller:hover .btn-expandir-galeria {
+    opacity: 1;
+}
+
+/* Filtros de galería */
+.btn-filtro-galeria {
+    padding: 8px 18px;
+    background: transparent;
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-pill);
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-weight: var(--font-weight-semibold);
+    font-size: var(--font-size-sm);
+    transition: var(--transition);
+    font-family: var(--font-family);
+}
+
+.btn-filtro-galeria:hover,
+.btn-filtro-galeria.active {
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+    background: var(--accent-bg);
+}
+
+/* Estado vacío */
+.empty-galeria {
+    column-span: all;
+    text-align: center;
+    padding: 80px var(--space-xl);
+    color: var(--text-muted);
+}
+
+.empty-galeria .icon {
+    font-size: 5rem;
+    display: block;
+    margin-bottom: var(--space-lg);
+    opacity: 0.5;
+}
+
+@media (max-width: 900px) {
+    #galeria-taller-grid { columns: 2 250px; }
+}
+
+@media (max-width: 600px) {
+    #galeria-taller-grid { columns: 1; }
+}

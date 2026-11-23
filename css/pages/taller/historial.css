@@ -1,0 +1,131 @@
+/* ============================================================================
+   TALLER - HISTORIAL, PAGOS, RENDIMIENTO
+   ============================================================================ */
+
+#stats-historial {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: var(--space-sm);
+    margin-bottom: var(--space-lg);
+}
+
+#tabla-historial,
+#tabla-pagos {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--bg-card);
+}
+
+#tabla-historial th,
+#tabla-pagos th {
+    padding: var(--space-md);
+    text-align: left;
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-wide);
+    border-bottom: 2px solid var(--border-color);
+    background: var(--bg-secondary);
+    font-weight: var(--font-weight-semibold);
+}
+
+#tabla-historial td,
+#tabla-pagos td {
+    padding: var(--space-md);
+    color: var(--text-primary);
+    font-size: var(--font-size-base);
+    border-bottom: 1px solid var(--border-color);
+}
+
+#tabla-historial tbody tr,
+#tabla-pagos tbody tr {
+    transition: var(--transition-fast);
+}
+
+#tabla-historial tbody tr:hover,
+#tabla-pagos tbody tr:hover {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+#paginacion-historial {
+    display: flex;
+    justify-content: center;
+    gap: var(--space-sm);
+    margin-top: var(--space-lg);
+}
+
+#resumen-pagos {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: var(--space-sm);
+    margin-bottom: var(--space-lg);
+}
+
+#rendimiento-mensual {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--space-md);
+    margin-bottom: var(--space-3xl);
+}
+
+/* Filtros de historial */
+.filtros-row {
+    display: flex;
+    gap: var(--space-sm);
+    flex-wrap: wrap;
+    background: var(--bg-card);
+    padding: var(--space-md);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    margin-bottom: var(--space-lg);
+    align-items: center;
+}
+
+.filtro-select,
+.filtro-input {
+    padding: var(--space-sm) var(--space-md);
+    background: var(--bg-input);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    color: var(--text-secondary);
+    font-size: var(--font-size-base);
+    font-family: var(--font-family);
+    transition: var(--transition);
+}
+
+.filtro-select:focus,
+.filtro-input:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+}
+
+.filtro-input--flex {
+    flex: 1;
+    min-width: 200px;
+}
+
+/* Historial row hover con transformación */
+.historial-row {
+    transition: all var(--transition-base) !important;
+}
+
+.historial-row:hover {
+    background: rgba(var(--accent-color-rgb), 0.05) !important;
+    transform: scale(1.005);
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+}
+
+@media (max-width: 900px) {
+    #tabla-historial,
+    #tabla-pagos {
+        font-size: var(--font-size-sm);
+    }
+    
+    #tabla-historial th,
+    #tabla-historial td,
+    #tabla-pagos th,
+    #tabla-pagos td {
+        padding: var(--space-sm);
+    }
+}

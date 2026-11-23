@@ -1,0 +1,52 @@
+/* ============================================================================
+   AUTOBRILLO - MAIN CSS (Punto de Entrada ÚNICO)
+   ============================================================================
+   ✅ UN SOLO LINK en el HTML
+   ✅ Todas las páginas funcionan con esto
+   ✅ Variables manipulables desde CSSManager
+   ============================================================================ */
+
+/* ================================================================
+   1. CORE (ORDEN CRÍTICO - NO CAMBIAR)
+   ================================================================ */
+@import url('./core/variables.css');
+@import url('./core/reset.css');
+@import url('./core/utilities.css');
+@import url('./core/responsive.css');
+
+/* ================================================================
+   2. COMPONENTS (Reutilizables)
+   ================================================================ */
+@import url('./components/buttons.css');
+@import url('./components/cards.css');
+@import url('./components/forms.css');
+@import url('./components/modals.css');
+@import url('./components/toast.css');
+@import url('./components/badges.css');
+@import url('./components/tema-selector.css');
+
+/* ================================================================
+   3. LAYOUT (Estructura)
+   ================================================================ */
+@import url('./layout/sidebar.css');
+@import url('./layout/topbar.css');
+@import url('./layout/grid.css');
+
+/* ================================================================
+   4. PAGES (Específicos)
+   ================================================================ */
+@import url('./pages/taller/taller.css');
+@import url('./pages/taller/dashboard.css');
+@import url('./pages/taller/plan.css');
+@import url('./pages/taller/servicio.css');
+@import url('./pages/taller/cita.css');
+@import url('./pages/taller/fotos.css');
+@import url('./pages/taller/login.css');
+@import url('./pages/taller/registro.css');
+
+@import url('./pages/empleado/empleado.css');
+@import url('./pages/empleado/trabajos.css');
+@import url('./pages/empleado/configuracion.css');
+
+@import url('./pages/cliente/cliente.css');
+@import url('./pages/auth/auth.css');

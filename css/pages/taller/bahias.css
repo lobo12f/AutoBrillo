@@ -1,0 +1,119 @@
+/* ============================================================================
+   TALLER - BAHÍAS
+   ============================================================================ */
+
+.bahias-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: var(--space-md);
+}
+
+.bahia-card {
+    background: var(--bg-primary);
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: var(--space-xl);
+    text-align: center;
+    transition: var(--transition);
+    cursor: pointer;
+}
+
+.bahia-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+}
+
+.bahia-card.disponible {
+    border-color: var(--accent-color);
+    background: rgba(var(--accent-color-rgb), 0.03);
+}
+
+.bahia-card.ocupada {
+    border-color: var(--color-warning);
+    background: rgba(var(--color-warning-rgb), 0.05);
+}
+
+.bahia-card.mantenimiento {
+    border-color: var(--color-danger);
+    background: rgba(var(--color-danger-rgb), 0.05);
+}
+
+.bahia-numero {
+    font-size: var(--font-size-5xl);
+    font-weight: var(--font-weight-bold);
+    margin-bottom: var(--space-xs);
+}
+
+.bahia-card.disponible .bahia-numero { color: var(--accent-color); }
+.bahia-card.ocupada .bahia-numero { color: var(--color-warning); }
+.bahia-card.mantenimiento .bahia-numero { color: var(--color-danger); }
+
+.bahia-estado {
+    font-size: var(--font-size-base);
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-wide);
+    color: var(--text-secondary);
+}
+
+.bahia-empleado {
+    font-size: var(--font-size-base);
+    color: var(--text-secondary);
+    margin-top: var(--space-sm);
+}
+
+/* Card de bahía en panel principal */
+.bahia-panel-card {
+    background: rgba(255, 255, 255, 0.02);
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg);
+    transition: var(--transition);
+    cursor: pointer;
+}
+
+.bahia-panel-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--accent-color);
+}
+
+/* Admin grid */
+.bahias-admin-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--space-lg);
+}
+
+.bahia-admin-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: var(--space-xl);
+    transition: var(--transition);
+}
+
+.bahia-admin-card:hover {
+    border-color: var(--accent-color);
+}
+
+.bahia-admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-lg);
+}
+
+.bahia-admin-estado {
+    padding: 5px 10px;
+    border-radius: var(--radius-pill);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+}
+
+@media (max-width: 768px) {
+    .bahias-grid { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 480px) {
+    .bahias-grid { grid-template-columns: 1fr; }
+}

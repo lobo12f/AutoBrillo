@@ -1,0 +1,171 @@
+/* ====================================================================
+   TOPBAR - AUTOBRILLO DETALLING
+   ==================================================================== */
+
+.topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 var(--spacing-lg);
+    height: var(--topbar-height);
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-color);
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    gap: var(--spacing-md);
+}
+
+/* ================================================================
+   LADO IZQUIERDO
+   ================================================================ */
+.topbar-left {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    flex: 1;
+    min-width: 0;
+}
+
+.topbar-title {
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--text-primary);
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.topbar-subtitle {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+/* ================================================================
+   BOTÓN MENÚ (móvil)
+   ================================================================ */
+.topbar-menu-btn {
+    display: none;
+    background: none;
+    border: none;
+    color: var(--text-primary);
+    font-size: var(--font-size-2xl);
+    cursor: pointer;
+    padding: var(--spacing-xs);
+    border-radius: var(--border-radius-sm);
+    transition: background var(--transition-base);
+}
+
+.topbar-menu-btn:hover {
+    background: var(--bg-tertiary);
+}
+
+/* ================================================================
+   LADO DERECHO
+   ================================================================ */
+.topbar-right {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+/* ================================================================
+   NOTIFICACIONES
+   ================================================================ */
+.topbar-notification {
+    position: relative;
+    background: none;
+    border: none;
+    color: var(--text-primary);
+    font-size: var(--font-size-xl);
+    cursor: pointer;
+    padding: var(--spacing-xs);
+    border-radius: var(--border-radius-sm);
+    transition: background var(--transition-base);
+}
+
+.topbar-notification:hover {
+    background: var(--bg-tertiary);
+}
+
+.topbar-notification-badge {
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    background: var(--color-danger);
+    color: white;
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-bold);
+    padding: 2px 5px;
+    border-radius: var(--border-radius-full);
+    min-width: 18px;
+    text-align: center;
+    line-height: 1;
+}
+
+/* ================================================================
+   USUARIO
+   ================================================================ */
+.topbar-user {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    cursor: pointer;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--border-radius-md);
+    transition: background var(--transition-base);
+}
+
+.topbar-user:hover {
+    background: var(--bg-tertiary);
+}
+
+.topbar-user-avatar {
+    width: 35px;
+    height: 35px;
+    border-radius: var(--border-radius-full);
+    object-fit: cover;
+    border: 2px solid var(--color-primary);
+    background: var(--bg-tertiary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--font-size-md);
+}
+
+.topbar-user-avatar img {
+    width: 100%;
+    height: 100%;
+    border-radius: var(--border-radius-full);
+    object-fit: cover;
+}
+
+.topbar-user-name {
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-medium);
+    color: var(--text-primary);
+    white-space: nowrap;
+}
+
+/* ================================================================
+   RESPONSIVE
+   ================================================================ */
+@media (max-width: 767px) {
+    .topbar {
+        padding: 0 var(--spacing-md);
+    }
+
+    .topbar-menu-btn {
+        display: block;
+    }
+
+    .topbar-title {
+        font-size: var(--font-size-lg);
+    }
+
+    .topbar-user-name {
+        display: none;
+    }
+}

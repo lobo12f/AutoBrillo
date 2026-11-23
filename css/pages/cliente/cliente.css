@@ -1,0 +1,817 @@
+/* Bloquear scroll solo cuando la clase esté activa */
+body.no-scroll {
+    overflow: hidden !important;
+    height: 100vh !important;
+    touch-action: none;
+    /* Evita gestos táctiles de desplazamiento en móviles */
+}
+
+.conte-quick-access-section {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    width: 100%;
+
+}
+
+.main-content-cliente {
+    margin-left: 250px;
+    /* Deja espacio exacto para la sidebar fija */
+    width: calc(100% - 250px);
+    /* Ocupa el resto de la pantalla horizontal */
+    max-width: 100%;
+    box-sizing: border-box;
+    padding: 30px 40px;
+    /* Margen interno equilibrado */
+    position: relative;
+    top: 80px;
+    /* Debajo del header superior */
+    overflow-x: hidden;
+}
+
+.dash-content-wrapper {
+    width: 100%;
+    min-width: 100%;
+
+}
+
+
+
+@media (max-width: 768px) {
+    .main-content-cliente {
+        margin-left: 0;
+        width: 100%;
+        padding: 11px 6px;
+
+    }
+
+    .quick-access-section {
+        display: grid;
+
+    }
+
+    .conte-quick-access-section {
+        display: grid;
+
+        gap: 15px;
+        width: 91%;
+        grid-template-columns: 2fr 2fr;
+    }
+}
+
+
+
+.avatar-edit-resumen {
+    width: 100%;
+    height: 32%;
+
+
+    position: relative;
+    justify-content: center;
+    display: grid;
+    align-items: center;
+}
+
+/* ================================================================
+   HEADER CLIENTE & BARRA DE NAVEGACIÓN
+   ================================================================ */
+
+
+.header-clis {
+    height: 80px;
+    width: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: var(--bg-header, #0f1621);
+    border-bottom: 1px solid var(--border-color, #1e2a3a);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+    z-index: var(--z-header, 400);
+}
+
+.header-actions-cliente {
+    position: relative;
+    left: auto;
+    top: auto;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+/* ================================================================
+   BOTÓN HAMBURGUESA
+   ================================================================ */
+.hamburger-btn {
+    display: none;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 28px;
+    height: 20px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    z-index: 500;
+}
+
+.hamburger-btn span {
+    width: 100%;
+    height: 3px;
+    background-color: var(--text-primary, #ffffff);
+    border-radius: 3px;
+    transition: all var(--transition-base, 0.3s ease);
+}
+
+/* Transformación a 'X' cuando el menú está abierto */
+.hamburger-btn.active span:nth-child(1) {
+    transform: translateY(8.5px) rotate(45deg);
+}
+
+.hamburger-btn.active span:nth-child(2) {
+    opacity: 0;
+}
+
+.hamburger-btn.active span:nth-child(3) {
+    transform: translateY(-8.5px) rotate(-45deg);
+}
+
+/* ================================================================
+   ESTILOS DE NAVEGACIÓN / SIDEBAR
+   ================================================================ */
+.sidba-cliente {
+    position: fixed;
+    top: 80px;
+    left: 0;
+    width: 250px;
+    height: calc(100vh - 80px);
+    background: var(--bg-sidebar, #0a0e14);
+    border-right: 1px solid var(--border-color, #1e2a3a);
+    padding: 20px 10px;
+    z-index: var(--z-sidebar, 300);
+    transition: transform var(--transition-base, 0.3s ease);
+}
+
+.sidba-cliente ul.side-links {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+    position: static;
+}
+
+.sidba-cliente ul.side-links li a {
+    display: block;
+    padding: 10px 15px;
+    color: var(--text-secondary, #8892a4);
+    text-decoration: none;
+    font-size: var(--font-size-md, 0.875rem);
+    border-radius: var(--radius-md, 10px);
+    transition: all var(--transition-base, 0.3s ease);
+}
+
+.sidba-cliente ul.side-links li a:hover,
+.sidba-cliente ul.side-links li a.active {
+    background: var(--accent-bg, rgba(0, 255, 136, 0.1));
+    color: var(--accent-color, #00ff88);
+}
+
+/* ================================================================
+   RESPONSIVE MÓVIL (< 768px)
+   ================================================================ */
+@media (max-width: 768px) {
+    .hamburger-btn {
+        display: flex;
+        /* Se muestra el botón en móvil */
+    }
+
+    .sidba-cliente {
+        transform: translateX(-100%);
+        /* Se oculta a la izquierda por defecto */
+        box-shadow: 5px 0 15px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Clase activa que añade JS al abrir el menú */
+    .sidba-cliente.open {
+        transform: translateX(0);
+        /* Entra a pantalla */
+    }
+}
+
+/* 🛠️ DEBUG: Agrega esto temporalmente al final de tu CSS 
+* {
+    outline: 1px solid red !important;
+}
+*/
+/* ================================================================
+   CORRECCIÓN DE DESBORDAMIENTO GLOBAL
+   ================================================================ */
+html,
+body {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+    position: relative;
+}
+
+/* Asegurar que las imágenes y videos nunca desborden su contenedor */
+img,
+video,
+iframe,
+table {
+    max-width: 100%;
+}
+
+/* Evitar desbordamiento en textos muy largos */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+span,
+a {
+    overflow-wrap: break-word;
+    word-break: break-word;
+}
+
+/* ================================================================
+   DASHBOARD HEADER MODERNO CON AVATAR INTERACTIVO
+   ================================================================ */
+.dash-header {
+    height: auto;
+    /* Dejar que el contenido defina la altura de forma fluida */
+    min-height: 140px;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    margin: 0 0 25px 0;
+    padding: 24px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    position: relative;
+    overflow: hidden;
+
+    /* Fondo con imagen de car detailing y degradado oscuro */
+    background: linear-gradient(135deg,
+            rgba(8, 12, 20, 0.94) 0%,
+            rgba(15, 22, 33, 0.88) 50%,
+            rgba(8, 12, 20, 0.94) 100%),
+        url('https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&q=80&w=1920') center/cover no-repeat;
+
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(0, 255, 136, 0.25);
+    /*  border-radius: var(--radius-xl, 16px);*/
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+
+
+
+/* Efecto Neón de Fondo */
+.dash-header::before {
+    content: '';
+    position: absolute;
+    top: -60px;
+    left: -20px;
+    width: 220px;
+    height: 220px;
+    background: radial-gradient(circle, rgba(0, 255, 136, 0.12) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+.dash-welcome-group {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    position: relative;
+    z-index: 1;
+}
+
+.profile-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+
+
+/* Contenedor del Avatar y Foto */
+.dash-avatar-wrapper {
+    position: relative;
+    flex-shrink: 0;
+    width: 100px;
+    height: 100px;
+}
+
+.dash-avatar {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    /*background: linear-gradient(135deg, #00ff88, #00d4ff);*/
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #080c14;
+    font-weight: 700;
+    font-size: 1.25rem;
+    box-shadow: 0 0 18px rgba(0, 255, 136, 0.25);
+    border: 2px solid rgba(255, 255, 255, 0.15);
+    position: relative;
+}
+
+/* Edición de Foto de Perfil */
+.avatar-edit {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    position: relative;
+
+}
+
+#foto-perfil-grande {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+    display: block;
+}
+
+/* Capa que aparece al pasar el cursor para subir foto */
+.avatar-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    cursor: pointer;
+    border-radius: 50%;
+    font-size: 1.2rem;
+}
+
+.avatar-edit:hover .avatar-overlay {
+    opacity: 1;
+}
+
+/* Iniciales ocultas cuando hay foto cargada (opcional en JS) */
+#user-initials {
+    display: none;
+    /* Si usas la etiqueta <img> de UI-Avatars */
+}
+
+/* Indicador Online */
+.status-indicator {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 2px solid #131c2b;
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    z-index: 2;
+}
+
+.status-indicator.online {
+    background-color: #00ff88;
+    box-shadow: 0 0 8px #00ff88;
+}
+
+/* Tipografía y Textos */
+.dash-welcome-text h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 4px 0 2px 0;
+    letter-spacing: -0.3px;
+}
+
+.highlight-name {
+    background: linear-gradient(90deg, #00ff88, #00d4ff);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.greeting-badge {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #00ff88;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.dash-subtitle {
+    font-size: 0.875rem;
+    color: #8892a4;
+    margin: 0;
+}
+
+/* Tag de Membresía */
+.dash-header-badge {
+    position: relative;
+    z-index: 1;
+}
+
+.membership-tag {
+    background: rgba(0, 255, 136, 0.08);
+    border: 1px solid rgba(0, 255, 136, 0.3);
+    color: #00ff88;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* Ajustes Móviles */
+@media (max-width: 640px) {
+    .dash-header {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 18px 20px;
+        gap: 16px;
+    }
+
+    .dash-avatar {
+        width: 100px;
+        height: 100px;
+    }
+
+    .dash-welcome-text h1 {
+        font-size: 1.2rem;
+    }
+
+    .dash-header-badge {
+        width: 100%;
+    }
+
+    .membership-tag {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+
+/* ================================================================
+   SECCIÓN: STATS GRID (TARJETAS DE RESUMEN)
+   ================================================================ */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+    gap: var(--space-lg, 20px);
+    width: 100%;
+    margin-bottom: var(--space-xl, 25px);
+    box-sizing: border-box;
+}
+
+.stat-card {
+    background: var(--bg-card, #131c2b);
+    border: 1px solid var(--border-color, #1e2a3a);
+    border-radius: var(--radius-lg, 15px);
+    padding: var(--space-lg, 20px);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: transform var(--transition-base, 0.3s ease), border-color var(--transition-base, 0.3s ease);
+    box-shadow: var(--shadow-sm, 0 2px 8px rgba(0, 0, 0, 0.3));
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-card:hover {
+    transform: translateY(-3px);
+    border-color: var(--accent-border, rgba(0, 255, 136, 0.3));
+    box-shadow: var(--shadow-md, 0 4px 16px rgba(0, 0, 0, 0.4));
+}
+
+/* Tarjeta destacada (Featured) */
+.stat-card.featured-stat {
+    border-color: rgba(0, 255, 136, 0.3);
+    background: linear-gradient(145deg, var(--bg-card, #131c2b), #1a273a);
+}
+
+/* Títulos de las tarjetas */
+.stat-card h3 {
+    font-size: var(--font-size-xs, 0.75rem);
+    font-weight: var(--font-weight-semibold, 600);
+    color: var(--text-secondary, #8892a4);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin: 0 0 10px 0;
+}
+
+/* Valores grandes */
+.stat-card .stat-value {
+    font-size: var(--font-size-3xl, 1.8rem);
+    font-weight: var(--font-weight-bold, 700);
+    color: var(--text-primary, #ffffff);
+    margin: 0 0 8px 0;
+    line-height: 1.2;
+    word-break: break-word;
+}
+
+/* Valores pequeños (ej: Próxima Cita) */
+.stat-card .stat-value-sm {
+    font-size: var(--font-size-lg, 1.1rem);
+    font-weight: var(--font-weight-semibold, 600);
+    color: var(--text-muted, #5a6478);
+    margin: 0 0 8px 0;
+    line-height: 1.3;
+}
+
+/* Subtextos/Notas */
+.stat-card small {
+    font-size: var(--font-size-xs, 0.75rem);
+    color: var(--text-muted, #8892a4);
+    display: block;
+    margin-top: auto;
+}
+
+/* Utilidades de color si no existen en tus variables */
+.stat-card .text-danger {
+    color: var(--color-danger, #ff4444) !important;
+}
+
+.stat-card .text-warning {
+    color: var(--color-warning, #ffbb33) !important;
+}
+
+/* Ajustes Responsivos Móviles */
+@media (max-width: 479px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+        /* Una columna en teléfonos pequeños */
+        gap: 12px;
+    }
+
+    .stat-card {
+        padding: 15px;
+    }
+
+    .stat-card .stat-value {
+        font-size: 1.5rem;
+    }
+}
+
+/* ================================================================
+   SECCIÓN: CITAS AGENDADAS (CONTROL DE DESBORDAMIENTO Y RESPONSIVE)
+   ================================================================ */
+.dash-section {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    margin-bottom: var(--space-2xl, 30px);
+}
+
+/* Cabecera de la sección */
+.section-header {
+    margin-bottom: var(--space-lg, 20px);
+    width: 100%;
+}
+
+.header-flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    /* Evita que la cabecera empuje la pantalla en móviles */
+    gap: var(--space-md, 15px);
+    width: 100%;
+}
+
+.header-title h2 {
+    font-size: var(--font-size-2xl, 1.4rem);
+    color: var(--text-primary, #ffffff);
+    margin-bottom: 4px;
+}
+
+.header-title p {
+    font-size: var(--font-size-sm, 0.85rem);
+    color: var(--text-secondary, #8892a4);
+    margin: 0;
+}
+
+/* Grupo de botones de la cabecera */
+.header-actions-group {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    /* Permite que los botones bajen si no caben en pantalla chica */
+    gap: 10px;
+}
+
+/* Botones estilo Tabs */
+.tab-btn {
+    padding: 8px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 600;
+    transition: all var(--transition-base, 0.3s ease);
+    border: 1px solid transparent;
+}
+
+.tab-activo-cliente {
+    border-color: var(--accent-color, #00ff88);
+    background: var(--accent-bg, rgba(0, 255, 136, 0.1));
+    color: var(--accent-color, #00ff88);
+}
+
+.tab-inactivo-cliente {
+    border-color: var(--border-color, #1e2a3a);
+    background: transparent;
+    color: var(--text-secondary, #8892a4);
+}
+
+.tab-inactivo-cliente:hover {
+    border-color: var(--border-color-strong, #3a4a5a);
+    color: var(--text-primary, #ffffff);
+}
+
+/* Cuadrícula de Citas */
+.citas-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
+    gap: var(--space-lg, 20px);
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Estilos adaptativos en móviles */
+@media (max-width: 640px) {
+    .header-flex {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .header-actions-group {
+        width: 100%;
+        justify-content: flex-start;
+    }
+
+    .btn-nueva-cita {
+        width: 100%;
+        /* Botón de nueva cita ocupa todo el ancho en móviles */
+        text-align: center;
+        margin-top: 5px;
+    }
+
+    .citas-grid {
+        grid-template-columns: 1fr;
+        /* Una columna en pantallas pequeñas */
+    }
+}
+
+/* ================================================================
+   GARAGE GRID & CONTENEDOR DE VEHÍCULOS
+   ================================================================ */
+
+
+/* Personalización de la Scrollbar */
+#contenedor-vehiculos::-webkit-scrollbar {
+    width: 6px;
+}
+
+#contenedor-vehiculos::-webkit-scrollbar-track {
+    background: rgba(15, 22, 33, 0.6);
+    border-radius: 10px;
+}
+
+#contenedor-vehiculos::-webkit-scrollbar-thumb {
+    background: var(--accent-color, #00ff88);
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+}
+
+/* ================================================================
+   TARJETA DE VEHÍCULO (CAR CARD)
+   ================================================================ */
+/* ================================================================
+   OPCIÓN 1: NEON GLASS BANNER
+   ================================================================ */
+
+
+.car-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(0, 255, 136, 0.4);
+    box-shadow: 0 8px 25px rgba(0, 255, 136, 0.15);
+}
+
+
+
+
+
+
+
+.car-card:hover .car-img {
+    transform: scale(1.05);
+}
+
+
+
+
+
+
+
+.btn-car-action {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    width: 34px;
+    height: 34px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.btn-car-action:hover {
+    background: rgba(0, 255, 136, 0.2);
+    border-color: #00ff88;
+    transform: translateY(-2px);
+}
+
+.car-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(0, 255, 136, 0.4);
+    box-shadow: 0 8px 24px rgba(0, 255, 136, 0.15);
+}
+
+
+
+
+
+
+
+.car-card:hover .car-img {
+    transform: scale(1.05);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.car-card:hover .car-action-hint {
+    color: #00ff88;
+}
+
+
+
+.btn-car-action {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 6px 10px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: #ffffff;
+}
+
+.btn-car-action:hover {
+    background: rgba(0, 255, 136, 0.15);
+    border-color: #00ff88;
+    transform: translateY(-2px);
+}
+
+.btn-car-action.delete:hover {
+    background: rgba(255, 68, 68, 0.15);
+    border-color: #ff4444;
+}
+
+@media (max-width: 640px) {
+    .conte-quick-access-section {
+        display: grid;
+
+        gap: 15px;
+        width: 92%;
+        grid-template-columns: 2fr 2fr;
+    }
+}

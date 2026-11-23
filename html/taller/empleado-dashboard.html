@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Empleado | AutoBrillo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+        <!-- ⭐ CSS UNIFICADO -->
+    <!-- ⭐ CSS MANAGER -->
+        <!-- ⭐ CSS UNIFICADO -->
+    <link rel="stylesheet" href="../../css/main.css">
+    <!-- ⭐ CSS MANAGER -->
+    <script type="module" src="../../javascript/css-manager.js"></script>
+</head>
+
+<body>
+    <!-- SIDEBAR (Desktop) -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">🚗</div>
+            <div class="sidebar-brand">
+                <h2>AutoBrillo</h2>
+                <span>Panel Empleado</span>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <a href="#" class="nav-item active" data-section="panel" onclick="cambiarSeccion('panel')">
+                <span class="nav-icon">📊</span>
+                <span class="nav-text">Panel</span>
+                <span class="nav-indicator"></span>
+            </a>
+            <a href="#" class="nav-item" data-section="trabajos" onclick="cambiarSeccion('trabajos')">
+                <span class="nav-icon">📋</span>
+                <span class="nav-text">Mis Trabajos</span>
+                <span class="nav-badge" id="badge-trabajos" style="display:none;">0</span>
+            </a>
+            <a href="#" class="nav-item" data-section="historial" onclick="cambiarSeccion('historial')">
+                <span class="nav-icon">📜</span>
+                <span class="nav-text">Historial</span>
+            </a>
+            <a href="#" class="nav-item" data-section="pagos" onclick="cambiarSeccion('pagos')">
+                <span class="nav-icon">💳</span>
+                <span class="nav-text">Pagos</span>
+            </a>
+            <a href="#" class="nav-item" data-section="notificaciones" onclick="cambiarSeccion('notificaciones')">
+                <span class="nav-icon">🔔</span>
+                <span class="nav-text">Notificaciones</span>
+                <span class="nav-badge" id="badge-notificaciones-sidebar" style="display:none;">0</span>
+            </a>
+            <a href="#" class="nav-item" data-section="resenas" onclick="cambiarSeccion('resenas')">
+                <span class="nav-icon">⭐</span>
+                <span class="nav-text">Reseñas</span>
+            </a>
+            <a href="#" class="nav-item" data-section="configuracion" onclick="cambiarSeccion('configuracion')">
+                <span class="nav-icon">⚙️</span>
+                <span class="nav-text">Configuración</span>
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="empleado-mini">
+                <div class="empleado-mini-avatar" id="sidebar-avatar">👨‍🔧</div>
+                <div class="empleado-mini-info">
+                    <strong id="sidebar-nombre">Cargando...</strong>
+                    <span id="sidebar-rol">Rol</span>
+                </div>
+            </div>
+            <button class="btn-logout-sidebar" onclick="window.cerrarSesion()">🚪 Salir</button>
+        </div>
+    </aside>
+
+    <!-- OVERLAY PARA MÓVIL -->
+    <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+        <!-- HEADER -->
+        <header class="topbar">
+            <button class="btn-menu-mobile" onclick="toggleSidebar()">☰</button>
+            <div class="topbar-title">
+                <h1 id="seccion-titulo">📊 Panel</h1>
+                <span id="fecha-actual"></span>
+            </div>
+            <div class="topbar-actions">
+                <button class="btn-icon" onclick="cambiarSeccion('notificaciones')">
+                    🔔
+                    <span class="badge-dot" id="badge-notificaciones-top" style="display:none;"></span>
+                </button>
+                <div class="topbar-empleado">
+                    <div class="topbar-avatar" id="topbar-avatar">👨‍🔧</div>
+                    <div class="topbar-info">
+                        <strong id="topbar-nombre">Cargando...</strong>
+                        <span id="topbar-rol">Rol</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- CONTENEDOR DE SECCIONES -->
+        <div class="sections-container">
+            <!-- SECCIÓN PANEL -->
+            <section class="seccion active" id="seccion-panel">
+                <!-- Ingresos -->
+                <div class="card ingresos-card">
+                    <div class="card-header">
+                        <h2>💰 Mis Ingresos</h2>
+                        <span class="card-subtitle">Meta diaria: RD$ 5,000</span>
+                    </div>
+                    <div class="ingresos-grid">
+                        <div class="ingreso-item">
+                            <div class="ingreso-icono">📅</div>
+                            <div class="ingreso-periodo">HOY</div>
+                            <div class="ingreso-monto" id="ingresos-hoy">RD$ 0</div>
+                            <div class="ingreso-sub" id="trabajos-hoy">0 trabajos</div>
+                        </div>
+                        <div class="ingreso-item">
+                            <div class="ingreso-icono">📆</div>
+                            <div class="ingreso-periodo">SEMANA</div>
+                            <div class="ingreso-monto" id="ingresos-semana">RD$ 0</div>
+                            <div class="ingreso-sub" id="trabajos-semana">0 trabajos</div>
+                        </div>
+                        <div class="ingreso-item">
+                            <div class="ingreso-icono">📊</div>
+                            <div class="ingreso-periodo">MES</div>
+                            <div class="ingreso-monto" id="ingresos-mes">RD$ 0</div>
+                            <div class="ingreso-sub" id="trabajos-mes">0 trabajos</div>
+                        </div>
+                        <div class="ingreso-item">
+                            <div class="ingreso-icono">🏆</div>
+                            <div class="ingreso-periodo">TOTAL</div>
+                            <div class="ingreso-monto total" id="ingresos-total">RD$ 0</div>
+                            <div class="ingreso-sub" id="trabajos-total">0 trabajos</div>
+                        </div>
+                    </div>
+                    <!-- Meta diaria -->
+                    <div class="meta-container">
+                        <div class="meta-info">
+                            <span>Progreso de meta diaria</span>
+                            <span id="meta-porcentaje">0%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="meta-fill"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Estadísticas -->
+                <div class="stats-grid">
+                    <div class="stat-card" onclick="cambiarSeccion('trabajos')">
+                        <div class="stat-icono">⏳</div>
+                        <div class="stat-valor" id="mis-pendientes">0</div>
+                        <div class="stat-label">Pendientes</div>
+                    </div>
+                    <div class="stat-card" onclick="cambiarSeccion('trabajos')">
+                        <div class="stat-icono">🔧</div>
+                        <div class="stat-valor" id="mis-en-proceso">0</div>
+                        <div class="stat-label">En Proceso</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icono">✅</div>
+                        <div class="stat-valor" id="mis-completados">0</div>
+                        <div class="stat-label">Completados Hoy</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icono">⭐</div>
+                        <div class="stat-valor" id="mi-calificacion">N/A</div>
+                        <div class="stat-label">Mi Calificación</div>
+                    </div>
+                </div>
+
+                <!-- Próximos trabajos -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2>📋 Próximos Trabajos</h2>
+                        <button class="btn-link" onclick="cambiarSeccion('trabajos')">Ver todos →</button>
+                    </div>
+                    <div id="proximos-trabajos">
+                        <p class="loading">Cargando...</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECCIÓN TRABAJOS-->
+            <section class="seccion" id="seccion-trabajos">
+                <div class="card">
+                    <div class="card-header" style="flex-direction:column; gap:15px; align-items:stretch;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+                            <h2>📋 Mis Trabajos</h2>
+                            <button onclick="window.actualizarTabActual && window.actualizarTabActual()" "
+                                style=" padding:8px 14px; border:1px solid #00ff88; border-radius:15px;
+                                background:transparent; color:#00ff88; cursor:pointer; font-size:0.75rem; transition:all
+                                0.3s;" onmouseover="this.style.background='rgba(0,255,136,0.1)';"
+                                onmouseout="this.style.background='transparent';" title="Actualizar trabajos">
+                                🔄 Actualizar
+                            </button>
+                        </div>
+
+                        <!-- Estadísticas rápidas -->
+                        <div style="display:flex; gap:10px; flex-wrap:wrap; width:100%;">
+                            <div
+                                style="background:rgba(255,187,51,0.05); border:1px solid rgba(255,187,51,0.2); border-radius:12px; padding:12px 16px; flex:1; min-width:100px; text-align:center;">
+                                <div style="font-size:1.4rem; font-weight:bold; color:#ffbb33;" id="stat-pendientes">0
+                                </div>
+                                <div style="font-size:0.65rem; color:#888;">⏳ Pendientes</div>
+                            </div>
+                            <div
+                                style="background:rgba(0,212,255,0.05); border:1px solid rgba(0,212,255,0.2); border-radius:12px; padding:12px 16px; flex:1; min-width:100px; text-align:center;">
+                                <div style="font-size:1.4rem; font-weight:bold; color:#00d4ff;" id="stat-activos">0
+                                </div>
+                                <div style="font-size:0.65rem; color:#888;">🔧 En Proceso</div>
+                            </div>
+                            <div
+                                style="background:rgba(0,255,136,0.05); border:1px solid rgba(0,255,136,0.2); border-radius:12px; padding:12px 16px; flex:1; min-width:100px; text-align:center;">
+                                <div style="font-size:1.4rem; font-weight:bold; color:#00ff88;" id="stat-completados">0
+                                </div>
+                                <div style="font-size:0.65rem; color:#888;">✅ Completados</div>
+                            </div>
+                            <div
+                                style="background:rgba(255,68,255,0.05); border:1px solid rgba(255,68,255,0.2); border-radius:12px; padding:12px 16px; flex:1; min-width:100px; text-align:center;">
+                                <div style="font-size:1.4rem; font-weight:bold; color:#ff44ff;" id="stat-ingresos">$0
+                                </div>
+                                <div style="font-size:0.65rem; color:#888;">💰 Ingresos</div>
+                            </div>
+                        </div>
+
+                        <!-- Tabs -->
+                        <div class="tabs" style="width:100%; display:flex; gap:8px;">
+                            <!-- Botón Pendientes -->
+                            <button class="tab active" id="tab-pendientes"
+                                onclick="window.cambiarTab && window.cambiarTab('pendientes')"
+                                style="flex:1; padding:10px; border:1px solid #00ff88; border-radius:12px; background:rgba(0,255,136,0.1); color:#00ff88; cursor:pointer; font-size:0.8rem; font-weight:600; transition:all 0.3s;">
+                                ⏳ Pendientes
+                            </button>
+
+                            <!-- Botón Realizados -->
+                            <button class="tab" id="tab-realizados"
+                                onclick="window.cambiarTab && window.cambiarTab('realizados')"
+                                style="flex:1; padding:10px; border:1px solid #333; border-radius:12px; background:transparent; color:#aaa; cursor:pointer; font-size:0.8rem; font-weight:600; transition:all 0.3s;">
+                                ✅ Realizados
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Contenedores de trabajos -->
+                    <div id="contenedor-pendientes" style="margin-top:15px;">
+                        <p class="loading">Cargando trabajos pendientes...</p>
+                    </div>
+                    <div id="contenedor-realizados" style="display:none; margin-top:15px;">
+                        <p class="loading">Cargando historial...</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECCIÓN PAGOS -->
+            <section class="seccion" id="seccion-pagos">
+                <div class="card">
+                    <div class="card-header" style="flex-direction:column; gap:15px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+                            <h2>💳 Mis Pagos</h2>
+                            <div style="display:flex; gap:8px;">
+                                <button onclick="exportarPagosCSV()"
+                                    style="padding:8px 14px; border:1px solid #00d4ff; border-radius:15px; background:transparent; color:#00d4ff; cursor:pointer; font-size:0.75rem;">
+                                    📥 Exportar CSV
+                                </button>
+                                <button onclick="cargarHistorialPagos()"
+                                    style="padding:8px 14px; border:1px solid #00ff88; border-radius:15px; background:transparent; color:#00ff88; cursor:pointer; font-size:0.75rem;">
+                                    🔄 Actualizar
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Resumen -->
+                        <div
+                            style="display:grid; grid-template-columns:repeat(auto-fit, minmax(120px, 1fr)); gap:10px; width:100%;">
+                            <div
+                                style="background:rgba(0,255,136,0.05); border:2px solid #00ff8830; border-radius:10px; padding:12px; text-align:center;">
+                                <div style="font-size:1.2rem; font-weight:700; color:#00ff88;" id="pago-total">$0</div>
+                                <small style="color:#888; font-size:0.65rem;">Total Pagado</small>
+                            </div>
+                            <div
+                                style="background:rgba(255,187,51,0.05); border:2px solid #ffbb3330; border-radius:10px; padding:12px; text-align:center;">
+                                <div style="font-size:1.2rem; font-weight:700; color:#ffbb33;" id="pago-pendiente">$0
+                                </div>
+                                <small style="color:#888; font-size:0.65rem;">Pendiente</small>
+                            </div>
+                            <div
+                                style="background:rgba(0,212,255,0.05); border:2px solid #00d4ff30; border-radius:10px; padding:12px; text-align:center;">
+                                <div style="font-size:1.2rem; font-weight:700; color:#00d4ff;" id="pago-trabajos">0
+                                </div>
+                                <small style="color:#888; font-size:0.65rem;">Total Trabajos</small>
+                            </div>
+                            <div
+                                style="background:rgba(255,68,255,0.05); border:2px solid #ff44ff30; border-radius:10px; padding:12px; text-align:center;">
+                                <div style="font-size:1.2rem; font-weight:700; color:#ff44ff;" id="pago-registros">0
+                                </div>
+                                <small style="color:#888; font-size:0.65rem;">Registros</small>
+                            </div>
+                        </div>
+
+                        <!-- Filtros -->
+                        <div style="display:flex; gap:8px; flex-wrap:wrap; width:100%;">
+                            <select id="filtro-pago-mes" onchange="cargarHistorialPagos()"
+                                style="padding:8px 12px; background:#0f1621; border:1px solid #333; border-radius:10px; color:#aaa; font-size:0.75rem;">
+                                <option value="TODOS">📅 Todos los meses</option>
+                                <option value="0">Enero</option>
+                                <option value="1">Febrero</option>
+                                <option value="2">Marzo</option>
+                                <option value="3">Abril</option>
+                                <option value="4">Mayo</option>
+                                <option value="5">Junio</option>
+                                <option value="6">Julio</option>
+                                <option value="7">Agosto</option>
+                                <option value="8">Septiembre</option>
+                                <option value="9">Octubre</option>
+                                <option value="10">Noviembre</option>
+                                <option value="11">Diciembre</option>
+                            </select>
+                            <select id="filtro-pago-estado" onchange="cargarHistorialPagos()"
+                                style="padding:8px 12px; background:#0f1621; border:1px solid #333; border-radius:10px; color:#aaa; font-size:0.75rem;">
+                                <option value="TODOS">📌 Todos</option>
+                                <option value="PAGADO">✅ Pagado</option>
+                                <option value="PENDIENTE">⏳ Pendiente</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Tabla -->
+                    <div style="overflow-x:auto; margin-top:15px; border:1px solid #1e2a3a; border-radius:12px;">
+                        <table style="width:100%; border-collapse:collapse; min-width:600px;">
+                            <thead>
+                                <tr style="border-bottom:2px solid #1e2a3a; background:#0a0e14;">
+                                    <th style="padding:12px; text-align:left; font-size:0.7rem; color:#888;">📅 Periodo
+                                    </th>
+                                    <th style="padding:12px; text-align:center; font-size:0.7rem; color:#888;">🔧
+                                        Trabajos</th>
+                                    <th style="padding:12px; text-align:center; font-size:0.7rem; color:#888;">💰
+                                        Generado</th>
+                                    <th style="padding:12px; text-align:center; font-size:0.7rem; color:#888;">% Com.
+                                    </th>
+                                    <th style="padding:12px; text-align:right; font-size:0.7rem; color:#888;">💵 Pagado
+                                    </th>
+                                    <th style="padding:12px; text-align:center; font-size:0.7rem; color:#888;">📌 Estado
+                                    </th>
+                                    <th style="padding:12px; text-align:center; font-size:0.7rem; color:#888;">🧾</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbody-pagos">
+                                <tr>
+                                    <td colspan="7" style="padding:40px; text-align:center; color:#888;">Cargando
+                                        pagos...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECCIÓN NOTIFICACIONES -->
+            <section class="seccion" id="seccion-notificaciones">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>🔔 Notificaciones</h2>
+                        <button class="btn-link" onclick="marcarTodasLeidasEmpleado()">Marcar todas leídas</button>
+                    </div>
+                    <div id="lista-notificaciones-empleado">
+                        <p class="loading">Cargando...</p>
+                    </div>
+                </div>
+            </section>
+            <!-- SECCIÓN HISTORIAL -->
+            <section class="seccion" id="seccion-historial">
+                <div class="card">
+                    <div class="card-header" style="flex-direction:column; gap:15px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+                            <h2>📜 Historial de Trabajos</h2>
+                            <div style="display:flex; gap:8px;">
+                                <button onclick="exportarHistorialCSV()"
+                                    style="padding:8px 14px; border:1px solid #00d4ff; border-radius:15px; background:transparent; color:#00d4ff; cursor:pointer; font-size:0.75rem;">
+                                    📥 Exportar CSV
+                                </button>
+                                <button onclick="cargarHistorial()"
+                                    style="padding:8px 14px; border:1px solid #00ff88; border-radius:15px; background:transparent; color:#00ff88; cursor:pointer; font-size:0.75rem;">
+                                    🔄 Actualizar
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Estadísticas rápidas -->
+                        <div id="stats-historial"
+                            style="display:grid; grid-template-columns:repeat(auto-fit, minmax(120px, 1fr)); gap:10px; width:100%;">
+                            <div
+                                style="background:rgba(0,255,136,0.05); border:1px solid #00ff8830; border-radius:12px; padding:12px; text-align:center;">
+                                <div style="font-size:1.3rem; font-weight:bold; color:#00ff88;" id="hist-total">0</div>
+                                <div style="font-size:0.65rem; color:#888;">📋 Trabajos</div>
+                            </div>
+                            <div
+                                style="background:rgba(255,68,255,0.05); border:1px solid #ff44ff30; border-radius:12px; padding:12px; text-align:center;">
+                                <div style="font-size:1.3rem; font-weight:bold; color:#ff44ff;" id="hist-ingresos">$0
+                                </div>
+                                <div style="font-size:0.65rem; color:#888;">💰 Ingresos</div>
+                            </div>
+                            <div
+                                style="background:rgba(255,187,51,0.05); border:1px solid #ffbb3330; border-radius:12px; padding:12px; text-align:center;">
+                                <div style="font-size:1.3rem; font-weight:bold; color:#ffbb33;" id="hist-calificacion">
+                                    N/A</div>
+                                <div style="font-size:0.65rem; color:#888;">⭐ Calificación</div>
+                            </div>
+                            <div
+                                style="background:rgba(0,212,255,0.05); border:1px solid #00d4ff30; border-radius:12px; padding:12px; text-align:center;">
+                                <div style="font-size:1.3rem; font-weight:bold; color:#00d4ff;"
+                                    id="hist-duracion-promedio">0min
+                                </div>
+                                <div style="font-size:0.65rem; color:#888;">⏱️ Duración Prom.</div>
+                            </div>
+                        </div>
+
+                        <!-- Filtros -->
+                        <div
+                            style="display:flex; gap:8px; flex-wrap:wrap; width:100%; background:rgba(255,255,255,0.02); padding:12px; border-radius:12px; border:1px solid #1e2a3a;">
+                            <select id="filtro-historial-servicio" onchange="cargarHistorial()"
+                                style="padding:8px 12px; background:#0f1621; border:1px solid #333; border-radius:10px; color:#aaa; font-size:0.75rem;">
+                                <option value="TODOS">🔧 Todos los servicios</option>
+                            </select>
+                            <input type="date" id="filtro-historial-desde" onchange="cargarHistorial()"
+                                style="padding:8px; background:#0f1621; border:1px solid #333; border-radius:10px; color:#aaa; font-size:0.75rem;">
+                            <input type="date" id="filtro-historial-hasta" onchange="cargarHistorial()"
+                                style="padding:8px; background:#0f1621; border:1px solid #333; border-radius:10px; color:#aaa; font-size:0.75rem;">
+                            <input type="text" id="busqueda-historial"
+                                placeholder="🔍 Buscar placa, cliente o servicio..." oninput="cargarHistorial()"
+                                style="flex:1; min-width:150px; padding:8px 14px; background:#0f1621; border:1px solid #333; border-radius:10px; color:#aaa; font-size:0.75rem;">
+                        </div>
+                    </div>
+
+                    <!-- Tabla -->
+                    <div style="overflow-x:auto; margin-top:15px; border:1px solid #1e2a3a; border-radius:12px;">
+                        <table style="width:100%; border-collapse:collapse; min-width:800px;" id="tabla-historial">
+                            <thead>
+                                <tr style="border-bottom:2px solid #1e2a3a; background:#0a0e14;">
+                                    <th style="padding:12px; text-align:left; font-size:0.7rem; color:#888;">📅 Fecha
+                                    </th>
+                                    <th style="padding:12px; text-align:left; font-size:0.7rem; color:#888;">👤 Cliente
+                                    </th>
+                                    <th style="padding:12px; text-align:left; font-size:0.7rem; color:#888;">🚗 Vehículo
+                                    </th>
+                                    <th style="padding:12px; text-align:left; font-size:0.7rem; color:#888;">🔧 Servicio
+                                    </th>
+                                    <th style="padding:12px; text-align:center; font-size:0.7rem; color:#888;">⏱️
+                                        Duración</th>
+                                    <th style="padding:12px; text-align:right; font-size:0.7rem; color:#888;">💰 Monto
+                                    </th>
+                                    <th style="padding:12px; text-align:center; font-size:0.7rem; color:#888;">⭐ Calif.
+                                    </th>
+                                    <th style="padding:12px; text-align:center; font-size:0.7rem; color:#888;">👁️</th>
+                                </tr>
+                            </thead>
+                            <tbody id="historial-tbody">
+                                <tr>
+                                    <td colspan="8" style="padding:40px; text-align:center; color:#888;">Cargando
+                                        historial...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Paginación -->
+                    <div id="paginacion-historial"
+                        style="display:flex; justify-content:center; gap:8px; margin-top:15px;"></div>
+                </div>
+            </section>
+            <!-- SECCIÓN RESEÑAS -->
+
+            <section id="seccion-resenas" class=" seccion">
+                <div class="section-header">
+                    <h2>⭐ Mis Reseñas</h2>
+                    <button class="btn-add" onclick="cargarResenasEmpleado()">🔄 Actualizar</button>
+                </div>
+
+                <!-- Estadísticas -->
+                <div id="stats-resenas"
+                    style="display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:10px; margin-bottom:20px;">
+                </div>
+
+                <!-- Filtros -->
+                <div
+                    style="display:flex; gap:10px; margin-bottom:15px; flex-wrap:wrap; background:#131c2b; padding:15px; border-radius:10px; border:1px solid #1e2a3a;">
+                    <select id="filtro-resenas-estrellas" onchange="filtrarResenasEmpleado()"
+                        style="padding:10px; background:#080c14; border:1px solid #1e2a3a; border-radius:8px; color:#fff;">
+                        <option value="TODAS">⭐ Todas</option>
+                        <option value="5">⭐⭐⭐⭐⭐ (5)</option>
+                        <option value="4">⭐⭐⭐⭐ (4)</option>
+                        <option value="3">⭐⭐⭐ (3)</option>
+                        <option value="2">⭐⭐ (2)</option>
+                        <option value="1">⭐ (1)</option>
+                        <option value="SIN_RESPUESTA">💬 Sin responder</option>
+                    </select>
+                    <input type="text" id="busqueda-resena" placeholder="🔍 Buscar por cliente o comentario..."
+                        oninput="filtrarResenasEmpleado()"
+                        style="flex:1; padding:10px; background:#080c14; border:1px solid #1e2a3a; border-radius:8px; color:#fff; min-width:200px;">
+                </div>
+
+                <!-- Lista de reseñas -->
+                <div id="lista-resenas-empleado" style="display:flex; flex-direction:column; gap:12px;">
+                    <p style="color:#888; text-align:center; padding:30px;">Cargando reseñas...</p>
+                </div>
+            </section>
+
+            <!-- Modal para responder reseñas -->
+            <div id="modal-responder-resena"
+                style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:1000; align-items:center; justify-content:center;">
+                <div
+                    style="background:#131c2b; border:1px solid #1e2a3a; border-radius:12px; padding:25px; max-width:500px; width:90%;">
+                    <h3 id="modal-responder-titulo" style="color:#fff; margin-bottom:15px;">👨‍🔧 Responder como
+                        Empleado</h3>
+
+                    <div id="resena-original"
+                        style="background:#080c14; border-radius:8px; padding:15px; margin-bottom:15px;">
+                        <!-- Se llena dinámicamente -->
+                    </div>
+
+                    <input type="hidden" id="respuesta-resena-id">
+                    <input type="hidden" id="respuesta-tipo" value="EMPLEADO">
+
+                    <textarea id="respuesta-texto" placeholder="Escribe tu respuesta..."
+                        style="width:100%; min-height:100px; background:#080c14; border:1px solid #1e2a3a; border-radius:8px; color:#fff; padding:12px; font-size:0.9rem; resize:vertical;"></textarea>
+
+                    <div style="display:flex; gap:10px; margin-top:15px; justify-content:flex-end;">
+                        <button onclick="document.getElementById('modal-responder-resena').style.display='none'"
+                            style="padding:10px 20px; background:transparent; border:1px solid #666; color:#aaa; border-radius:6px; cursor:pointer;">
+                            Cancelar
+                        </button>
+                        <button onclick="window.enviarRespuestaEmpleado()"
+                            style="padding:10px 20px; background:#ffbb33; color:#000; border:none; border-radius:6px; cursor:pointer; font-weight:600;">
+                            Enviar Respuesta
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <!-- SECCIÓN CONFIGURACIÓN -->
+            <section class="seccion" id="seccion-configuracion">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>⚙️ Configuración</h2>
+                    </div>
+                    <div class="config-tabs">
+                        <button class="config-tab active" onclick="cambiarConfigTab('perfil')">👤 Perfil</button>
+                        <button class="config-tab" onclick="cambiarConfigTab('password')">🔒 Contraseña</button>
+                        <button class="config-tab" onclick="cambiarConfigTab('preferencias')">🎨 Preferencias</button>
+                    </div>
+                    <div id="config-perfil">
+                        <div class="config-avatar">
+                            <img id="config-foto-preview" src="" alt="Foto" style="display:none;">
+                            <span id="config-foto-placeholder">👨‍🔧</span>
+                        </div>
+                        <div class="form-group">
+                            <label>📸 Foto de perfil</label>
+                            <input type="file" id="config-foto-input" accept="image/*"
+                                onchange="previewFotoPerfil(event)">
+                        </div>
+                        <div class="form-group">
+                            <label>👤 Nombre completo</label>
+                            <input type="text" id="config-nombre" placeholder="Tu nombre">
+                        </div>
+                        <div class="form-group">
+                            <label>📱 Teléfono</label>
+                            <input type="tel" id="config-telefono" placeholder="Tu teléfono">
+                        </div>
+                        <div class="form-group">
+                            <label>🕐 Horario</label>
+                            <div class="horario-grid">
+                                <input type="time" id="config-horario-inicio" value="08:00">
+                                <span>a</span>
+                                <input type="time" id="config-horario-fin" value="17:00">
+                            </div>
+                        </div>
+                        <button class="btn-primario" onclick="guardarPerfil()">💾 Guardar Perfil</button>
+                    </div>
+                    <div id="config-password" style="display:none;">
+                        <div class="form-group">
+                            <label>🔑 Contraseña actual</label>
+                            <input type="password" id="config-password-actual">
+                        </div>
+                        <div class="form-group">
+                            <label>🔒 Nueva contraseña</label>
+                            <input type="password" id="config-password-nueva">
+                        </div>
+                        <div class="form-group">
+                            <label>✅ Confirmar</label>
+                            <input type="password" id="config-password-confirmar">
+                        </div>
+                        <button class="btn-primario" onclick="cambiarPassword()">🔒 Cambiar Contraseña</button>
+                    </div>
+                    <div id="config-preferencias" style="display:none;">
+                        <div class="preferencia-item">
+                            <div><strong>🔔 Sonido</strong>
+                                <p>Reproducir sonido al recibir notificación</p>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" id="config-sonido" checked
+                                    onchange="guardarPreferencia('sonido', this.checked)">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="preferencia-item">
+                            <div><strong>📱 Toast</strong>
+                                <p>Mostrar notificación emergente</p>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" id="config-toast" checked
+                                    onchange="guardarPreferencia('toast', this.checked)">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="preferencia-item">
+                            <div><strong>🎨 Tema oscuro</strong>
+                                <p>Usar tema oscuro</p>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" id="config-tema-oscuro" checked
+                                    onchange="guardarPreferencia('temaOscuro', this.checked)">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <!-- BOTTOM NAVIGATION (Móvil) -->
+    <nav class="bottom-nav" id="bottom-nav">
+        <a href="#" class="bottom-item active" onclick="cambiarSeccion('panel')">
+            <span class="bottom-icon">📊</span>
+            <span class="bottom-text">Panel</span>
+        </a>
+        <a href="#" class="bottom-item" onclick="cambiarSeccion('trabajos')">
+            <span class="bottom-icon">📋</span>
+            <span class="bottom-text">Trabajos</span>
+            <span class="bottom-badge" id="badge-trabajos-bottom" style="display:none;">0</span>
+        </a>
+        <a href="#" class="bottom-item" onclick="cambiarSeccion('pagos')">
+            <span class="bottom-icon">💳</span>
+            <span class="bottom-text">Pagos</span>
+        </a>
+        <a href="#" class="bottom-item" onclick="cambiarSeccion('notificaciones')">
+            <span class="bottom-icon">🔔</span>
+            <span class="bottom-text">Alertas</span>
+            <span class="bottom-badge" id="badge-notificaciones-bottom" style="display:none;">0</span>
+        </a>
+        <a href="#" class="bottom-item" onclick="cambiarSeccion('configuracion')">
+            <span class="bottom-icon">⚙️</span>
+            <span class="bottom-text">Config</span>
+        </a>
+    </nav>
+
+    <!-- MODAL FOTOS -->
+    <div id="modal-fotos" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-fotos-titulo">📸 Subir Fotos</h3>
+                <span class="modal-close" onclick="cerrarModalFotos()">&times;</span>
+            </div>
+            <div id="fotos-preview"></div>
+            <input type="file" id="input-fotos" accept="image/*" multiple onchange="previewFotos(event)">
+            <div class="modal-actions">
+                <button class="btn-secundario" onclick="cerrarModalFotos()">Cancelar</button>
+                <button class="btn-primario" onclick="subirFotos()">📤 Subir</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST CONTAINER -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <script type="module" src="../../javascript/taller/empleado/empleado-dashboard.js"></script>
+</body>
+
+</html>

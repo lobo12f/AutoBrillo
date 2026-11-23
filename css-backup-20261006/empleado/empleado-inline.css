@@ -1,0 +1,594 @@
+/* ============================================================================
+   AUTOBRILLO - ESTILOS EXTRAÍDOS DEL EMPLEADO-DASHBOARD.HTML
+   ============================================================================
+   Reemplaza todos los estilos inline del panel de empleado.
+   Usa variables del sistema central (variables.css)
+   ============================================================================ */
+
+/* ============================================================================
+   CARD GENÉRICA
+   ============================================================================ */
+.card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: var(--space-xl);
+    margin-bottom: var(--space-xl);
+    transition: border-color var(--transition-base);
+}
+
+.card:hover {
+    border-color: var(--border-color-light);
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-lg);
+    padding-bottom: var(--space-md);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.card-header h2 {
+    color: var(--text-primary);
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-bold);
+    margin: 0;
+}
+
+.card-subtitle {
+    color: var(--text-muted);
+    font-size: var(--font-size-sm);
+}
+
+/* ============================================================================
+   CARD DE INGRESOS
+   ============================================================================ */
+.ingresos-card {
+    background: linear-gradient(135deg,
+            rgba(var(--accent-color-rgb), 0.03) 0%,
+            var(--bg-card) 100%);
+}
+
+.ingresos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: var(--space-md);
+    margin-bottom: var(--space-lg);
+}
+
+.ingreso-item {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: var(--space-lg);
+    text-align: center;
+    transition: all var(--transition-base);
+}
+
+.ingreso-item:hover {
+    border-color: var(--accent-color);
+    transform: translateY(-2px);
+}
+
+.ingreso-icono {
+    font-size: var(--font-size-3xl);
+    margin-bottom: var(--space-xs);
+}
+
+.ingreso-periodo {
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-wide);
+    margin-bottom: var(--space-xs);
+    font-weight: var(--font-weight-semibold);
+}
+
+.ingreso-monto {
+    font-size: var(--font-size-2xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--accent-color);
+    margin-bottom: var(--space-xxs);
+}
+
+.ingreso-monto.total {
+    color: var(--color-gold);
+}
+
+.ingreso-sub {
+    font-size: var(--font-size-xs);
+    color: var(--text-secondary);
+}
+
+/* ============================================================================
+   META DIARIA
+   ============================================================================ */
+.meta-container {
+    margin-top: var(--space-lg);
+    padding-top: var(--space-lg);
+    border-top: 1px solid var(--border-color);
+}
+
+.meta-info {
+    display: flex;
+    justify-content: space-between;
+    color: var(--text-secondary);
+    font-size: var(--font-size-sm);
+    margin-bottom: var(--space-sm);
+}
+
+.progress-bar {
+    width: 100%;
+    height: 10px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: var(--radius-pill);
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent-color), var(--color-info));
+    border-radius: var(--radius-pill);
+    transition: width var(--transition-slow);
+    width: 0%;
+}
+
+/* ============================================================================
+   STATS GRID
+   ============================================================================ */
+.empleado-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: var(--space-md);
+    margin-bottom: var(--space-xl);
+}
+
+.empleado-stat-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: var(--space-lg);
+    text-align: center;
+    cursor: pointer;
+    transition: all var(--transition-base);
+}
+
+.empleado-stat-card:hover {
+    border-color: var(--accent-color);
+    transform: translateY(-2px);
+}
+
+.empleado-stat-card .stat-icono {
+    font-size: var(--font-size-3xl);
+    margin-bottom: var(--space-xs);
+}
+
+.empleado-stat-card .stat-valor {
+    font-size: var(--font-size-3xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--text-primary);
+    margin-bottom: var(--space-xxs);
+}
+
+.empleado-stat-card .stat-label {
+    font-size: var(--font-size-xs);
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-wide);
+}
+
+/* ============================================================================
+   SECCIÓN TRABAJOS - ESTADÍSTICAS RÁPIDAS
+   ============================================================================ */
+.trabajos-stats-grid {
+    display: flex;
+    gap: var(--space-sm);
+    flex-wrap: wrap;
+    width: 100%;
+}
+
+.trabajo-stat {
+    border-radius: var(--radius-md);
+    padding: var(--space-md) var(--space-lg);
+    flex: 1;
+    min-width: 100px;
+    text-align: center;
+}
+
+.trabajo-stat--pendientes {
+    background: rgba(var(--color-warning-rgb), 0.05);
+    border: 1px solid rgba(var(--color-warning-rgb), 0.2);
+}
+
+.trabajo-stat--pendientes .trabajo-stat-valor {
+    color: var(--color-warning);
+}
+
+.trabajo-stat--activos {
+    background: rgba(var(--color-info-rgb), 0.05);
+    border: 1px solid rgba(var(--color-info-rgb), 0.2);
+}
+
+.trabajo-stat--activos .trabajo-stat-valor {
+    color: var(--color-info);
+}
+
+.trabajo-stat--completados {
+    background: rgba(var(--accent-color-rgb), 0.05);
+    border: 1px solid rgba(var(--accent-color-rgb), 0.2);
+}
+
+.trabajo-stat--completados .trabajo-stat-valor {
+    color: var(--accent-color);
+}
+
+.trabajo-stat--ingresos {
+    background: rgba(var(--color-purple-rgb), 0.05);
+    border: 1px solid rgba(var(--color-purple-rgb), 0.2);
+}
+
+.trabajo-stat--ingresos .trabajo-stat-valor {
+    color: var(--color-purple);
+}
+
+.trabajo-stat-valor {
+    font-size: var(--font-size-3xl);
+    font-weight: var(--font-weight-bold);
+}
+
+.trabajo-stat-label {
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+}
+
+/* ============================================================================
+   TABS (Pendientes / Realizados)
+   ============================================================================ */
+.tabs {
+    width: 100%;
+    display: flex;
+    gap: var(--space-sm);
+}
+
+.tab {
+    flex: 1;
+    padding: var(--space-md);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-semibold);
+    transition: all var(--transition-base);
+    font-family: var(--font-family);
+}
+
+.tab:hover {
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+}
+
+.tab.active {
+    border: 2px solid var(--accent-color);
+    background: var(--accent-bg);
+    color: var(--accent-color);
+}
+
+/* ============================================================================
+   BOTONES ESPECÍFICOS
+   ============================================================================ */
+.btn-link {
+    background: transparent;
+    border: none;
+    color: var(--accent-color);
+    cursor: pointer;
+    font-size: var(--font-size-base);
+    font-family: var(--font-family);
+    transition: opacity var(--transition-base);
+    padding: 0;
+}
+
+.btn-link:hover {
+    opacity: 0.8;
+    text-decoration: underline;
+}
+
+.btn-outline-accent {
+    padding: var(--space-sm) 14px;
+    border: 1px solid var(--accent-color);
+    border-radius: var(--radius-lg);
+    background: transparent;
+    color: var(--accent-color);
+    cursor: pointer;
+    font-size: var(--font-size-sm);
+    font-family: var(--font-family);
+    transition: all var(--transition-base);
+}
+
+.btn-outline-accent:hover {
+    background: var(--accent-bg);
+}
+
+.btn-outline-info {
+    padding: var(--space-sm) 14px;
+    border: 1px solid var(--color-info);
+    border-radius: var(--radius-lg);
+    background: transparent;
+    color: var(--color-info);
+    cursor: pointer;
+    font-size: var(--font-size-sm);
+    font-family: var(--font-family);
+    transition: all var(--transition-base);
+}
+
+.btn-outline-info:hover {
+    background: rgba(var(--color-info-rgb), 0.1);
+}
+
+/* ============================================================================
+   TABLAS
+   ============================================================================ */
+.table-container {
+    overflow-x: auto;
+    margin-top: var(--space-lg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 600px;
+}
+
+.data-table thead tr {
+    border-bottom: 2px solid var(--border-color);
+    background: var(--bg-secondary);
+}
+
+.data-table th {
+    padding: var(--space-md);
+    font-size: var(--font-size-sm);
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-wide);
+    font-weight: var(--font-weight-semibold);
+}
+
+.data-table td {
+    padding: var(--space-md);
+    color: var(--text-primary);
+    font-size: var(--font-size-base);
+}
+
+.data-table tbody tr {
+    border-bottom: 1px solid var(--border-color);
+    transition: background var(--transition-fast);
+}
+
+.data-table tbody tr:hover {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+/* ============================================================================
+   SECCIÓN PAGOS - RESUMEN
+   ============================================================================ */
+.pagos-resumen-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: var(--space-sm);
+    width: 100%;
+}
+
+.pago-resumen-item {
+    border-radius: var(--radius-sm);
+    padding: var(--space-md);
+    text-align: center;
+}
+
+.pago-resumen-item--total {
+    background: rgba(var(--accent-color-rgb), 0.05);
+    border: 2px solid rgba(var(--accent-color-rgb), 0.2);
+}
+
+.pago-resumen-item--pendiente {
+    background: rgba(var(--color-warning-rgb), 0.05);
+    border: 2px solid rgba(var(--color-warning-rgb), 0.2);
+}
+
+.pago-resumen-item--trabajos {
+    background: rgba(var(--color-info-rgb), 0.05);
+    border: 2px solid rgba(var(--color-info-rgb), 0.2);
+}
+
+.pago-resumen-item--registros {
+    background: rgba(var(--color-purple-rgb), 0.05);
+    border: 2px solid rgba(var(--color-purple-rgb), 0.2);
+}
+
+.pago-resumen-valor {
+    font-size: var(--font-size-2xl);
+    font-weight: var(--font-weight-bold);
+}
+
+.pago-resumen-item--total .pago-resumen-valor {
+    color: var(--accent-color);
+}
+
+.pago-resumen-item--pendiente .pago-resumen-valor {
+    color: var(--color-warning);
+}
+
+.pago-resumen-item--trabajos .pago-resumen-valor {
+    color: var(--color-info);
+}
+
+.pago-resumen-item--registros .pago-resumen-valor {
+    color: var(--color-purple);
+}
+
+.pago-resumen-label {
+    color: var(--text-muted);
+    font-size: var(--font-size-xs);
+}
+
+/* ============================================================================
+   FILTROS
+   ============================================================================ */
+.filtros-row {
+    display: flex;
+    gap: var(--space-sm);
+    flex-wrap: wrap;
+    width: 100%;
+    background: rgba(255, 255, 255, 0.02);
+    padding: var(--space-md);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+}
+
+.filtro-select,
+.filtro-input {
+    padding: var(--space-sm) var(--space-md);
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    color: var(--text-secondary);
+    font-size: var(--font-size-sm);
+    font-family: var(--font-family);
+    transition: border-color var(--transition-base);
+}
+
+.filtro-select:focus,
+.filtro-input:focus {
+    outline: none;
+    border-color: var(--accent-color);
+}
+
+.filtro-input--flex {
+    flex: 1;
+    min-width: 150px;
+}
+
+/* ============================================================================
+   HISTORIAL - STATS GRID
+   ============================================================================ */
+.historial-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: var(--space-sm);
+    width: 100%;
+}
+
+.historial-stat {
+    border-radius: var(--radius-md);
+    padding: var(--space-md);
+    text-align: center;
+}
+
+.historial-stat--trabajos {
+    background: rgba(var(--accent-color-rgb), 0.05);
+    border: 1px solid rgba(var(--accent-color-rgb), 0.2);
+}
+
+.historial-stat--ingresos {
+    background: rgba(var(--color-purple-rgb), 0.05);
+    border: 1px solid rgba(var(--color-purple-rgb), 0.2);
+}
+
+.historial-stat--calificacion {
+    background: rgba(var(--color-warning-rgb), 0.05);
+    border: 1px solid rgba(var(--color-warning-rgb), 0.2);
+}
+
+.historial-stat--duracion {
+    background: rgba(var(--color-info-rgb), 0.05);
+    border: 1px solid rgba(var(--color-info-rgb), 0.2);
+}
+
+.historial-stat-valor {
+    font-size: var(--font-size-2xl);
+    font-weight: var(--font-weight-bold);
+}
+
+.historial-stat--trabajos .historial-stat-valor {
+    color: var(--accent-color);
+}
+
+.historial-stat--ingresos .historial-stat-valor {
+    color: var(--color-purple);
+}
+
+.historial-stat--calificacion .historial-stat-valor {
+    color: var(--color-warning);
+}
+
+.historial-stat--duracion .historial-stat-valor {
+    color: var(--color-info);
+}
+
+.historial-stat-label {
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+}
+
+/* ============================================================================
+   HEADER CON BOTONES
+   ============================================================================ */
+.header-with-buttons {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.header-actions {
+    display: flex;
+    gap: var(--space-sm);
+}
+
+/* ============================================================================
+   LOADING / EMPTY STATES
+   ============================================================================ */
+.loading {
+    color: var(--text-muted);
+    text-align: center;
+    padding: var(--space-2xl);
+}
+
+.empty-state {
+    color: var(--text-muted);
+    text-align: center;
+    padding: var(--space-2xl);
+}
+
+/* ============================================================================
+   RESPONSIVE
+   ============================================================================ */
+@media (max-width: 768px) {
+    .ingresos-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .empleado-stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .header-with-buttons {
+        flex-direction: column;
+        align-items: stretch;
+        gap: var(--space-md);
+    }
+
+    .header-actions {
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 480px) {
+    .ingresos-grid {
+        grid-template-columns: 1fr;
+    }
+}

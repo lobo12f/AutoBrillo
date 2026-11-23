@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar Sesión | AutoBrillo Detailing</title>
+    <link rel="stylesheet" href="../../css/inicioDeSecion.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&display=swap" rel="stylesheet">
+</head>
+
+<body class="auth-page">
+
+    <form class="login-card" onsubmit="window.iniciarSesion(event)">
+        <div class="logo-area">
+            <h2>AUTOBRILLO<span>Detailing</span></h2>
+        </div>
+
+        <h3>BIENVENIDO DE NUEVO</h3>
+        <p>Gestiona tus citas y mantén tu suscripción activa.</p>
+
+        <div class="input-group">
+            <label>Correo Electrónico</label>
+            <input type="email" id="log-email" placeholder="tu@correo.com" required>
+        </div>
+
+        <div class="input-group">
+            <label>Contraseña</label>
+            <input type="password" id="log-pass" placeholder="••••••••" required>
+        </div>
+
+        <div class="options">
+            <label><input type="checkbox"> Recordar mi sesión</label>
+            <a href="#">¿Olvidaste tu contraseña?</a>
+        </div>
+
+        <button type="submit" class="btn-primary">ENTRAR AL PORTAL</button>
+
+        <p class="footer-text">¿Aún no eres miembro? <a href="../clientes/regitroNuevoUsuario.html">Regístrate aquí</a>
+        </p>
+        <a href="../indet.html" class="back-link">← Volver al inicio</a>
+    </form>
+
+    <script type="module" src="../../javascript/auth.js"></script>
+</body>
+
+</html>

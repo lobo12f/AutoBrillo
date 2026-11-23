@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro | AutoBrillo Detailing</title>
+    <link rel="stylesheet" href="../../css/main.css">
+    <link rel="stylesheet" href="../../css/regitro.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&display=swap" rel="stylesheet">
+</head>
+
+<body class="auth-page">
+
+    <!-- ✅ id="registerForm" y SIN onsubmit ni method -->
+    <form id="registerForm" class="register-card">
+        <a href="../indet.html" class="back-link">← Volver al inicio</a>
+
+        <div class="logo-area">
+            <h2>AUTOBRILLO<span>Detailing</span></h2>
+        </div>
+
+        <h3>CREAR CUENTA</h3>
+        <p>Únete a la élite del cuidado automotriz en San Pedro de Macorís.</p>
+
+        <div class="input-row">
+            <div class="input-group">
+                <label>Nombre</label>
+                <input id="reg-nombre" placeholder="Nombre" required>
+            </div>
+            <div class="input-group">
+                <label>Apellido</label>
+                <input id="reg-apellido" type="text" placeholder="Ej. Pérez" required>
+            </div>
+        </div>
+
+        <div class="input-group">
+            <label>Correo Electrónico</label>
+            <input type="email" id="reg-email" placeholder="correo@ejemplo.com" required>
+        </div>
+
+        <div class="input-group">
+            <label>WhatsApp (Opcional)</label>
+            <input id="reg-whatsapp" placeholder="809-000-0000">
+        </div>
+
+        <div class="input-row passwords">
+            <div class="input-group">
+                <label>Contraseña</label>
+                <input type="password" id="pass1" placeholder="Mínimo 8 caracteres" minlength="8" required>
+            </div>
+            <div class="input-group">
+                <label>Confirmar Contraseña</label>
+                <input type="password" id="pass2" placeholder="Repite tu contraseña" required>
+            </div>
+        </div>
+
+        <div class="options">
+            <label><input type="checkbox" required> ACEPTO LOS TÉRMINOS Y POLÍTICAS.</label>
+        </div>
+
+        <button type="submit" class="btn-primary">CREAR MI CUENTA</button>
+    </form>
+
+    <!-- ✅ Script correcto como módulo -->
+    <script type="module" src="../../javascript/registro.js"></script>
+</body>
+
+</html>

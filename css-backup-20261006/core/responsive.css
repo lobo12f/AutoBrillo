@@ -1,0 +1,160 @@
+/* ====================================================================
+   RESPONSIVE GLOBAL - AUTOBRILLO DETALLING
+   ====================================================================
+   Breakpoints:
+   - Móvil: < 480px
+   - Móvil grande: 480px - 767px
+   - Tablet: 768px - 1023px
+   - Desktop: 1024px - 1439px
+   - Desktop grande: >= 1440px
+   ==================================================================== */
+
+/* ================================================================
+   MÓVIL PEQUEÑO (< 480px)
+   ================================================================ */
+@media (max-width: 479px) {
+    :root {
+        --font-size-base: 0.875rem;
+        --spacing-md: 12px;
+        --spacing-lg: 16px;
+        --sidebar-width: 100%;
+    }
+
+    /* Ocultar sidebar en móvil (usar bottom-nav) */
+    .sidebar {
+        transform: translateX(-100%);
+    }
+
+    .sidebar.open {
+        transform: translateX(0);
+    }
+
+    /* Grid a 1 columna */
+    .grid-2,
+    .grid-3,
+    .grid-4 {
+        grid-template-columns: 1fr !important;
+    }
+
+    /* Ocultar elementos no esenciales */
+    .hide-mobile {
+        display: none !important;
+    }
+}
+
+/* ================================================================
+   MÓVIL (480px - 767px)
+   ================================================================ */
+@media (min-width: 480px) and (max-width: 767px) {
+    :root {
+        --sidebar-width: 100%;
+    }
+
+    .sidebar {
+        transform: translateX(-100%);
+    }
+
+    .sidebar.open {
+        transform: translateX(0);
+    }
+
+    .grid-3,
+    .grid-4 {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+
+    .hide-tablet {
+        display: none !important;
+    }
+}
+
+/* ================================================================
+   TABLET (768px - 1023px)
+   ================================================================ */
+@media (min-width: 768px) and (max-width: 1023px) {
+    :root {
+        --sidebar-width: 200px;
+    }
+
+    .grid-4 {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+
+    .grid-3 {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+}
+
+/* ================================================================
+   DESKTOP (>= 1024px)
+   ================================================================ */
+@media (min-width: 1024px) {
+    .hide-desktop {
+        display: none !important;
+    }
+
+    /* Mostrar sidebar */
+    .sidebar {
+        transform: translateX(0);
+    }
+}
+
+/* ================================================================
+   PREFERENCIAS DEL USUARIO
+   ================================================================ */
+
+/* Reducir movimiento */
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* Modo oscuro del sistema */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg-primary: #080c14;
+        --text-primary: #ffffff;
+    }
+}
+
+/* Modo claro del sistema */
+@media (prefers-color-scheme: light) {
+    :root {
+        --bg-primary: #f5f5f5;
+        --text-primary: #333333;
+    }
+}
+
+/* ================================================================
+   ORIENTACIÓN
+   ================================================================ */
+@media (orientation: landscape) and (max-height: 500px) {
+    .hide-landscape {
+        display: none !important;
+    }
+}
+
+/* ================================================================
+   IMPRESIÓN
+   ================================================================ */
+@media print {
+
+    .no-print,
+    .sidebar,
+    .topbar,
+    .bottom-nav {
+        display: none !important;
+    }
+
+    body {
+        background: white;
+        color: black;
+    }
+}

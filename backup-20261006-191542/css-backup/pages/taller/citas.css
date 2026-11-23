@@ -1,0 +1,558 @@
+.cita-card {
+    background: linear-gradient(180deg, var(--bg-card, #131c2b) 0%, var(--bg-input, #0a0e14) 100%);
+    border: 1px solid var(--border-color, #1e2a3a);
+    border-left: 4px solid;
+    border-radius: 14px;
+    padding: 16px 18px;
+    margin-bottom: 10px;
+    transition: all 0.3s ease;
+}
+
+.cita-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+.cita-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    margin-bottom: 8px;
+}
+
+.cita-card-vehiculo {
+    color: var(--text-primary, #fff);
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.cita-card-vehiculo small {
+    color: var(--text-muted, #888);
+    font-weight: 400;
+}
+
+.cita-card-estado {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 15px;
+    font-size: 0.7rem;
+    font-weight: 600;
+}
+
+.cita-card-info {
+    color: var(--text-secondary, #aaa);
+    font-size: 0.8rem;
+    line-height: 1.5;
+}
+
+.cita-card-actions {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border-color, #1e2a3a);
+}
+
+.cita-btn {
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border: 1px solid;
+    background: transparent;
+    transition: all 0.2s;
+}
+
+.cita-btn-confirmar {
+    border-color: #00ff88;
+    color: #00ff88;
+}
+
+.cita-btn-confirmar:hover {
+    background: #00ff8818;
+}
+
+.cita-btn-cancelar {
+    border-color: #ff4444;
+    color: #ff4444;
+}
+
+.cita-btn-cancelar:hover {
+    background: #ff444418;
+}
+
+.cita-btn-recibir {
+    border-color: #00d4ff;
+    color: #00d4ff;
+}
+
+.cita-btn-recibir:hover {
+    background: #00d4ff18;
+}
+
+.cita-btn-iniciar {
+    border-color: #ffbb33;
+    color: #ffbb33;
+}
+
+.cita-btn-iniciar:hover {
+    background: #ffbb3318;
+}
+
+.cita-btn-finalizar {
+    border-color: #00ff88;
+    color: #00ff88;
+}
+
+.cita-btn-finalizar:hover {
+    background: #00ff8818;
+}
+
+.cita-btn-fotos {
+    border-color: #88888840;
+    color: #888;
+}
+
+.cita-btn-fotos:hover {
+    background: #88888818;
+}
+
+.cita-badge-listo {
+    background: #ff44ff15;
+    color: #ff44ff;
+    padding: 6px 12px;
+    border-radius: 15px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+/* ================================================================
+📸 MODAL DE FOTOS - DISEÑO PREMIUM REDISEÑADO
+================================================================*/
+@keyframes slideUp {
+    from {
+        transform: translateY(30px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        box-shadow: 0 0 0 0 rgba(0, 255, 136, 0.3);
+    }
+
+    50% {
+        box-shadow: 0 0 0 15px transparent;
+    }
+}
+
+/* Overlay */
+.modal-fotos-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.92);
+    z-index: 10000;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(12px);
+}
+
+.modal-fotos-overlay[style*="display: flex"],
+.modal-fotos-overlay[style*="display:flex"] {
+    display: flex !important;
+}
+
+/* Contenedor */
+.modal-fotos-container {
+    max-width: 750px;
+    width: 95%;
+    max-height: 88vh;
+    overflow-y: auto;
+    background: linear-gradient(180deg, #0f1621 0%, #0a0e14 100%);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 20px;
+    animation: slideUp 0.35s ease;
+    box-shadow: 0 40px 120px rgba(0, 0, 0, 0.9);
+}
+
+/* Header */
+.modal-fotos-header {
+    padding: 30px 30px 15px;
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    background: linear-gradient(180deg, #0f1621 0%, #0f162180 90%, transparent 100%);
+}
+
+.modal-fotos-close {
+    position: absolute;
+    top: 20px;
+    right: 22px;
+    font-size: 1rem;
+    cursor: pointer;
+    color: #888;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.3s;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.modal-fotos-close:hover {
+    background: #ff444422;
+    color: #ff4444;
+    border-color: #ff4444;
+}
+
+.modal-fotos-header-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.modal-fotos-icon {
+    width: 55px;
+    height: 55px;
+    background: linear-gradient(135deg, var(--accent-color, #00ff88), var(--accent-color, #00ff88)88);
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.6rem;
+    box-shadow: 0 8px 25px rgba(0, 255, 136, 0.25);
+    animation: pulse 2s infinite;
+}
+
+.modal-fotos-title {
+    color: #fff;
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.modal-fotos-subtitle {
+    color: #888;
+    font-size: 0.72rem;
+    margin: 3px 0 0;
+}
+
+/* Info cita - Card destacada */
+.modal-fotos-info {
+    margin: 5px 30px 20px;
+    padding: 20px;
+    background: linear-gradient(135deg, rgba(255, 187, 51, 0.06), rgba(255, 136, 0, 0.03));
+    border: 1px solid rgba(255, 187, 51, 0.15);
+    border-radius: 16px;
+}
+
+.modal-fotos-info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.modal-fotos-vehiculo {
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.modal-fotos-servicio {
+    color: #aaa;
+    margin: 5px 0 0;
+    font-size: 0.85rem;
+}
+
+.modal-fotos-fecha {
+    color: #888;
+    margin: 2px 0 0;
+    font-size: 0.75rem;
+}
+
+.modal-fotos-estado {
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Tabs - Botones grandes con iconos */
+.modal-fotos-tabs {
+    display: flex;
+    gap: 8px;
+    margin: 0 30px 20px;
+    padding: 4px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 14px;
+}
+
+.tab-foto {
+    flex: 1;
+    padding: 14px 10px;
+    background: transparent;
+    border: none;
+    border-radius: 10px;
+    color: #666;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.85rem;
+    transition: all 0.3s;
+    font-family: Inter, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.tab-foto::before {
+    font-size: 1.2rem;
+}
+
+.tab-foto.active {
+    background: rgba(255, 107, 107, 0.15);
+    color: #ff6b6b;
+    font-weight: 700;
+    box-shadow: 0 4px 15px rgba(255, 107, 107, 0.15);
+}
+
+.tab-foto:hover:not(.active) {
+    color: #aaa;
+    background: rgba(255, 255, 255, 0.03);
+}
+
+/* Upload area - Más grande y atractiva */
+.modal-fotos-upload {
+    margin: 0 30px 20px;
+    border: 2px dashed rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 50px 30px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    background: rgba(255, 255, 255, 0.01);
+}
+
+.modal-fotos-upload:hover {
+    border-color: var(--accent-color, #00ff88);
+    background: rgba(0, 255, 136, 0.03);
+    transform: scale(1.01);
+}
+
+.modal-fotos-upload-icon {
+    font-size: 3.5rem;
+    margin-bottom: 12px;
+    display: block;
+}
+
+.modal-fotos-upload-text {
+    color: #ccc;
+    margin: 10px 0 5px;
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.modal-fotos-upload-hint {
+    color: #666;
+    font-size: 0.75rem;
+}
+
+/* Contador con badge */
+.modal-fotos-contador {
+    display: none;
+    margin: 0 30px 15px;
+    padding: 8px 16px;
+    background: rgba(0, 255, 136, 0.08);
+    border: 1px solid rgba(0, 255, 136, 0.2);
+    border-radius: 20px;
+    color: var(--accent-color, #00ff88);
+    font-size: 0.8rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* Preview con bordes redondeados */
+.modal-fotos-preview {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 10px;
+    margin: 0 30px 20px;
+}
+
+.modal-fotos-preview img {
+    border-radius: 10px;
+    border: 2px solid rgba(255, 255, 255, 0.05);
+    transition: all 0.3s;
+}
+
+.modal-fotos-preview img:hover {
+    border-color: var(--accent-color, #00ff88);
+    transform: scale(1.03);
+}
+
+/* Descripción */
+.modal-fotos-descripcion {
+    margin: 0 30px 20px;
+}
+
+.modal-fotos-descripcion label {
+    color: #aaa;
+    font-size: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+.modal-fotos-descripcion input {
+    width: 100%;
+    padding: 14px 16px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    color: #fff;
+    font-size: 0.85rem;
+    transition: all 0.3s;
+    font-family: Inter, sans-serif;
+}
+
+.modal-fotos-descripcion input:focus {
+    border-color: var(--accent-color, #00ff88);
+    background: rgba(255, 255, 255, 0.05);
+    box-shadow: 0 0 0 4px rgba(0, 255, 136, 0.06);
+    outline: none;
+}
+
+/* Progreso */
+.modal-fotos-progreso {
+    margin: 0 30px 20px;
+}
+
+.modal-fotos-progreso-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    color: #aaa;
+    font-size: 0.8rem;
+}
+
+.modal-fotos-progreso-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 20px;
+    height: 10px;
+    overflow: hidden;
+}
+
+.modal-fotos-progreso-fill {
+    background: linear-gradient(90deg, var(--accent-color, #00ff88), #00d4ff);
+    height: 100%;
+    width: 0%;
+    border-radius: 20px;
+    transition: width 0.4s ease;
+}
+
+/* Ya subidas */
+.modal-fotos-ya-subidas {
+    margin: 0 30px 20px;
+}
+
+.modal-fotos-ya-subidas h4 {
+    color: #aaa;
+    margin-bottom: 12px;
+    font-size: 0.85rem;
+}
+
+.modal-fotos-galeria {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+    gap: 10px;
+}
+
+.modal-fotos-galeria img {
+    border-radius: 10px;
+    border: 2px solid rgba(255, 255, 255, 0.05);
+    transition: all 0.3s;
+}
+
+.modal-fotos-galeria img:hover {
+    border-color: var(--accent-color, #00ff88);
+    transform: scale(1.05);
+}
+
+.modal-fotos-vacio {
+    color: #666;
+    font-size: 0.8rem;
+    text-align: center;
+    padding: 30px;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 12px;
+}
+
+/* Botones */
+.modal-fotos-buttons {
+    display: flex;
+    gap: 10px;
+    padding: 20px 30px 30px;
+    border-top: 1px solid rgba(255, 255, 255, 0.04);
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.modal-fotos-btn-cancelar {
+    flex: 1;
+    padding: 15px;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    color: #aaa;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: all 0.3s;
+}
+
+.modal-fotos-btn-cancelar:hover {
+    background: rgba(255, 255, 255, 0.03);
+    color: #fff;
+}
+
+.modal-fotos-btn-subir {
+    flex: 2;
+    padding: 15px;
+    background: linear-gradient(135deg, var(--accent-color, #00ff88), var(--accent-color, #00ff88)cc);
+    color: #000;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 0.9rem;
+    transition: all 0.3s;
+    box-shadow: 0 6px 20px rgba(0, 255, 136, 0.3);
+}
+
+.modal-fotos-btn-subir:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(0, 255, 136, 0.5);
+}
